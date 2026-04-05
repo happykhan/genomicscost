@@ -1,16 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import CostSummary from './CostSummary'
 import { useProject } from '../store/ProjectContext'
-
-const STEPS = [
-  { n: 1, label: 'Setup' },
-  { n: 2, label: 'Platform' },
-  { n: 3, label: 'Consumables' },
-  { n: 4, label: 'Equipment' },
-  { n: 5, label: 'Personnel' },
-  { n: 6, label: 'Facility' },
-  { n: 7, label: 'Results' },
-]
+import { useTranslation } from '../i18n'
 
 interface WizardShellProps {
   step: number
@@ -24,6 +15,17 @@ function MobileCostPerSample() {
 
 export default function WizardShell({ step, children }: WizardShellProps) {
   const navigate = useNavigate()
+  const { t } = useTranslation()
+
+  const STEPS = [
+    { n: 1, label: t('step1_label') },
+    { n: 2, label: t('step2_label') },
+    { n: 3, label: t('step3_label') },
+    { n: 4, label: t('step4_label') },
+    { n: 5, label: t('step5_label') },
+    { n: 6, label: t('step6_label') },
+    { n: 7, label: t('step7_label') },
+  ]
 
   const canBack = step > 1
   const canNext = step < 7
@@ -93,7 +95,7 @@ export default function WizardShell({ step, children }: WizardShellProps) {
                 cursor: canBack ? 'pointer' : 'not-allowed',
               }}
             >
-              ← Back
+              {t('btn_back')}
             </button>
 
             {canNext && (
@@ -102,7 +104,7 @@ export default function WizardShell({ step, children }: WizardShellProps) {
                 className="px-6 py-2 rounded text-sm font-semibold"
                 style={{ background: 'var(--gx-accent)', color: 'var(--gx-bg)', cursor: 'pointer', border: 'none' }}
               >
-                Next →
+                {t('btn_next')}
               </button>
             )}
           </div>
@@ -124,7 +126,7 @@ export default function WizardShell({ step, children }: WizardShellProps) {
         className="lg:hidden fixed bottom-0 left-0 right-0 px-4 py-2 z-10 flex items-center justify-between"
         style={{ background: 'var(--gx-bg-alt)', borderTop: '1px solid var(--gx-border)' }}
       >
-        <span className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Cost per sample</span>
+        <span className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_cost_per_sample')}</span>
         <span className="font-bold text-lg" style={{ color: 'var(--gx-accent)' }}>
           <MobileCostPerSample />
         </span>

@@ -1,4 +1,5 @@
 import { useProject } from '../../store/ProjectContext'
+import { useTranslation } from '../../i18n'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { WORKFLOW_STEPS, WORKFLOW_STEP_LABELS } from '../../lib/calculations'
@@ -18,26 +19,27 @@ function pct(part: number, total: number) {
 
 export default function Step7() {
   const { project, costs, saveProject } = useProject()
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { exchangeRate, currency, samplesPerYear } = project
   const showLocalCurrency = exchangeRate !== 1 || currency !== 'USD'
 
   const rows = [
-    { label: 'Sequencing reagents', value: costs.sequencingReagents },
-    { label: 'Library preparation', value: costs.libraryPrep },
-    { label: 'Consumables', value: costs.consumables },
-    { label: 'Equipment (amortised)', value: costs.equipment },
-    { label: 'Personnel', value: costs.personnel },
-    { label: 'Training', value: costs.training },
-    { label: 'Facility & overhead', value: costs.facility },
-    { label: 'Transport', value: costs.transport },
-    { label: 'Bioinformatics', value: costs.bioinformatics },
-    { label: 'Quality management', value: costs.qms },
+    { label: t('label_sequencing_reagents'), value: costs.sequencingReagents },
+    { label: t('label_library_prep'), value: costs.libraryPrep },
+    { label: t('label_consumables'), value: costs.consumables },
+    { label: t('label_equipment'), value: costs.equipment },
+    { label: t('label_personnel'), value: costs.personnel },
+    { label: t('label_training'), value: costs.training },
+    { label: t('label_facility'), value: costs.facility },
+    { label: t('label_transport'), value: costs.transport },
+    { label: t('label_bioinformatics'), value: costs.bioinformatics },
+    { label: t('label_qms'), value: costs.qms },
   ].filter(r => r.value > 0)
 
   const maxValue = Math.max(...rows.map(r => r.value), 1)
 
-  // Workflow breakdown rows
+  // Workflow breakdown rows — use translated labels where available
   const workflowRows = WORKFLOW_STEPS.map(step => ({
     step,
     label: WORKFLOW_STEP_LABELS[step],
@@ -56,7 +58,7 @@ export default function Step7() {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>Step 7: Results</h2>
+      <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>{t('step7_title')}</h2>
       <p className="text-sm mb-6" style={{ color: 'var(--gx-text-muted)' }}>
         {project.name || 'Unnamed project'} · {project.country || 'No country'} · {project.year}
       </p>
@@ -67,7 +69,7 @@ export default function Step7() {
         style={{ background: 'var(--gx-accent)', color: 'var(--gx-bg)' }}
       >
         <div className="text-sm font-medium mb-2" style={{ opacity: 0.85 }}>
-          Estimated cost per sample
+          {t('label_cost_per_sample')}
         </div>
         <div className="text-6xl font-bold mb-1">
           ${fmt(costs.costPerSample)}
@@ -139,7 +141,7 @@ export default function Step7() {
               </tr>
             ))}
             <tr style={{ borderTop: '2px solid var(--gx-border)', fontWeight: 700 }}>
-              <td className="px-4 py-2" style={{ color: 'var(--gx-text)' }}>Total annual</td>
+              <td className="px-4 py-2" style={{ color: 'var(--gx-text)' }}>{t('label_annual_total')}</td>
               <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-accent)' }}>${fmt(costs.total)}</td>
               {showLocalCurrency && (
                 <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-accent)' }}>
@@ -155,7 +157,7 @@ export default function Step7() {
       {/* Feature 5: Workflow step breakdown */}
       <div className="card overflow-hidden mb-6">
         <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--gx-border)', background: 'var(--gx-bg-alt)' }}>
-          <h3 className="text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>Costs per workflow step</h3>
+          <h3 className="text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>{t('label_workflow_breakdown')}</h3>
         </div>
         <table className="w-full text-sm">
           <thead>
@@ -224,7 +226,7 @@ export default function Step7() {
       {costs.establishmentCost > 0 && (
         <div className="card p-4 mb-6 flex justify-between items-center flex-wrap gap-3">
           <div>
-            <div className="text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>Establishment cost (one-off)</div>
+            <div className="text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>{t('label_establishment_cost')}</div>
             <div className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)' }}>
               Capital equipment to be purchased before operations begin
             </div>
@@ -249,21 +251,21 @@ export default function Step7() {
           className="px-5 py-2 rounded text-sm font-semibold"
           style={{ background: 'var(--gx-accent)', color: 'var(--gx-bg)', border: 'none', cursor: 'pointer' }}
         >
-          Save project
+          {t('btn_save')}
         </button>
         <button
           onClick={handlePrint}
           className="px-5 py-2 rounded text-sm font-medium"
           style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
         >
-          Export PDF (print)
+          {t('btn_print')}
         </button>
         <button
           onClick={() => navigate('/wizard/1')}
           className="px-5 py-2 rounded text-sm font-medium"
           style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
         >
-          ← Edit inputs
+          {t('btn_edit')}
         </button>
         <button
           onClick={() => navigate('/')}

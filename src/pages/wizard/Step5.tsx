@@ -1,4 +1,5 @@
 import { useProject } from '../../store/ProjectContext'
+import { useTranslation } from '../../i18n'
 
 const inputClass = 'border border-[var(--gx-border)] rounded-[var(--gx-radius)] bg-[var(--gx-bg)] text-[var(--gx-text)] p-2 text-sm focus:outline-none focus:border-[var(--gx-accent)]'
 const labelClass = 'text-xs text-[var(--gx-text-muted)] uppercase tracking-wider mb-1 block'
@@ -9,6 +10,7 @@ function fmt(n: number) {
 
 export default function Step5() {
   const { project, updateProject } = useProject()
+  const { t } = useTranslation()
   const { personnel } = project
 
   function updatePerson(index: number, patch: Partial<typeof personnel[0]>) {
@@ -31,9 +33,9 @@ export default function Step5() {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>Step 5: Personnel</h2>
+      <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>{t('step5_title')}</h2>
       <p className="text-sm mb-6" style={{ color: 'var(--gx-text-muted)' }}>
-        Enter annual salary, % time on genomic surveillance, and annual training costs per role.
+        {t('step5_desc')}
       </p>
 
       <div className="flex flex-col gap-3">
@@ -45,7 +47,7 @@ export default function Step5() {
               <div className="flex flex-wrap gap-4 items-start">
                 {/* Role name */}
                 <div className="flex-1 min-w-36">
-                  <label className={labelClass}>Role</label>
+                  <label className={labelClass}>{t('col_role')}</label>
                   <input
                     type="text"
                     value={person.role}
@@ -57,7 +59,7 @@ export default function Step5() {
 
                 {/* Salary */}
                 <div style={{ width: 140 }}>
-                  <label className={labelClass}>Annual salary (USD)</label>
+                  <label className={labelClass}>{t('col_salary')}</label>
                   <input
                     type="number"
                     value={person.annualSalaryUsd}
@@ -70,7 +72,7 @@ export default function Step5() {
 
                 {/* % time slider */}
                 <div className="flex-1 min-w-48">
-                  <label className={labelClass}>% time on sequencing — {person.pctTime}%</label>
+                  <label className={labelClass}>{t('col_pct_time')} — {person.pctTime}%</label>
                   <input
                     type="range"
                     min={0}
@@ -84,7 +86,7 @@ export default function Step5() {
 
                 {/* Feature 1: Training cost per year */}
                 <div style={{ width: 130 }}>
-                  <label className={labelClass}>Training cost (USD/yr)</label>
+                  <label className={labelClass}>{t('col_training')}</label>
                   <input
                     type="number"
                     value={training}
@@ -97,7 +99,7 @@ export default function Step5() {
 
                 {/* Annual attributed */}
                 <div style={{ minWidth: 100, textAlign: 'right' }}>
-                  <label className={labelClass}>Annual cost</label>
+                  <label className={labelClass}>{t('col_annual_cost')}</label>
                   <div className="text-sm font-semibold pt-2" style={{ color: 'var(--gx-accent)' }}>
                     ${fmt(annualCost)}
                   </div>
@@ -126,7 +128,7 @@ export default function Step5() {
           className="px-4 py-2 rounded text-sm font-medium"
           style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
         >
-          + Add role
+          {t('btn_add')}
         </button>
         <div className="text-sm font-semibold flex gap-4">
           <span>
@@ -136,7 +138,7 @@ export default function Step5() {
             Training: <span style={{ color: 'var(--gx-accent)' }}>${fmt(trainingTotal)}</span>
           </span>
           <span>
-            Total: <span style={{ color: 'var(--gx-accent)' }}>${fmt(salaryTotal + trainingTotal)}</span>
+            {t('label_total_personnel')}: <span style={{ color: 'var(--gx-accent)' }}>${fmt(salaryTotal + trainingTotal)}</span>
           </span>
         </div>
       </div>

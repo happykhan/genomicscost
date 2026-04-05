@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { ProjectProvider } from './store/ProjectContext'
+import { LanguageProvider, useTranslation, LANGUAGES } from './i18n'
 import { NavBar } from '@genomicx/ui'
 import Home from './pages/Home'
 import About from './pages/About'
@@ -26,32 +27,63 @@ const AppIcon = () => (
   </svg>
 )
 
+function AppInner() {
+  const { t, lang, setLang } = useTranslation()
+
+  return (
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--gx-bg)', color: 'var(--gx-text)' }}>
+      <NavBar
+        appName="Genomics Costing Tool"
+        appSubtitle={t('app_subtitle')}
+        icon={<AppIcon />}
+        githubUrl="https://github.com/happykhan/genomicscost"
+        actions={
+          <>
+            <a href="/about" style={{ color: 'var(--gx-text-muted)', fontSize: '0.85rem' }}>{t('nav_about')}</a>
+            <select
+              value={lang}
+              onChange={e => setLang(e.target.value as keyof typeof LANGUAGES)}
+              style={{
+                background: 'var(--gx-bg-alt)',
+                color: 'var(--gx-text)',
+                border: '1px solid var(--gx-border)',
+                borderRadius: 'var(--gx-radius)',
+                fontSize: '0.8rem',
+                padding: '2px 6px',
+                cursor: 'pointer',
+              }}
+            >
+              {Object.entries(LANGUAGES).map(([code, name]) => (
+                <option key={code} value={code}>{name}</option>
+              ))}
+            </select>
+          </>
+        }
+      />
+      <main className="flex-1">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/wizard/1" element={<WizardShell step={1}><Step1 /></WizardShell>} />
+          <Route path="/wizard/2" element={<WizardShell step={2}><Step2 /></WizardShell>} />
+          <Route path="/wizard/3" element={<WizardShell step={3}><Step3 /></WizardShell>} />
+          <Route path="/wizard/4" element={<WizardShell step={4}><Step4 /></WizardShell>} />
+          <Route path="/wizard/5" element={<WizardShell step={5}><Step5 /></WizardShell>} />
+          <Route path="/wizard/6" element={<WizardShell step={6}><Step6 /></WizardShell>} />
+          <Route path="/wizard/7" element={<WizardShell step={7}><Step7 /></WizardShell>} />
+          <Route path="/about" element={<About />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
+    </div>
+  )
+}
+
 export default function App() {
   return (
-    <ProjectProvider>
-      <div className="min-h-screen flex flex-col" style={{ background: 'var(--gx-bg)', color: 'var(--gx-text)' }}>
-        <NavBar
-          appName="Genomics Costing Tool"
-          appSubtitle="Genomic surveillance lab cost estimator"
-          icon={<AppIcon />}
-          githubUrl="https://github.com/happykhan/genomicscost"
-          actions={<a href="/about" style={{ color: 'var(--gx-text-muted)', fontSize: '0.85rem' }}>About</a>}
-        />
-        <main className="flex-1">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/wizard/1" element={<WizardShell step={1}><Step1 /></WizardShell>} />
-            <Route path="/wizard/2" element={<WizardShell step={2}><Step2 /></WizardShell>} />
-            <Route path="/wizard/3" element={<WizardShell step={3}><Step3 /></WizardShell>} />
-            <Route path="/wizard/4" element={<WizardShell step={4}><Step4 /></WizardShell>} />
-            <Route path="/wizard/5" element={<WizardShell step={5}><Step5 /></WizardShell>} />
-            <Route path="/wizard/6" element={<WizardShell step={6}><Step6 /></WizardShell>} />
-            <Route path="/wizard/7" element={<WizardShell step={7}><Step7 /></WizardShell>} />
-            <Route path="/about" element={<About />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </main>
-      </div>
-    </ProjectProvider>
+    <LanguageProvider>
+      <ProjectProvider>
+        <AppInner />
+      </ProjectProvider>
+    </LanguageProvider>
   )
 }

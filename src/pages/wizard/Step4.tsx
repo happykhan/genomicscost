@@ -1,4 +1,5 @@
 import { useProject } from '../../store/ProjectContext'
+import { useTranslation } from '../../i18n'
 import catalogue from '../../data/catalogue.json'
 import type { EquipmentStatus } from '../../types'
 
@@ -7,12 +8,6 @@ const inputClass = 'border border-[var(--gx-border)] rounded-[var(--gx-radius)] 
 function fmt(n: number) {
   return n.toLocaleString('en-US', { maximumFractionDigits: 0 })
 }
-
-const STATUS_OPTIONS: { value: EquipmentStatus; label: string }[] = [
-  { value: 'buy', label: 'Buy' },
-  { value: 'have', label: 'Have' },
-  { value: 'skip', label: 'Skip' },
-]
 
 // Category display labels
 const CAT_LABELS: Record<string, string> = {
@@ -24,7 +19,14 @@ const CAT_LABELS: Record<string, string> = {
 
 export default function Step4() {
   const { project, updateProject } = useProject()
+  const { t } = useTranslation()
   const { equipment } = project
+
+  const STATUS_OPTIONS: { value: EquipmentStatus; labelKey: string }[] = [
+    { value: 'buy', labelKey: 'opt_buy' },
+    { value: 'have', labelKey: 'opt_have' },
+    { value: 'skip', labelKey: 'opt_skip' },
+  ]
 
   function updateItem(index: number, patch: Partial<typeof equipment[0]>) {
     const next = equipment.map((e, i) => i === index ? { ...e, ...patch } : e)
@@ -85,9 +87,9 @@ export default function Step4() {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>Step 4: Equipment</h2>
+      <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>{t('step4_title')}</h2>
       <p className="text-sm mb-6" style={{ color: 'var(--gx-text-muted)' }}>
-        For each item, indicate if you need to buy it, already have it, or will skip it. Costs are amortised over the item's lifespan.
+        {t('step4_desc')}
       </p>
 
       {grouped.map(group => (
@@ -124,7 +126,7 @@ export default function Step4() {
                           cursor: 'pointer',
                         }}
                       >
-                        {opt.label}
+                        {t(opt.labelKey)}
                       </button>
                     ))}
                   </div>
@@ -133,7 +135,7 @@ export default function Step4() {
                   {item.status === 'buy' && (
                     <>
                       <div className="flex items-center gap-1">
-                        <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Qty</label>
+                        <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_qty')}</label>
                         <input
                           type="number"
                           value={item.quantity}
@@ -144,7 +146,7 @@ export default function Step4() {
                         />
                       </div>
                       <div className="flex items-center gap-1">
-                        <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>$ each</label>
+                        <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_price_each')}</label>
                         <input
                           type="number"
                           value={item.unitCostUsd}
@@ -156,7 +158,7 @@ export default function Step4() {
                       </div>
                       {/* Feature 2: editable lifespan */}
                       <div className="flex items-center gap-1">
-                        <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Life (yr)</label>
+                        <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_life_yr')}</label>
                         <input
                           type="number"
                           value={item.lifespanYears ?? 5}
@@ -195,7 +197,7 @@ export default function Step4() {
           onChange={e => { if (e.target.value) { addFromCatalogue(e.target.value); e.target.value = '' } }}
           style={{ flex: 1, minWidth: 200 }}
         >
-          <option value="">Add from catalogue…</option>
+          <option value="">{t('label_add_catalogue')}</option>
           {availableToAdd.map(name => (
             <option key={name} value={name}>{name}</option>
           ))}
@@ -205,18 +207,18 @@ export default function Step4() {
           className="px-4 py-2 rounded text-sm font-medium"
           style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
         >
-          + Custom item
+          {t('btn_custom_item')}
         </button>
       </div>
 
       {/* Totals */}
       <div className="card p-4 flex justify-between items-center flex-wrap gap-3 mt-4">
         <div>
-          <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Annual (amortised by lifespan)</div>
+          <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_annual_amortised')}</div>
           <div className="text-lg font-semibold" style={{ color: 'var(--gx-accent)' }}>${fmt(annualTotal)}</div>
         </div>
         <div>
-          <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Establishment (one-off)</div>
+          <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_establishment')}</div>
           <div className="text-lg font-semibold" style={{ color: 'var(--gx-text)' }}>${fmt(establishmentTotal)}</div>
         </div>
       </div>

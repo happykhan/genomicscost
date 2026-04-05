@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useProject } from '../../store/ProjectContext'
+import { useTranslation } from '../../i18n'
 import { createDefaultSequencer } from '../../lib/defaults'
 import { calculateSamplesPerRun } from '../../lib/calculations'
 import catalogue from '../../data/catalogue.json'
@@ -22,6 +23,7 @@ interface SequencerPanelProps {
 
 function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogenType, canRemove }: SequencerPanelProps) {
   const { project, updateSequencer, updateProject } = useProject()
+  const { t } = useTranslation()
 
   const isCaptureAll = sequencer.captureAll || pathogenName === 'Multiple pathogens (capture-all)'
 
@@ -136,7 +138,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
               onChange={e => updateSequencer(index, { enabled: e.target.checked })}
               style={{ accentColor: 'var(--gx-accent)', width: 14, height: 14 }}
             />
-            <span style={{ color: 'var(--gx-text-muted)' }}>Enabled</span>
+            <span style={{ color: 'var(--gx-text-muted)' }}>{t('label_enabled')}</span>
           </label>
           {canRemove && (
             <button
@@ -144,7 +146,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
               className="text-xs px-2 py-0.5 rounded"
               style={{ color: 'var(--gx-text-muted)', background: 'none', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
             >
-              Remove
+              {t('btn_remove')}
             </button>
           )}
         </div>
@@ -175,7 +177,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
       <div className="flex flex-col gap-5">
         {/* Reagent kit */}
         <div>
-          <label className={labelClass}>Reagent kit</label>
+          <label className={labelClass}>{t('field_reagent_kit')}</label>
           <select
             className={inputClass}
             value={sequencer.reagentKitName}
@@ -188,18 +190,18 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
           {selectedKit && (
             <div className="text-xs mt-1 flex gap-4" style={{ color: 'var(--gx-text-muted)' }}>
               {selectedKit.max_reads_per_flowcell
-                ? <span>Max reads: {selectedKit.max_reads_per_flowcell.toLocaleString()}</span>
+                ? <span>{t('label_max_reads')}: {selectedKit.max_reads_per_flowcell.toLocaleString()}</span>
                 : <span>Max output: {selectedKit.max_output_mb.toLocaleString()} Mb</span>
               }
-              {selectedKit.read_length_bp && <span>Read length: {selectedKit.read_length_bp} bp</span>}
-              {selectedKit.unit_price_usd && <span>List price: ${selectedKit.unit_price_usd.toLocaleString()}</span>}
+              {selectedKit.read_length_bp && <span>{t('label_read_length')}: {selectedKit.read_length_bp} bp</span>}
+              {selectedKit.unit_price_usd && <span>{t('label_list_price')}: ${selectedKit.unit_price_usd.toLocaleString()}</span>}
             </div>
           )}
         </div>
 
         {/* Kit price override */}
         <div>
-          <label className={labelClass}>Reagent kit price (USD) — override if needed</label>
+          <label className={labelClass}>{t('field_kit_price')}</label>
           <input
             type="number"
             className={inputClass}
@@ -212,7 +214,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
         {/* Feature 7: capture-all mode — show min reads instead of coverage */}
         {isCaptureAll ? (
           <div>
-            <label className={labelClass}>Minimum reads per sample (capture-all)</label>
+            <label className={labelClass}>{t('field_min_reads')}</label>
             <input
               type="number"
               className={inputClass}
@@ -228,7 +230,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className={labelClass}>Coverage (×)</label>
+              <label className={labelClass}>{t('field_coverage')}</label>
               <input
                 type="number"
                 className={inputClass}
@@ -238,7 +240,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
               />
             </div>
             <div>
-              <label className={labelClass}>Samples per run (calculated)</label>
+              <label className={labelClass}>{t('field_samples_per_run')}</label>
               <div
                 className="p-2 text-sm rounded"
                 style={{
@@ -249,7 +251,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
               >
                 {sequencer.samplesPerRun}
                 <span className="text-xs ml-2" style={{ color: 'var(--gx-text-muted)' }}>
-                  effective (after controls)
+                  {t('label_effective')}
                 </span>
               </div>
             </div>
@@ -259,7 +261,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
         {/* If capture-all, still show samples per run readout */}
         {isCaptureAll && (
           <div>
-            <label className={labelClass}>Samples per run (calculated)</label>
+            <label className={labelClass}>{t('field_samples_per_run')}</label>
             <div
               className="p-2 text-sm rounded"
               style={{
@@ -270,7 +272,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
             >
               {sequencer.samplesPerRun}
               <span className="text-xs ml-2" style={{ color: 'var(--gx-text-muted)' }}>
-                effective (after controls)
+                {t('label_effective')}
               </span>
             </div>
           </div>
@@ -279,7 +281,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* Buffer % slider */}
           <div>
-            <label className={labelClass}>Buffer % — {sequencer.bufferPct}%</label>
+            <label className={labelClass}>{t('field_buffer_pct')} — {sequencer.bufferPct}%</label>
             <input
               type="range"
               min={0}
@@ -293,7 +295,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
 
           {/* Retest % slider */}
           <div>
-            <label className={labelClass}>Retest % — {sequencer.retestPct}%</label>
+            <label className={labelClass}>{t('field_retest_pct')} — {sequencer.retestPct}%</label>
             <input
               type="range"
               min={0}
@@ -307,7 +309,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
 
           {/* Feature 3: controls per run */}
           <div>
-            <label className={labelClass}>Controls per run</label>
+            <label className={labelClass}>{t('field_controls_per_run')}</label>
             <input
               type="number"
               className={inputClass}
@@ -324,7 +326,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
 
         {/* Library prep kit */}
         <div>
-          <label className={labelClass}>Library prep kit</label>
+          <label className={labelClass}>{t('field_lib_prep_kit')}</label>
           <select
             className={inputClass}
             value={sequencer.libPrepKitName}
@@ -339,7 +341,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
 
         {/* Library prep cost per sample */}
         <div>
-          <label className={labelClass}>Library prep cost per sample (USD)</label>
+          <label className={labelClass}>{t('field_lib_prep_cost')}</label>
           <input
             type="number"
             className={inputClass}
@@ -359,7 +361,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
               onChange={e => updateSequencer(index, { enrichment: e.target.checked })}
               style={{ accentColor: 'var(--gx-accent)', width: 16, height: 16 }}
             />
-            <span style={{ color: 'var(--gx-text)' }}>Enrichment step included</span>
+            <span style={{ color: 'var(--gx-text)' }}>{t('field_enrichment')}</span>
           </label>
         </div>
       </div>
@@ -369,6 +371,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
 
 export default function Step2() {
   const { project, updateProject } = useProject()
+  const { t } = useTranslation()
   const { sequencers } = project
 
   function addSecondSequencer() {
@@ -378,9 +381,9 @@ export default function Step2() {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>Step 2: Sequencing Platform</h2>
+      <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>{t('step2_title')}</h2>
       <p className="text-sm mb-6" style={{ color: 'var(--gx-text-muted)' }}>
-        Choose your sequencer(s), reagent kit and library preparation approach.
+        {t('step2_desc')}
       </p>
 
       {sequencers.map((seq, idx) => (
@@ -402,7 +405,7 @@ export default function Step2() {
           className="px-4 py-2 rounded text-sm font-medium"
           style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
         >
-          + Add second sequencer
+          {t('btn_add_sequencer')}
         </button>
       )}
     </div>

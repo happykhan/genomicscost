@@ -1,15 +1,15 @@
 import { useProject } from '../../store/ProjectContext'
+import { useTranslation } from '../../i18n'
 import catalogue from '../../data/catalogue.json'
 
 const inputClass = 'border border-[var(--gx-border)] rounded-[var(--gx-radius)] bg-[var(--gx-bg)] text-[var(--gx-text)] p-2 text-sm focus:outline-none focus:border-[var(--gx-accent)]'
 
-// Group by workflow label
-const WORKFLOW_LABELS: Record<string, string> = {
-  sample_receipt: 'Sample receipt',
-  nucleic_acid_extraction: 'Nucleic acid extraction',
-  pcr_testing: 'PCR testing',
-  general_lab: 'General lab',
-  null: 'Other',
+const WORKFLOW_KEYS: Record<string, string> = {
+  sample_receipt: 'wf_sample_receipt',
+  nucleic_acid_extraction: 'wf_nucleic_acid_extraction',
+  pcr_testing: 'wf_pcr_testing',
+  general_lab: 'wf_general_lab',
+  null: 'wf_other',
 }
 
 function fmt(n: number) {
@@ -18,6 +18,7 @@ function fmt(n: number) {
 
 export default function Step3() {
   const { project, updateProject } = useProject()
+  const { t } = useTranslation()
   const { consumables, samplesPerYear } = project
 
   function updateConsumable(index: number, patch: Partial<typeof consumables[0]>) {
@@ -47,7 +48,7 @@ export default function Step3() {
   const groups = Array.from(new Set(withWorkflow.map(c => c.workflow ?? 'null')))
   const grouped = groups.map(wf => ({
     workflow: wf,
-    label: WORKFLOW_LABELS[wf] ?? wf,
+    label: t(WORKFLOW_KEYS[wf] ?? 'wf_other'),
     items: withWorkflow.filter(c => (c.workflow ?? 'null') === wf),
   }))
 
@@ -57,17 +58,17 @@ export default function Step3() {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>Step 3: Consumables</h2>
+      <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>{t('step3_title')}</h2>
       <div className="flex items-center gap-3 mb-4">
         <p className="text-sm" style={{ color: 'var(--gx-text-muted)' }}>
-          Edit quantity per sample and unit cost. Toggle items on/off.
+          {t('step3_desc')}
         </p>
         <span className="text-xs px-2 py-1 rounded-full flex-shrink-0" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-accent)', border: '1px solid var(--gx-border)' }}>
           {samplesPerYear.toLocaleString()} samples/yr
         </span>
       </div>
       <div className="text-xs mb-4 p-3 rounded" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text-muted)', border: '1px solid var(--gx-border)' }}>
-        Unit costs are placeholders ($5) — enter your actual local prices. Qty/sample is the number of units consumed per sample processed.
+        {t('note_placeholder_costs')}
       </div>
 
       {grouped.map(group => (
@@ -79,11 +80,11 @@ export default function Step3() {
             <table className="w-full text-sm">
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--gx-border)', background: 'var(--gx-bg-alt)' }}>
-                  <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Item</th>
-                  <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Qty/sample</th>
-                  <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Unit cost ($)</th>
-                  <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Annual ($)</th>
-                  <th className="px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>On</th>
+                  <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_item')}</th>
+                  <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_qty_sample')}</th>
+                  <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_unit_cost')}</th>
+                  <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual')}</th>
+                  <th className="px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_on')}</th>
                   <th className="px-3 py-2"></th>
                 </tr>
               </thead>
@@ -166,10 +167,10 @@ export default function Step3() {
           className="px-4 py-2 rounded text-sm font-medium"
           style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
         >
-          + Add item
+          {t('btn_add')}
         </button>
         <div className="text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>
-          Total consumables: <span style={{ color: 'var(--gx-accent)' }}>${fmt(total)}</span>
+          {t('label_total_consumables')}: <span style={{ color: 'var(--gx-accent)' }}>${fmt(total)}</span>
         </div>
       </div>
     </div>

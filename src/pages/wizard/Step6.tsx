@@ -1,4 +1,5 @@
 import { useProject } from '../../store/ProjectContext'
+import { useTranslation } from '../../i18n'
 import catalogue from '../../data/catalogue.json'
 
 const inputClass = 'border border-[var(--gx-border)] rounded-[var(--gx-radius)] bg-[var(--gx-bg)] text-[var(--gx-text)] p-2 text-sm focus:outline-none focus:border-[var(--gx-accent)]'
@@ -12,6 +13,7 @@ const CLOUD_PLATFORMS = catalogue.bioinformatics_cloud.cloud_platforms.map(p => 
 
 export default function Step6() {
   const { project, updateProject } = useProject()
+  const { t } = useTranslation()
   const { facility, transport, bioinformatics, qms } = project
 
   // ── Facility ─────────────────────────────────────────────────────────────────
@@ -47,21 +49,21 @@ export default function Step6() {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>Step 6: Facility, Transport & Bioinformatics</h2>
+      <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>{t('step6_title')}</h2>
       <p className="text-sm mb-6" style={{ color: 'var(--gx-text-muted)' }}>
         Overhead costs, sample transport and your bioinformatics approach.
       </p>
 
       {/* ── Facility ── */}
       <section className="mb-8">
-        <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--gx-text)' }}>Facility costs</h3>
+        <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--gx-text)' }}>{t('field_facility')}</h3>
         <div className="card overflow-hidden mb-2">
           <table className="w-full text-sm">
             <thead>
               <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
                 <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Label</th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Monthly cost ($)</th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>% sequencing</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_monthly_cost')}</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_pct_sequencing')}</th>
                 <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Annual attr. ($)</th>
                 <th className="px-3 py-2"></th>
               </tr>
@@ -90,20 +92,20 @@ export default function Step6() {
           </table>
         </div>
         <div className="flex justify-between items-center">
-          <button onClick={addFacilityRow} className="px-3 py-1.5 rounded text-xs font-medium" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>+ Add row</button>
+          <button onClick={addFacilityRow} className="px-3 py-1.5 rounded text-xs font-medium" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>{t('btn_add')}</button>
           <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total: <strong style={{ color: 'var(--gx-accent)' }}>${fmt(facilityTotal)}</strong></div>
         </div>
       </section>
 
       {/* ── Transport ── */}
       <section className="mb-8">
-        <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--gx-text)' }}>Transport</h3>
+        <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--gx-text)' }}>{t('field_transport')}</h3>
         <div className="card overflow-hidden mb-2">
           <table className="w-full text-sm">
             <thead>
               <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
                 <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Label</th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Annual cost ($)</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual_cost_transport')}</th>
                 <th className="px-3 py-2"></th>
               </tr>
             </thead>
@@ -125,14 +127,14 @@ export default function Step6() {
           </table>
         </div>
         <div className="flex justify-between items-center">
-          <button onClick={addTransportRow} className="px-3 py-1.5 rounded text-xs font-medium" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>+ Add row</button>
+          <button onClick={addTransportRow} className="px-3 py-1.5 rounded text-xs font-medium" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>{t('btn_add')}</button>
           <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total: <strong style={{ color: 'var(--gx-accent)' }}>${fmt(transportTotal)}</strong></div>
         </div>
       </section>
 
       {/* ── Bioinformatics ── */}
       <section className="mb-8">
-        <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--gx-text)' }}>Bioinformatics</h3>
+        <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--gx-text)' }}>{t('field_bioinformatics')}</h3>
         <div className="card p-4 flex flex-col gap-4">
           {/* Type radio */}
           <div>
@@ -148,7 +150,9 @@ export default function Step6() {
                     onChange={() => updateProject({ bioinformatics: { ...bioinformatics, type } })}
                     style={{ accentColor: 'var(--gx-accent)' }}
                   />
-                  <span style={{ color: 'var(--gx-text)', textTransform: 'capitalize' }}>{type === 'inhouse' ? 'In-house' : type === 'none' ? 'None / included' : 'Cloud'}</span>
+                  <span style={{ color: 'var(--gx-text)' }}>
+                    {type === 'cloud' ? t('opt_cloud') : type === 'inhouse' ? t('opt_inhouse') : t('opt_none')}
+                  </span>
                 </label>
               ))}
             </div>
@@ -157,7 +161,7 @@ export default function Step6() {
           {bioinformatics.type === 'cloud' && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className={labelClass}>Platform</label>
+                <label className={labelClass}>{t('field_cloud_platform')}</label>
                 <select
                   className={inputClass}
                   value={bioinformatics.cloudPlatform}
@@ -168,7 +172,7 @@ export default function Step6() {
                 </select>
               </div>
               <div>
-                <label className={labelClass}>Cost per sample (USD)</label>
+                <label className={labelClass}>{t('field_cost_per_sample')}</label>
                 <input
                   type="number"
                   value={bioinformatics.costPerSampleUsd}
@@ -184,7 +188,7 @@ export default function Step6() {
 
           {bioinformatics.type === 'inhouse' && (
             <div>
-              <label className={labelClass}>Annual server / infrastructure cost (USD)</label>
+              <label className={labelClass}>{t('field_annual_server')}</label>
               <input
                 type="number"
                 value={bioinformatics.annualServerCostUsd}
@@ -200,16 +204,16 @@ export default function Step6() {
 
       {/* ── QMS ── */}
       <section>
-        <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--gx-text)' }}>Quality management (optional)</h3>
+        <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--gx-text)' }}>{t('field_qms')} (optional)</h3>
         <div className="card overflow-hidden mb-2">
           <table className="w-full text-sm">
             <thead>
               <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
-                <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Activity</th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Cost ($)</th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Qty</th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Annual ($)</th>
-                <th className="px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>On</th>
+                <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_activity')}</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_cost')}</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_quantity')}</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual')}</th>
+                <th className="px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_on')}</th>
               </tr>
             </thead>
             <tbody>

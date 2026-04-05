@@ -1,19 +1,21 @@
 import { useNavigate } from 'react-router-dom'
 import { useProject } from '../store/ProjectContext'
-
-const STEP_DESCRIPTIONS = [
-  { n: 1, label: 'Setup', desc: 'Lab name, country, pathogen and annual sample volume' },
-  { n: 2, label: 'Platform', desc: 'Sequencing platform, reagent kits and library preparation' },
-  { n: 3, label: 'Consumables', desc: 'Lab consumables and reagent costs per sample' },
-  { n: 4, label: 'Equipment', desc: 'Capital equipment — buy, have, or skip' },
-  { n: 5, label: 'Personnel', desc: 'Staff roles, salaries and time allocated to sequencing' },
-  { n: 6, label: 'Facility', desc: 'Rent, utilities, transport and bioinformatics' },
-  { n: 7, label: 'Results', desc: 'Full cost breakdown and PDF export' },
-]
+import { useTranslation } from '../i18n'
 
 export default function Home() {
   const navigate = useNavigate()
   const { savedProjects, loadProject, deleteProject, newProject } = useProject()
+  const { t } = useTranslation()
+
+  const STEP_DESCRIPTIONS = [
+    { n: 1, label: t('step1_label'), desc: t('step1_desc') },
+    { n: 2, label: t('step2_label'), desc: t('step2_desc') },
+    { n: 3, label: t('step3_label'), desc: t('step3_desc') },
+    { n: 4, label: t('step4_label'), desc: t('step4_desc') },
+    { n: 5, label: t('step5_label'), desc: t('step5_desc') },
+    { n: 6, label: t('step6_label'), desc: '' },
+    { n: 7, label: t('step7_label'), desc: '' },
+  ]
 
   function handleNewProject() {
     newProject()
@@ -30,21 +32,20 @@ export default function Home() {
       {/* Hero */}
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold mb-3" style={{ color: 'var(--gx-text)' }}>
-          Genomics Costing Tool
+          {t('home_title')}
         </h1>
         <p className="text-lg mb-6" style={{ color: 'var(--gx-text-muted)' }}>
-          Estimate the cost of running a genomic surveillance laboratory
+          {t('home_subtitle')}
         </p>
         <p className="text-sm mb-8 max-w-xl mx-auto" style={{ color: 'var(--gx-text-muted)' }}>
-          Based on the WHO Genomics Costing Tool (second edition). Walk through 7 guided steps to
-          estimate reagent, equipment, personnel and facility costs — then export a PDF summary.
+          {t('home_based_on')}
         </p>
         <button
           onClick={handleNewProject}
           className="px-8 py-3 rounded-lg text-base font-semibold"
           style={{ background: 'var(--gx-accent)', color: 'var(--gx-bg)', border: 'none', cursor: 'pointer' }}
         >
-          New project
+          {t('home_start')}
         </button>
       </div>
 
@@ -68,7 +69,7 @@ export default function Home() {
               </div>
               <div>
                 <div className="text-sm font-medium" style={{ color: 'var(--gx-text)' }}>{s.label}</div>
-                <div className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)' }}>{s.desc}</div>
+                {s.desc && <div className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)' }}>{s.desc}</div>}
               </div>
             </div>
           ))}
@@ -79,7 +80,7 @@ export default function Home() {
       {savedProjects.length > 0 && (
         <div>
           <h2 className="text-sm uppercase tracking-wider mb-4 font-semibold" style={{ color: 'var(--gx-text-muted)' }}>
-            Saved projects
+            {t('home_load')}
           </h2>
           <div className="flex flex-col gap-2">
             {savedProjects.map(p => (
@@ -108,7 +109,7 @@ export default function Home() {
                     className="px-3 py-1.5 rounded text-xs font-medium"
                     style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text-muted)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
                   >
-                    Delete
+                    {t('btn_remove')}
                   </button>
                 </div>
               </div>

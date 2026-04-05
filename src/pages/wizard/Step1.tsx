@@ -1,4 +1,5 @@
 import { useProject } from '../../store/ProjectContext'
+import { useTranslation } from '../../i18n'
 import catalogue from '../../data/catalogue.json'
 
 const inputClass = 'border border-[var(--gx-border)] rounded-[var(--gx-radius)] bg-[var(--gx-bg)] text-[var(--gx-text)] p-2 text-sm focus:outline-none focus:border-[var(--gx-accent)] w-full'
@@ -6,6 +7,7 @@ const labelClass = 'text-xs text-[var(--gx-text-muted)] uppercase tracking-wider
 
 export default function Step1() {
   const { project, updateProject } = useProject()
+  const { t } = useTranslation()
 
   const filteredPathogens = catalogue.pathogens.filter(p => {
     if (!project.pathogenType) return true
@@ -32,15 +34,15 @@ export default function Step1() {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>Step 1: Setup</h2>
+      <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>{t('step1_title')}</h2>
       <p className="text-sm mb-6" style={{ color: 'var(--gx-text-muted)' }}>
-        Tell us about your lab and the pathogen you're sequencing.
+        {t('step1_desc')}
       </p>
 
       <div className="flex flex-col gap-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className={labelClass}>Lab / project name</label>
+            <label className={labelClass}>{t('field_project_name')}</label>
             <input
               type="text"
               className={inputClass}
@@ -50,7 +52,7 @@ export default function Step1() {
             />
           </div>
           <div>
-            <label className={labelClass}>Country</label>
+            <label className={labelClass}>{t('field_country')}</label>
             <input
               type="text"
               className={inputClass}
@@ -63,7 +65,7 @@ export default function Step1() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className={labelClass}>Year</label>
+            <label className={labelClass}>{t('field_year')}</label>
             <input
               type="number"
               className={inputClass}
@@ -74,7 +76,7 @@ export default function Step1() {
             />
           </div>
           <div>
-            <label className={labelClass}>Samples per year</label>
+            <label className={labelClass}>{t('field_samples_per_year')}</label>
             <input
               type="number"
               className={inputClass}
@@ -86,7 +88,7 @@ export default function Step1() {
         </div>
 
         <div>
-          <label className={labelClass}>Pathogen type</label>
+          <label className={labelClass}>{t('field_pathogen_type')}</label>
           <div className="flex gap-3">
             {(['viral', 'bacterial'] as const).map(type => (
               <label key={type} className="flex items-center gap-2 cursor-pointer text-sm">
@@ -98,14 +100,16 @@ export default function Step1() {
                   onChange={() => handlePathogenTypeChange(type)}
                   style={{ accentColor: 'var(--gx-accent)' }}
                 />
-                <span style={{ color: 'var(--gx-text)', textTransform: 'capitalize' }}>{type}</span>
+                <span style={{ color: 'var(--gx-text)' }}>
+                  {type === 'viral' ? t('opt_viral') : t('opt_bacterial')}
+                </span>
               </label>
             ))}
           </div>
         </div>
 
         <div>
-          <label className={labelClass}>Pathogen</label>
+          <label className={labelClass}>{t('field_pathogen_name')}</label>
           <select
             className={inputClass}
             value={isCaptureAll ? '__capture_all__' : project.pathogenName}
@@ -122,7 +126,7 @@ export default function Step1() {
         {/* Feature 7: hide genome size / coverage for capture-all; show min reads instead */}
         {!isCaptureAll && (
           <div>
-            <label className={labelClass}>Genome size (Mb) — auto-filled from pathogen</label>
+            <label className={labelClass}>{t('field_genome_size')} — auto-filled from pathogen</label>
             <input
               type="number"
               className={inputClass}
