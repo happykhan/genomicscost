@@ -12,6 +12,20 @@ import Step5 from './pages/wizard/Step5'
 import Step6 from './pages/wizard/Step6'
 import Step7 from './pages/wizard/Step7'
 
+const AppIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="28" height="28">
+    <rect width="32" height="32" rx="7" fill="#0f172a"/>
+    <rect x="5"  y="22" width="5" height="6"  rx="1.5" fill="#2dd4bf" opacity="0.45"/>
+    <rect x="13" y="16" width="5" height="12" rx="1.5" fill="#2dd4bf" opacity="0.70"/>
+    <rect x="21" y="9"  width="6" height="19" rx="1.5" fill="#2dd4bf"/>
+    <circle cx="7.5"   cy="20"   r="3"   fill="#2dd4bf" opacity="0.45"/>
+    <circle cx="15.5"  cy="13.5" r="3"   fill="#2dd4bf" opacity="0.70"/>
+    <circle cx="24"    cy="6.5"  r="3.5" fill="#2dd4bf"/>
+    <line x1="10.5" y1="19.2" x2="12.5" y2="14.5" stroke="#2dd4bf" stroke-width="1.2" opacity="0.4" strokeLinecap="round"/>
+    <line x1="18.5" y1="12.5" x2="20.5" y2="8"    stroke="#2dd4bf" stroke-width="1.2" opacity="0.55" strokeLinecap="round"/>
+  </svg>
+)
+
 export default function App() {
   return (
     <ProjectProvider>
@@ -19,6 +33,7 @@ export default function App() {
         <NavBar
           appName="Genomics Costing Tool"
           appSubtitle="Genomic surveillance lab cost estimator"
+          icon={<AppIcon />}
           githubUrl="https://github.com/happykhan/genomicscost"
           actions={<a href="/about" style={{ color: 'var(--gx-text-muted)', fontSize: '0.85rem' }}>About</a>}
         />
