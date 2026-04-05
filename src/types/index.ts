@@ -102,7 +102,7 @@ export interface FacilityItem {
 }
 
 export interface BioinformaticsConfig {
-  type: 'cloud' | 'inhouse' | 'none'
+  type: 'cloud' | 'inhouse' | 'hybrid' | 'none'
   cloudPlatform: string
   costPerSampleUsd: number
   annualServerCostUsd: number
@@ -112,6 +112,7 @@ export interface QMSItem {
   activity: string
   costUsd: number
   quantity: number
+  pctSequencing: number  // 0-100, % of cost attributed to sequencing
   enabled: boolean
 }
 

@@ -48,6 +48,7 @@ export function createDefaultProject(): Project {
     activity: q.activity,
     costUsd: q.default_cost_usd ?? 1000,
     quantity: q.default_quantity ?? 1,
+    pctSequencing: 85,  // WHO default: 85% attributed to sequencing
     enabled: true,
   }))
 
