@@ -77,6 +77,14 @@ export interface SequencerConfig {
   libPrepKitName: string
   libPrepCostPerSample: number
   enrichment: boolean
+  // Feature 3: controls per run
+  controlsPerRun: number
+  // Feature 6: dual sequencer
+  enabled: boolean
+  label: string
+  // Feature 7: capture-all mode
+  captureAll: boolean
+  minReadsPerSample: number
 }
 
 export type EquipmentStatus = 'buy' | 'have' | 'skip'
@@ -87,12 +95,16 @@ export interface EquipmentItem {
   status: EquipmentStatus
   quantity: number
   unitCostUsd: number
+  // Feature 2: per-item lifespan
+  lifespanYears: number
 }
 
 export interface PersonnelItem {
   role: string
   annualSalaryUsd: number
   pctTime: number  // 0-100
+  // Feature 1: training costs
+  trainingCostUsd: number
 }
 
 export interface FacilityItem {
@@ -130,8 +142,9 @@ export interface Project {
   pathogenName: string
   genomeSizeMb: number
   samplesPerYear: number
-  sequencer: SequencerConfig
-  consumables: Array<{ name: string; unitCostUsd: number; quantityPerSample: number; enabled: boolean }>
+  // Feature 6: dual sequencer (replaces singular sequencer)
+  sequencers: SequencerConfig[]
+  consumables: Array<{ name: string; unitCostUsd: number; quantityPerSample: number; enabled: boolean; workflow?: string }>
   equipment: EquipmentItem[]
   personnel: PersonnelItem[]
   facility: FacilityItem[]
@@ -153,6 +166,9 @@ export interface CostBreakdown {
   transport: number
   bioinformatics: number
   qms: number
+  training: number
   total: number
   costPerSample: number
+  // Feature 5: workflow breakdown
+  workflowBreakdown: Record<string, number>
 }

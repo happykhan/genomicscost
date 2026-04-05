@@ -13,6 +13,10 @@ export default function Step1() {
   })
 
   function handlePathogenChange(name: string) {
+    if (name === '__capture_all__') {
+      updateProject({ pathogenName: 'Multiple pathogens (capture-all)', genomeSizeMb: 0 })
+      return
+    }
     const found = catalogue.pathogens.find(p => p.name === name)
     updateProject({
       pathogenName: name,
@@ -23,6 +27,8 @@ export default function Step1() {
   function handlePathogenTypeChange(type: 'viral' | 'bacterial') {
     updateProject({ pathogenType: type, pathogenName: '', genomeSizeMb: 0 })
   }
+
+  const isCaptureAll = project.pathogenName === 'Multiple pathogens (capture-all)'
 
   return (
     <div>
@@ -102,29 +108,71 @@ export default function Step1() {
           <label className={labelClass}>Pathogen</label>
           <select
             className={inputClass}
-            value={project.pathogenName}
+            value={isCaptureAll ? '__capture_all__' : project.pathogenName}
             onChange={e => handlePathogenChange(e.target.value)}
           >
             <option value="">Select a pathogen…</option>
+            <option value="__capture_all__">Multiple pathogens (capture-all)</option>
             {filteredPathogens.map(p => (
               <option key={p.name} value={p.name}>{p.name}</option>
             ))}
           </select>
         </div>
 
-        <div>
-          <label className={labelClass}>Genome size (Mb) — auto-filled from pathogen</label>
-          <input
-            type="number"
-            className={inputClass}
-            value={project.genomeSizeMb}
-            step={0.001}
-            min={0}
-            onChange={e => updateProject({ genomeSizeMb: parseFloat(e.target.value) || 0 })}
-            style={{ color: 'var(--gx-text-muted)' }}
-          />
-          <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>
-            You can edit this if your pathogen has a non-standard genome size.
+        {/* Feature 7: hide genome size / coverage for capture-all; show min reads instead */}
+        {!isCaptureAll && (
+          <div>
+            <label className={labelClass}>Genome size (Mb) — auto-filled from pathogen</label>
+            <input
+              type="number"
+              className={inputClass}
+              value={project.genomeSizeMb}
+              step={0.001}
+              min={0}
+              onChange={e => updateProject({ genomeSizeMb: parseFloat(e.target.value) || 0 })}
+              style={{ color: 'var(--gx-text-muted)' }}
+            />
+            <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>
+              You can edit this if your pathogen has a non-standard genome size.
+            </div>
+          </div>
+        )}
+
+        {isCaptureAll && (
+          <div className="p-3 rounded text-sm" style={{ background: 'var(--gx-bg-alt)', border: '1px solid var(--gx-border)', color: 'var(--gx-text-muted)' }}>
+            Capture-all mode: genome size and coverage are not used. Set the minimum reads per sample in Step 2.
+          </div>
+        )}
+
+        {/* Feature 4: local currency */}
+        <div className="pt-2" style={{ borderTop: '1px solid var(--gx-border)' }}>
+          <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--gx-text)' }}>Local currency</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Currency code (e.g. KES, NGN, USD)</label>
+              <input
+                type="text"
+                className={inputClass}
+                value={project.currency}
+                placeholder="USD"
+                maxLength={8}
+                onChange={e => updateProject({ currency: e.target.value.toUpperCase() })}
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Exchange rate to local currency (1 USD = ?)</label>
+              <input
+                type="number"
+                className={inputClass}
+                value={project.exchangeRate}
+                min={0}
+                step={0.01}
+                onChange={e => updateProject({ exchangeRate: parseFloat(e.target.value) || 1 })}
+              />
+              <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>
+                Set to 1 to keep everything in USD.
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -35,7 +35,7 @@ export default function Step4() {
     updateProject({
       equipment: [
         ...equipment,
-        { name: 'Custom equipment', category: 'lab_equipment', status: 'buy', quantity: 1, unitCostUsd: 0 },
+        { name: 'Custom equipment', category: 'lab_equipment', status: 'buy', quantity: 1, unitCostUsd: 0, lifespanYears: 5 },
       ],
     })
   }
@@ -57,14 +57,16 @@ export default function Step4() {
           status: 'buy',
           quantity: cat.recommended_quantity ?? 1,
           unitCostUsd: cat.unit_cost_usd ?? 0,
+          lifespanYears: cat.category === 'sequencing_platform' ? 10 : 5,
         },
       ],
     })
   }
 
+  // Feature 2: use per-item lifespan for annualisation
   const annualTotal = equipment
     .filter(e => e.status === 'buy')
-    .reduce((sum, e) => sum + e.unitCostUsd * e.quantity / 5, 0)
+    .reduce((sum, e) => sum + e.unitCostUsd * e.quantity / Math.max(1, e.lifespanYears ?? 5), 0)
 
   const establishmentTotal = equipment
     .filter(e => e.status === 'buy')
@@ -85,7 +87,7 @@ export default function Step4() {
     <div>
       <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>Step 4: Equipment</h2>
       <p className="text-sm mb-6" style={{ color: 'var(--gx-text-muted)' }}>
-        For each item, indicate if you need to buy it, already have it, or will skip it. Equipment costs are amortised over 5 years.
+        For each item, indicate if you need to buy it, already have it, or will skip it. Costs are amortised over the item's lifespan.
       </p>
 
       {grouped.map(group => (
@@ -95,7 +97,8 @@ export default function Step4() {
           </div>
           <div className="flex flex-col gap-2">
             {group.items.map(item => {
-              const annual = item.status === 'buy' ? item.unitCostUsd * item.quantity / 5 : 0
+              const lifespan = Math.max(1, item.lifespanYears ?? 5)
+              const annual = item.status === 'buy' ? item.unitCostUsd * item.quantity / lifespan : 0
               return (
                 <div
                   key={item.idx}
@@ -126,7 +129,7 @@ export default function Step4() {
                     ))}
                   </div>
 
-                  {/* Qty + Cost (only if buying) */}
+                  {/* Qty + Cost + Lifespan (only if buying) */}
                   {item.status === 'buy' && (
                     <>
                       <div className="flex items-center gap-1">
@@ -149,6 +152,19 @@ export default function Step4() {
                           onChange={e => updateItem(item.idx, { unitCostUsd: parseFloat(e.target.value) || 0 })}
                           className={inputClass}
                           style={{ width: 100, textAlign: 'right' }}
+                        />
+                      </div>
+                      {/* Feature 2: editable lifespan */}
+                      <div className="flex items-center gap-1">
+                        <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Life (yr)</label>
+                        <input
+                          type="number"
+                          value={item.lifespanYears ?? 5}
+                          min={1}
+                          max={30}
+                          onChange={e => updateItem(item.idx, { lifespanYears: parseInt(e.target.value) || 5 })}
+                          className={inputClass}
+                          style={{ width: 60, textAlign: 'center' }}
                         />
                       </div>
                       <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>
@@ -196,7 +212,7 @@ export default function Step4() {
       {/* Totals */}
       <div className="card p-4 flex justify-between items-center flex-wrap gap-3 mt-4">
         <div>
-          <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Annual (amortised over 5 yr)</div>
+          <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Annual (amortised by lifespan)</div>
           <div className="text-lg font-semibold" style={{ color: 'var(--gx-accent)' }}>${fmt(annualTotal)}</div>
         </div>
         <div>

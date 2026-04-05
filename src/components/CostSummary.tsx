@@ -13,11 +13,12 @@ export default function CostSummary() {
     { label: 'Consumables', value: costs.consumables },
     { label: 'Equipment (amortised)', value: costs.equipment },
     { label: 'Personnel', value: costs.personnel },
+    { label: 'Training', value: costs.training },
     { label: 'Facility', value: costs.facility },
     { label: 'Transport', value: costs.transport },
     { label: 'Bioinformatics', value: costs.bioinformatics },
     { label: 'QMS', value: costs.qms },
-  ]
+  ].filter(r => r.value > 0)
 
   return (
     <div className="flex flex-col gap-3">

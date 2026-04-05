@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
 import { useProject } from '../../store/ProjectContext'
+import { createDefaultSequencer } from '../../lib/defaults'
 import catalogue from '../../data/catalogue.json'
+import type { SequencerConfig } from '../../types'
 
 const inputClass = 'border border-[var(--gx-border)] rounded-[var(--gx-radius)] bg-[var(--gx-bg)] text-[var(--gx-text)] p-2 text-sm focus:outline-none focus:border-[var(--gx-accent)] w-full'
 const labelClass = 'text-xs text-[var(--gx-text-muted)] uppercase tracking-wider mb-1 block'
@@ -10,20 +12,27 @@ type PlatformId = typeof PLATFORM_IDS[number]
 
 function calcSamplesPerRun(maxOutputMb: number, genomeSizeMb: number, coverageX: number, bufferPct: number): number {
   if (!maxOutputMb || !genomeSizeMb || !coverageX) return 1
-  // genomeSizeMb × coverageX = total Mb needed per sample; apply buffer for off-target reads
   const mbPerSample = genomeSizeMb * coverageX * (1 + bufferPct / 100)
   return Math.max(1, Math.floor(maxOutputMb / mbPerSample))
 }
 
-export default function Step2() {
-  const { project, updateSequencer } = useProject()
-  const { sequencer } = project
+interface SequencerPanelProps {
+  index: number
+  sequencer: SequencerConfig
+  genomeSizeMb: number
+  pathogenName: string
+  canRemove: boolean
+}
+
+function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, canRemove }: SequencerPanelProps) {
+  const { project, updateSequencer, updateProject } = useProject()
+
+  const isCaptureAll = sequencer.captureAll || pathogenName === 'Multiple pathogens (capture-all)'
 
   const currentPlatform = catalogue.platforms.find(p => p.id === sequencer.platformId)
   const kits = currentPlatform?.reagent_kits ?? []
   const selectedKit = kits.find(k => k.name === sequencer.reagentKitName) ?? kits[0]
 
-  // Library prep kits for this platform
   const libPrepKits = catalogue.library_prep_kits.filter(k => {
     const name = (currentPlatform?.name ?? '').toLowerCase()
     return k.compatible_platforms.some(cp => cp.toLowerCase().includes(name)) ||
@@ -33,42 +42,114 @@ export default function Step2() {
       (sequencer.platformId === 'mgi' && k.name.toLowerCase().includes('mgi'))
   })
 
-  // Auto-calc samplesPerRun when kit, genome size, coverage or buffer changes
+  // Auto-calc samplesPerRun when kit, genome size, coverage, buffer, controls, or capture-all settings change
   useEffect(() => {
     if (!selectedKit) return
-    const calculated = calcSamplesPerRun(
-      selectedKit.max_output_mb,
-      project.genomeSizeMb,
-      sequencer.coverageX,
-      sequencer.bufferPct
-    )
-    updateSequencer({ samplesPerRun: calculated })
-  }, [sequencer.reagentKitName, project.genomeSizeMb, sequencer.coverageX, sequencer.bufferPct]) // eslint-disable-line react-hooks/exhaustive-deps
+    let calculated: number
+    if (isCaptureAll) {
+      const kitMaxReads = selectedKit.max_reads_per_flowcell ?? 0
+      const readsWithBuffer = (sequencer.minReadsPerSample ?? 100_000) * (1 + (sequencer.bufferPct ?? 0) / 100)
+      const gross = kitMaxReads > 0 ? Math.floor(kitMaxReads / readsWithBuffer) : 1
+      calculated = Math.max(1, gross - Math.max(0, sequencer.controlsPerRun ?? 0))
+    } else {
+      calculated = calcSamplesPerRun(
+        selectedKit.max_output_mb,
+        genomeSizeMb,
+        sequencer.coverageX,
+        sequencer.bufferPct
+      )
+      calculated = Math.max(1, calculated - Math.max(0, sequencer.controlsPerRun ?? 0))
+    }
+    updateSequencer(index, { samplesPerRun: calculated })
+  }, [ // eslint-disable-line react-hooks/exhaustive-deps
+    sequencer.reagentKitName, genomeSizeMb, sequencer.coverageX, sequencer.bufferPct,
+    sequencer.controlsPerRun, isCaptureAll, sequencer.minReadsPerSample,
+  ])
 
-  function handlePlatformChange(platformId: PlatformId) {
-    const platform = catalogue.platforms.find(p => p.id === platformId)
+  const PLATFORM_PREFIX: Record<string, string> = {
+    illumina: 'Illumina',
+    ont: 'ONT',
+    thermofisher: 'ThermoFisher',
+    mgi: 'MGI',
+  }
+
+  function handlePlatformChange(newPlatformId: PlatformId) {
+    const platform = catalogue.platforms.find(p => p.id === newPlatformId)
     const firstKit = platform?.reagent_kits[0]
-    updateSequencer({
-      platformId,
+    updateSequencer(index, {
+      platformId: newPlatformId,
       reagentKitName: firstKit?.name ?? '',
       reagentKitPrice: firstKit?.unit_price_usd ?? 0,
     })
+
+    // Sync sequencing_platform equipment to match active platforms after this change
+    const updatedSequencers = project.sequencers.map((s, i) =>
+      i === index ? { ...s, platformId: newPlatformId } : s
+    )
+    const activePlatformIds = [...new Set(updatedSequencers.filter(s => s.enabled).map(s => s.platformId))]
+
+    const nonSeqEquipment = project.equipment.filter(e => e.category !== 'sequencing_platform')
+
+    const seqEquipment = activePlatformIds.flatMap(pid => {
+      const prefix = PLATFORM_PREFIX[pid] ?? pid
+      const existing = project.equipment.filter(e =>
+        e.category === 'sequencing_platform' && e.name.startsWith(prefix)
+      )
+      if (existing.length > 0) return existing
+      const catItem = catalogue.equipment.find(e =>
+        e.category === 'sequencing_platform' && e.name.startsWith(prefix)
+      )
+      if (!catItem) return []
+      return [{
+        name: catItem.name,
+        category: 'sequencing_platform',
+        status: 'buy' as const,
+        quantity: 1,
+        unitCostUsd: catItem.unit_cost_usd ?? 0,
+        lifespanYears: 10,
+      }]
+    })
+
+    updateProject({ equipment: [...seqEquipment, ...nonSeqEquipment] })
   }
 
   function handleKitChange(kitName: string) {
     const kit = kits.find(k => k.name === kitName)
-    updateSequencer({
+    updateSequencer(index, {
       reagentKitName: kitName,
       reagentKitPrice: kit?.unit_price_usd ?? 0,
     })
   }
 
+  function handleRemove() {
+    updateProject({ sequencers: project.sequencers.filter((_, i) => i !== index) })
+  }
+
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>Step 2: Sequencing Platform</h2>
-      <p className="text-sm mb-6" style={{ color: 'var(--gx-text-muted)' }}>
-        Choose your sequencer, reagent kit and library preparation approach.
-      </p>
+    <div className="card p-5 mb-6" style={{ borderLeft: '3px solid var(--gx-accent)' }}>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>{sequencer.label}</h3>
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-2 cursor-pointer text-xs">
+            <input
+              type="checkbox"
+              checked={sequencer.enabled}
+              onChange={e => updateSequencer(index, { enabled: e.target.checked })}
+              style={{ accentColor: 'var(--gx-accent)', width: 14, height: 14 }}
+            />
+            <span style={{ color: 'var(--gx-text-muted)' }}>Enabled</span>
+          </label>
+          {canRemove && (
+            <button
+              onClick={handleRemove}
+              className="text-xs px-2 py-0.5 rounded"
+              style={{ color: 'var(--gx-text-muted)', background: 'none', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
+            >
+              Remove
+            </button>
+          )}
+        </div>
+      </div>
 
       {/* Platform tabs */}
       <div className="flex gap-1 mb-6 p-1 rounded-lg w-fit" style={{ background: 'var(--gx-bg-alt)' }}>
@@ -121,24 +202,59 @@ export default function Step2() {
             className={inputClass}
             value={sequencer.reagentKitPrice}
             min={0}
-            onChange={e => updateSequencer({ reagentKitPrice: parseFloat(e.target.value) || 0 })}
+            onChange={e => updateSequencer(index, { reagentKitPrice: parseFloat(e.target.value) || 0 })}
           />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Coverage */}
+        {/* Feature 7: capture-all mode — show min reads instead of coverage */}
+        {isCaptureAll ? (
           <div>
-            <label className={labelClass}>Coverage (×)</label>
+            <label className={labelClass}>Minimum reads per sample (capture-all)</label>
             <input
               type="number"
               className={inputClass}
-              value={sequencer.coverageX}
-              min={1}
-              onChange={e => updateSequencer({ coverageX: parseInt(e.target.value) || 1 })}
+              value={sequencer.minReadsPerSample ?? 100_000}
+              min={1000}
+              step={10000}
+              onChange={e => updateSequencer(index, { minReadsPerSample: parseInt(e.target.value) || 100_000 })}
             />
+            <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>
+              Used instead of genome size × coverage for multi-pathogen capture panels.
+            </div>
           </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Coverage (×)</label>
+              <input
+                type="number"
+                className={inputClass}
+                value={sequencer.coverageX}
+                min={1}
+                onChange={e => updateSequencer(index, { coverageX: parseInt(e.target.value) || 1 })}
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Samples per run (calculated)</label>
+              <div
+                className="p-2 text-sm rounded"
+                style={{
+                  border: '1px solid var(--gx-border)',
+                  background: 'var(--gx-bg-alt)',
+                  color: 'var(--gx-text)',
+                }}
+              >
+                {sequencer.samplesPerRun}
+                <span className="text-xs ml-2" style={{ color: 'var(--gx-text-muted)' }}>
+                  effective (after controls)
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
 
-          {/* Samples per run (calculated) */}
+        {/* If capture-all, still show samples per run readout */}
+        {isCaptureAll && (
           <div>
             <label className={labelClass}>Samples per run (calculated)</label>
             <div
@@ -151,13 +267,13 @@ export default function Step2() {
             >
               {sequencer.samplesPerRun}
               <span className="text-xs ml-2" style={{ color: 'var(--gx-text-muted)' }}>
-                based on genome size × coverage
+                effective (after controls)
               </span>
             </div>
           </div>
-        </div>
+        )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* Buffer % slider */}
           <div>
             <label className={labelClass}>Buffer % — {sequencer.bufferPct}%</label>
@@ -167,7 +283,7 @@ export default function Step2() {
               max={50}
               step={1}
               value={sequencer.bufferPct}
-              onChange={e => updateSequencer({ bufferPct: parseInt(e.target.value) })}
+              onChange={e => updateSequencer(index, { bufferPct: parseInt(e.target.value) })}
               style={{ width: '100%', accentColor: 'var(--gx-accent)' }}
             />
           </div>
@@ -181,9 +297,25 @@ export default function Step2() {
               max={30}
               step={1}
               value={sequencer.retestPct}
-              onChange={e => updateSequencer({ retestPct: parseInt(e.target.value) })}
+              onChange={e => updateSequencer(index, { retestPct: parseInt(e.target.value) })}
               style={{ width: '100%', accentColor: 'var(--gx-accent)' }}
             />
+          </div>
+
+          {/* Feature 3: controls per run */}
+          <div>
+            <label className={labelClass}>Controls per run</label>
+            <input
+              type="number"
+              className={inputClass}
+              value={sequencer.controlsPerRun ?? 2}
+              min={0}
+              max={96}
+              onChange={e => updateSequencer(index, { controlsPerRun: parseInt(e.target.value) || 0 })}
+            />
+            <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>
+              Subtracted from samples per run
+            </div>
           </div>
         </div>
 
@@ -193,7 +325,7 @@ export default function Step2() {
           <select
             className={inputClass}
             value={sequencer.libPrepKitName}
-            onChange={e => updateSequencer({ libPrepKitName: e.target.value })}
+            onChange={e => updateSequencer(index, { libPrepKitName: e.target.value })}
           >
             <option value="">None / custom</option>
             {libPrepKits.map(k => (
@@ -211,7 +343,7 @@ export default function Step2() {
             value={sequencer.libPrepCostPerSample}
             min={0}
             step={0.5}
-            onChange={e => updateSequencer({ libPrepCostPerSample: parseFloat(e.target.value) || 0 })}
+            onChange={e => updateSequencer(index, { libPrepCostPerSample: parseFloat(e.target.value) || 0 })}
           />
         </div>
 
@@ -221,13 +353,54 @@ export default function Step2() {
             <input
               type="checkbox"
               checked={sequencer.enrichment}
-              onChange={e => updateSequencer({ enrichment: e.target.checked })}
+              onChange={e => updateSequencer(index, { enrichment: e.target.checked })}
               style={{ accentColor: 'var(--gx-accent)', width: 16, height: 16 }}
             />
             <span style={{ color: 'var(--gx-text)' }}>Enrichment step included</span>
           </label>
         </div>
       </div>
+    </div>
+  )
+}
+
+export default function Step2() {
+  const { project, updateProject } = useProject()
+  const { sequencers } = project
+
+  function addSecondSequencer() {
+    const newSeq = createDefaultSequencer('Sequencer 2')
+    updateProject({ sequencers: [...sequencers, newSeq] })
+  }
+
+  return (
+    <div>
+      <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>Step 2: Sequencing Platform</h2>
+      <p className="text-sm mb-6" style={{ color: 'var(--gx-text-muted)' }}>
+        Choose your sequencer(s), reagent kit and library preparation approach.
+      </p>
+
+      {sequencers.map((seq, idx) => (
+        <SequencerPanel
+          key={idx}
+          index={idx}
+          sequencer={seq}
+          genomeSizeMb={project.genomeSizeMb}
+          pathogenName={project.pathogenName}
+          canRemove={sequencers.length > 1}
+        />
+      ))}
+
+      {/* Feature 6: add second sequencer */}
+      {sequencers.length < 2 && (
+        <button
+          onClick={addSecondSequencer}
+          className="px-4 py-2 rounded text-sm font-medium"
+          style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
+        >
+          + Add second sequencer
+        </button>
+      )}
     </div>
   )
 }

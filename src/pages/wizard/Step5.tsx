@@ -18,7 +18,7 @@ export default function Step5() {
 
   function addPerson() {
     updateProject({
-      personnel: [...personnel, { role: 'New role', annualSalaryUsd: 30000, pctTime: 20 }],
+      personnel: [...personnel, { role: 'New role', annualSalaryUsd: 30000, pctTime: 20, trainingCostUsd: 1000 }],
     })
   }
 
@@ -26,18 +26,20 @@ export default function Step5() {
     updateProject({ personnel: personnel.filter((_, i) => i !== index) })
   }
 
-  const total = personnel.reduce((sum, p) => sum + p.annualSalaryUsd * p.pctTime / 100, 0)
+  const salaryTotal = personnel.reduce((sum, p) => sum + p.annualSalaryUsd * p.pctTime / 100, 0)
+  const trainingTotal = personnel.reduce((sum, p) => sum + (p.trainingCostUsd ?? 0), 0)
 
   return (
     <div>
       <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>Step 5: Personnel</h2>
       <p className="text-sm mb-6" style={{ color: 'var(--gx-text-muted)' }}>
-        Enter annual salary and the percentage of time each role spends on genomic surveillance.
+        Enter annual salary, % time on genomic surveillance, and annual training costs per role.
       </p>
 
       <div className="flex flex-col gap-3">
         {personnel.map((person, idx) => {
           const annualCost = person.annualSalaryUsd * person.pctTime / 100
+          const training = person.trainingCostUsd ?? 0
           return (
             <div key={idx} className="card p-4">
               <div className="flex flex-wrap gap-4 items-start">
@@ -80,11 +82,27 @@ export default function Step5() {
                   />
                 </div>
 
+                {/* Feature 1: Training cost per year */}
+                <div style={{ width: 130 }}>
+                  <label className={labelClass}>Training cost (USD/yr)</label>
+                  <input
+                    type="number"
+                    value={training}
+                    min={0}
+                    onChange={e => updatePerson(idx, { trainingCostUsd: parseInt(e.target.value) || 0 })}
+                    className={inputClass}
+                    style={{ width: '100%' }}
+                  />
+                </div>
+
                 {/* Annual attributed */}
                 <div style={{ minWidth: 100, textAlign: 'right' }}>
                   <label className={labelClass}>Annual cost</label>
                   <div className="text-sm font-semibold pt-2" style={{ color: 'var(--gx-accent)' }}>
                     ${fmt(annualCost)}
+                  </div>
+                  <div className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)' }}>
+                    + ${fmt(training)} training
                   </div>
                 </div>
 
@@ -110,8 +128,16 @@ export default function Step5() {
         >
           + Add role
         </button>
-        <div className="text-sm font-semibold">
-          Total personnel: <span style={{ color: 'var(--gx-accent)' }}>${fmt(total)}</span>
+        <div className="text-sm font-semibold flex gap-4">
+          <span>
+            Salaries: <span style={{ color: 'var(--gx-accent)' }}>${fmt(salaryTotal)}</span>
+          </span>
+          <span>
+            Training: <span style={{ color: 'var(--gx-accent)' }}>${fmt(trainingTotal)}</span>
+          </span>
+          <span>
+            Total: <span style={{ color: 'var(--gx-accent)' }}>${fmt(salaryTotal + trainingTotal)}</span>
+          </span>
         </div>
       </div>
     </div>

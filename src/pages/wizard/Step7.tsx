@@ -1,9 +1,14 @@
 import { useProject } from '../../store/ProjectContext'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
+import { WORKFLOW_STEPS, WORKFLOW_STEP_LABELS } from '../../lib/calculations'
 
 function fmt(n: number) {
   return n.toLocaleString('en-US', { maximumFractionDigits: 0 })
+}
+
+function fmtCurrency(n: number, decimals = 0) {
+  return n.toLocaleString('en-US', { maximumFractionDigits: decimals, minimumFractionDigits: decimals })
 }
 
 function pct(part: number, total: number) {
@@ -14,6 +19,8 @@ function pct(part: number, total: number) {
 export default function Step7() {
   const { project, costs, saveProject } = useProject()
   const navigate = useNavigate()
+  const { exchangeRate, currency, samplesPerYear } = project
+  const showLocalCurrency = exchangeRate !== 1 || currency !== 'USD'
 
   const rows = [
     { label: 'Sequencing reagents', value: costs.sequencingReagents },
@@ -21,6 +28,7 @@ export default function Step7() {
     { label: 'Consumables', value: costs.consumables },
     { label: 'Equipment (amortised)', value: costs.equipment },
     { label: 'Personnel', value: costs.personnel },
+    { label: 'Training', value: costs.training },
     { label: 'Facility & overhead', value: costs.facility },
     { label: 'Transport', value: costs.transport },
     { label: 'Bioinformatics', value: costs.bioinformatics },
@@ -28,6 +36,14 @@ export default function Step7() {
   ].filter(r => r.value > 0)
 
   const maxValue = Math.max(...rows.map(r => r.value), 1)
+
+  // Workflow breakdown rows
+  const workflowRows = WORKFLOW_STEPS.map(step => ({
+    step,
+    label: WORKFLOW_STEP_LABELS[step],
+    value: costs.workflowBreakdown[step] ?? 0,
+  }))
+  const workflowTotal = workflowRows.reduce((s, r) => s + r.value, 0)
 
   function handleSave() {
     saveProject()
@@ -56,8 +72,13 @@ export default function Step7() {
         <div className="text-6xl font-bold mb-1">
           ${fmt(costs.costPerSample)}
         </div>
-        <div className="text-sm" style={{ opacity: 0.75 }}>
-          {project.samplesPerYear} samples/year · {project.pathogenName || 'No pathogen'}
+        {showLocalCurrency && (
+          <div className="text-2xl font-semibold mt-1" style={{ opacity: 0.85 }}>
+            {fmtCurrency(costs.costPerSample * exchangeRate)} {currency}
+          </div>
+        )}
+        <div className="text-sm mt-1" style={{ opacity: 0.75 }}>
+          {samplesPerYear} samples/year · {project.pathogenName || 'No pathogen'}
         </div>
       </div>
 
@@ -91,13 +112,16 @@ export default function Step7() {
         </div>
       </div>
 
-      {/* Summary table */}
+      {/* Summary table — Feature 4: local currency column */}
       <div className="card overflow-hidden mb-6">
         <table className="w-full text-sm">
           <thead>
             <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
               <th className="text-left px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Category</th>
-              <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Annual cost (USD)</th>
+              <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Annual (USD)</th>
+              {showLocalCurrency && (
+                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Annual ({currency})</th>
+              )}
               <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>% of total</th>
             </tr>
           </thead>
@@ -106,12 +130,90 @@ export default function Step7() {
               <tr key={row.label} style={{ borderBottom: '1px solid var(--gx-border)' }}>
                 <td className="px-4 py-2" style={{ color: 'var(--gx-text)' }}>{row.label}</td>
                 <td className="px-4 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>${fmt(row.value)}</td>
+                {showLocalCurrency && (
+                  <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-text-muted)' }}>
+                    {fmtCurrency(row.value * exchangeRate)}
+                  </td>
+                )}
                 <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-text-muted)' }}>{pct(row.value, costs.total)}%</td>
               </tr>
             ))}
             <tr style={{ borderTop: '2px solid var(--gx-border)', fontWeight: 700 }}>
               <td className="px-4 py-2" style={{ color: 'var(--gx-text)' }}>Total annual</td>
               <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-accent)' }}>${fmt(costs.total)}</td>
+              {showLocalCurrency && (
+                <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-accent)' }}>
+                  {fmtCurrency(costs.total * exchangeRate)} {currency}
+                </td>
+              )}
+              <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-text-muted)' }}>100%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* Feature 5: Workflow step breakdown */}
+      <div className="card overflow-hidden mb-6">
+        <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--gx-border)', background: 'var(--gx-bg-alt)' }}>
+          <h3 className="text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>Costs per workflow step</h3>
+        </div>
+        <table className="w-full text-sm">
+          <thead>
+            <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
+              <th className="text-left px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Workflow step</th>
+              <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Annual (USD)</th>
+              {showLocalCurrency && (
+                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Annual ({currency})</th>
+              )}
+              <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Cost/sample (USD)</th>
+              {showLocalCurrency && (
+                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Cost/sample ({currency})</th>
+              )}
+              <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>%</th>
+            </tr>
+          </thead>
+          <tbody>
+            {workflowRows.map(row => {
+              const perSample = samplesPerYear > 0 ? row.value / samplesPerYear : 0
+              return (
+                <tr key={row.step} style={{ borderBottom: '1px solid var(--gx-border)' }}>
+                  <td className="px-4 py-2" style={{ color: 'var(--gx-text)' }}>{row.label}</td>
+                  <td className="px-4 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>${fmt(row.value)}</td>
+                  {showLocalCurrency && (
+                    <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-text-muted)' }}>
+                      {fmtCurrency(row.value * exchangeRate)}
+                    </td>
+                  )}
+                  <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-text)' }}>
+                    ${fmtCurrency(perSample, 2)}
+                  </td>
+                  {showLocalCurrency && (
+                    <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-text-muted)' }}>
+                      {fmtCurrency(perSample * exchangeRate, 2)}
+                    </td>
+                  )}
+                  <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-text-muted)' }}>
+                    {pct(row.value, workflowTotal)}%
+                  </td>
+                </tr>
+              )
+            })}
+            <tr style={{ borderTop: '2px solid var(--gx-border)', fontWeight: 700 }}>
+              <td className="px-4 py-2" style={{ color: 'var(--gx-text)' }}>Total</td>
+              <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-accent)' }}>${fmt(workflowTotal)}</td>
+              {showLocalCurrency && (
+                <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-accent)' }}>
+                  {fmtCurrency(workflowTotal * exchangeRate)}
+                </td>
+              )}
+              <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-accent)' }}>
+                ${fmtCurrency(samplesPerYear > 0 ? workflowTotal / samplesPerYear : 0, 2)}
+              </td>
+              {showLocalCurrency && (
+                <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-accent)' }}>
+                  {fmtCurrency(samplesPerYear > 0 ? workflowTotal * exchangeRate / samplesPerYear : 0, 2)}
+                </td>
+              )}
               <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-text-muted)' }}>100%</td>
             </tr>
           </tbody>
@@ -120,15 +222,22 @@ export default function Step7() {
 
       {/* Establishment cost */}
       {costs.establishmentCost > 0 && (
-        <div className="card p-4 mb-6 flex justify-between items-center">
+        <div className="card p-4 mb-6 flex justify-between items-center flex-wrap gap-3">
           <div>
             <div className="text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>Establishment cost (one-off)</div>
             <div className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)' }}>
               Capital equipment to be purchased before operations begin
             </div>
           </div>
-          <div className="text-xl font-bold" style={{ color: 'var(--gx-text)' }}>
-            ${fmt(costs.establishmentCost)}
+          <div>
+            <div className="text-xl font-bold" style={{ color: 'var(--gx-text)' }}>
+              ${fmt(costs.establishmentCost)}
+            </div>
+            {showLocalCurrency && (
+              <div className="text-sm" style={{ color: 'var(--gx-text-muted)' }}>
+                {fmtCurrency(costs.establishmentCost * exchangeRate)} {currency}
+              </div>
+            )}
           </div>
         </div>
       )}

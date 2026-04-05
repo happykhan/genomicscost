@@ -1,14 +1,33 @@
-import type { Project } from '../types'
+import type { Project, SequencerConfig } from '../types'
 import catalogue from '../data/catalogue.json'
 
 function randomId(): string {
   return Math.random().toString(36).slice(2, 10)
 }
 
-export function createDefaultProject(): Project {
+export function createDefaultSequencer(label: string): SequencerConfig {
   const illuminaPlatform = catalogue.platforms.find(p => p.id === 'illumina')!
   const firstKit = illuminaPlatform.reagent_kits[0]
+  return {
+    platformId: 'illumina',
+    reagentKitName: firstKit.name,
+    reagentKitPrice: firstKit.unit_price_usd ?? 0,
+    samplesPerRun: 96,
+    coverageX: 10,
+    bufferPct: 10,
+    retestPct: 5,
+    libPrepKitName: '',
+    libPrepCostPerSample: 25,
+    enrichment: false,
+    controlsPerRun: 2,
+    enabled: true,
+    label,
+    captureAll: false,
+    minReadsPerSample: 100_000,
+  }
+}
 
+export function createDefaultProject(): Project {
   // First 8 consumable-like reagents from catalogue that have quantity_per_sample > 0
   // quantityPerSample is units-per-sample; if pack_size > 1, normalise to packs-per-sample
   const defaultConsumables = catalogue.reagents
@@ -24,6 +43,7 @@ export function createDefaultProject(): Project {
         unitCostUsd: 5,   // placeholder — user must enter local price per pack
         quantityPerSample: qtyPerSample,
         enabled: true,
+        workflow: r.workflow ?? undefined,
       }
     })
 
@@ -43,12 +63,15 @@ export function createDefaultProject(): Project {
       status: 'have' as const,
       quantity: 1,
       unitCostUsd: e.unit_cost_usd ?? 0,
+      // Feature 2: sequencers get 10-year lifespan, everything else 5
+      lifespanYears: e.category === 'sequencing_platform' ? 10 : 5,
     }))
 
   const defaultPersonnel = catalogue.personnel_roles.map((r, i) => ({
     role: r.role,
     annualSalaryUsd: 30000,
     pctTime: [20, 30, 50, 50, 60][i] ?? 20,
+    trainingCostUsd: 1000,
   }))
 
   const defaultQMS = catalogue.qms_activities.map(q => ({
@@ -68,18 +91,7 @@ export function createDefaultProject(): Project {
     pathogenName: 'severe acute respiratory syndrome coronavirus 2 (SARS-CoV-2)',
     genomeSizeMb: 0.03,
     samplesPerYear: 200,
-    sequencer: {
-      platformId: 'illumina',
-      reagentKitName: firstKit.name,
-      reagentKitPrice: firstKit.unit_price_usd ?? 0,
-      samplesPerRun: 96,
-      coverageX: 10,
-      bufferPct: 10,
-      retestPct: 5,
-      libPrepKitName: '',
-      libPrepCostPerSample: 25,
-      enrichment: false,
-    },
+    sequencers: [createDefaultSequencer('Sequencer 1')],
     consumables: defaultConsumables,
     equipment: defaultEquipment,
     personnel: defaultPersonnel,
