@@ -10,7 +10,8 @@ type PlatformId = typeof PLATFORM_IDS[number]
 
 function calcSamplesPerRun(maxOutputMb: number, genomeSizeMb: number, coverageX: number, bufferPct: number): number {
   if (!maxOutputMb || !genomeSizeMb || !coverageX) return 1
-  const mbPerSample = genomeSizeMb * 1000 * coverageX * (1 + bufferPct / 100)
+  // genomeSizeMb × coverageX = total Mb needed per sample; apply buffer for off-target reads
+  const mbPerSample = genomeSizeMb * coverageX * (1 + bufferPct / 100)
   return Math.max(1, Math.floor(maxOutputMb / mbPerSample))
 }
 
