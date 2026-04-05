@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useProject } from '../../store/ProjectContext'
 import { createDefaultSequencer } from '../../lib/defaults'
+import { calculateSamplesPerRun } from '../../lib/calculations'
 import catalogue from '../../data/catalogue.json'
 import type { SequencerConfig } from '../../types'
 
@@ -10,21 +11,16 @@ const labelClass = 'text-xs text-[var(--gx-text-muted)] uppercase tracking-wider
 const PLATFORM_IDS = ['illumina', 'ont', 'thermofisher', 'mgi'] as const
 type PlatformId = typeof PLATFORM_IDS[number]
 
-function calcSamplesPerRun(maxOutputMb: number, genomeSizeMb: number, coverageX: number, bufferPct: number): number {
-  if (!maxOutputMb || !genomeSizeMb || !coverageX) return 1
-  const mbPerSample = genomeSizeMb * coverageX * (1 + bufferPct / 100)
-  return Math.max(1, Math.floor(maxOutputMb / mbPerSample))
-}
-
 interface SequencerPanelProps {
   index: number
   sequencer: SequencerConfig
   genomeSizeMb: number
   pathogenName: string
+  pathogenType: string
   canRemove: boolean
 }
 
-function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, canRemove }: SequencerPanelProps) {
+function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogenType, canRemove }: SequencerPanelProps) {
   const { project, updateSequencer, updateProject } = useProject()
 
   const isCaptureAll = sequencer.captureAll || pathogenName === 'Multiple pathogens (capture-all)'
@@ -42,28 +38,30 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, canRemov
       (sequencer.platformId === 'mgi' && k.name.toLowerCase().includes('mgi'))
   })
 
-  // Auto-calc samplesPerRun when kit, genome size, coverage, buffer, controls, or capture-all settings change
+  // Barcoding limit from selected lib prep kit
+  const selectedLibPrepKit = catalogue.library_prep_kits.find(k => k.name === sequencer.libPrepKitName)
+  const barcodingLimit = selectedLibPrepKit?.barcoding_limit ?? Infinity
+
+  // Auto-calc samplesPerRun using Annex 2 reads-based formula
   useEffect(() => {
     if (!selectedKit) return
-    let calculated: number
-    if (isCaptureAll) {
-      const kitMaxReads = selectedKit.max_reads_per_flowcell ?? 0
-      const readsWithBuffer = (sequencer.minReadsPerSample ?? 100_000) * (1 + (sequencer.bufferPct ?? 0) / 100)
-      const gross = kitMaxReads > 0 ? Math.floor(kitMaxReads / readsWithBuffer) : 1
-      calculated = Math.max(1, gross - Math.max(0, sequencer.controlsPerRun ?? 0))
-    } else {
-      calculated = calcSamplesPerRun(
-        selectedKit.max_output_mb,
-        genomeSizeMb,
-        sequencer.coverageX,
-        sequencer.bufferPct
-      )
-      calculated = Math.max(1, calculated - Math.max(0, sequencer.controlsPerRun ?? 0))
-    }
+    const calculated = calculateSamplesPerRun(
+      genomeSizeMb,
+      sequencer.coverageX,
+      selectedKit.read_length_bp ?? 150,
+      selectedKit.max_reads_per_flowcell ?? 0,
+      sequencer.bufferPct,
+      barcodingLimit,
+      pathogenType,
+      isCaptureAll,
+      sequencer.minReadsPerSample ?? 100_000,
+      sequencer.controlsPerRun ?? 0,
+    )
     updateSequencer(index, { samplesPerRun: calculated })
   }, [ // eslint-disable-line react-hooks/exhaustive-deps
     sequencer.reagentKitName, genomeSizeMb, sequencer.coverageX, sequencer.bufferPct,
     sequencer.controlsPerRun, isCaptureAll, sequencer.minReadsPerSample,
+    sequencer.libPrepKitName, pathogenType,
   ])
 
   const PLATFORM_PREFIX: Record<string, string> = {
@@ -188,7 +186,11 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, canRemov
           </select>
           {selectedKit && (
             <div className="text-xs mt-1 flex gap-4" style={{ color: 'var(--gx-text-muted)' }}>
-              <span>Max output: {selectedKit.max_output_mb.toLocaleString()} Mb</span>
+              {selectedKit.max_reads_per_flowcell
+                ? <span>Max reads: {selectedKit.max_reads_per_flowcell.toLocaleString()}</span>
+                : <span>Max output: {selectedKit.max_output_mb.toLocaleString()} Mb</span>
+              }
+              {selectedKit.read_length_bp && <span>Read length: {selectedKit.read_length_bp} bp</span>}
               {selectedKit.unit_price_usd && <span>List price: ${selectedKit.unit_price_usd.toLocaleString()}</span>}
             </div>
           )}
@@ -387,6 +389,7 @@ export default function Step2() {
           sequencer={seq}
           genomeSizeMb={project.genomeSizeMb}
           pathogenName={project.pathogenName}
+          pathogenType={project.pathogenType}
           canRemove={sequencers.length > 1}
         />
       ))}
