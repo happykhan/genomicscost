@@ -58,9 +58,17 @@ export default function Step3() {
   return (
     <div>
       <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>Step 3: Consumables</h2>
-      <p className="text-sm mb-6" style={{ color: 'var(--gx-text-muted)' }}>
-        Edit quantity per sample and unit cost for each consumable. Toggle items on/off.
-      </p>
+      <div className="flex items-center gap-3 mb-4">
+        <p className="text-sm" style={{ color: 'var(--gx-text-muted)' }}>
+          Edit quantity per sample and unit cost. Toggle items on/off.
+        </p>
+        <span className="text-xs px-2 py-1 rounded-full flex-shrink-0" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-accent)', border: '1px solid var(--gx-border)' }}>
+          {samplesPerYear.toLocaleString()} samples/yr
+        </span>
+      </div>
+      <div className="text-xs mb-4 p-3 rounded" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text-muted)', border: '1px solid var(--gx-border)' }}>
+        Unit costs are placeholders ($5) — enter your actual local prices. Qty/sample is the number of units consumed per sample processed.
+      </div>
 
       {grouped.map(group => (
         <div key={group.workflow} className="mb-6">

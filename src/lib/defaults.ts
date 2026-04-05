@@ -10,15 +10,22 @@ export function createDefaultProject(): Project {
   const firstKit = illuminaPlatform.reagent_kits[0]
 
   // First 8 consumable-like reagents from catalogue that have quantity_per_sample > 0
+  // quantityPerSample is units-per-sample; if pack_size > 1, normalise to packs-per-sample
   const defaultConsumables = catalogue.reagents
     .filter(r => r.quantity_per_sample != null && r.quantity_per_sample > 0)
     .slice(0, 8)
-    .map(r => ({
-      name: r.name,
-      unitCostUsd: 5,
-      quantityPerSample: r.quantity_per_sample ?? 1,
-      enabled: true,
-    }))
+    .map(r => {
+      const packSize = r.pack_size ?? 1
+      const qtyPerSample = packSize > 1
+        ? parseFloat(((r.quantity_per_sample ?? 1) / packSize).toFixed(4))
+        : (r.quantity_per_sample ?? 1)
+      return {
+        name: r.name,
+        unitCostUsd: 5,   // placeholder — user must enter local price per pack
+        quantityPerSample: qtyPerSample,
+        enabled: true,
+      }
+    })
 
   // 5 key equipment items
   const equipmentCatalogue = catalogue.equipment
