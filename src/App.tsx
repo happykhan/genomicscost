@@ -1,6 +1,7 @@
+import { useState, useRef, useEffect } from 'react'
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { ProjectProvider } from './store/ProjectContext'
-import { LanguageProvider, useTranslation } from './i18n'
+import { LanguageProvider, useTranslation, LANGUAGES } from './i18n'
 import { NavBar } from '@genomicx/ui'
 import Home from './pages/Home'
 import About from './pages/About'
@@ -27,6 +28,111 @@ const AppIcon = () => (
   </svg>
 )
 
+function GlobePicker() {
+  const { lang, setLang } = useTranslation()
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        title="Language"
+        style={{
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          padding: '2px 4px',
+          color: 'var(--gx-text-muted)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 4,
+          fontSize: '0.8rem',
+        }}
+      >
+        <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.33 6h2.01A13.27 13.27 0 006 10c0 1.4.18 2.74.5 4H4.33A7.96 7.96 0 012 10c0-1.44.38-2.8 1.05-4H4.33zm1.5 0h8.34c.37 1.26.58 2.6.58 4s-.21 2.74-.58 4H5.83A12.14 12.14 0 015.25 10c0-1.4.2-2.74.58-4zm9.84 0h.02C16.62 7.2 17 8.56 17 10s-.38 2.8-1.05 4h-1.62c.32-1.26.5-2.6.5-4s-.18-2.74-.5-4h-.67zM10 2.08c.9 0 2.1 1.46 2.84 3.92H7.16C7.9 3.54 9.1 2.08 10 2.08zm0 15.84c-.9 0-2.1-1.46-2.84-3.92h5.68C12.1 16.46 10.9 17.92 10 17.92z" clipRule="evenodd"/>
+        </svg>
+        {lang.toUpperCase()}
+      </button>
+      {open && (
+        <div style={{
+          position: 'absolute',
+          right: 0,
+          top: 'calc(100% + 6px)',
+          background: 'var(--gx-bg)',
+          border: '1px solid var(--gx-border)',
+          borderRadius: 'var(--gx-radius)',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          minWidth: 130,
+          zIndex: 100,
+          overflow: 'hidden',
+        }}>
+          {Object.entries(LANGUAGES).map(([code, name]) => (
+            <button
+              key={code}
+              onClick={() => { setLang(code as keyof typeof LANGUAGES); setOpen(false) }}
+              style={{
+                display: 'block',
+                width: '100%',
+                padding: '8px 14px',
+                background: code === lang ? 'var(--gx-bg-alt)' : 'none',
+                border: 'none',
+                cursor: 'pointer',
+                textAlign: 'left',
+                fontSize: '0.85rem',
+                color: code === lang ? 'var(--gx-accent)' : 'var(--gx-text)',
+                fontWeight: code === lang ? 600 : 400,
+              }}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function LangFooter() {
+  const { lang, setLang } = useTranslation()
+  return (
+    <div style={{
+      borderTop: '1px solid var(--gx-border)',
+      padding: '12px 24px',
+      display: 'flex',
+      justifyContent: 'center',
+      gap: 8,
+      flexWrap: 'wrap',
+    }}>
+      {Object.entries(LANGUAGES).map(([code, name]) => (
+        <button
+          key={code}
+          onClick={() => setLang(code as keyof typeof LANGUAGES)}
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '0.78rem',
+            color: code === lang ? 'var(--gx-accent)' : 'var(--gx-text-muted)',
+            fontWeight: code === lang ? 600 : 400,
+            padding: '2px 6px',
+          }}
+        >
+          {name}
+        </button>
+      ))}
+    </div>
+  )
+}
 
 function WizardTabBar() {
   const { t } = useTranslation()
@@ -47,46 +153,72 @@ function WizardTabBar() {
   ]
 
   return (
-    <div
-      style={{
-        borderBottom: '1px solid var(--gx-border)',
-        background: 'var(--gx-bg)',
-        overflowX: 'auto',
-        whiteSpace: 'nowrap',
-      }}
-    >
-      <div style={{ display: 'flex', minWidth: 'max-content', padding: '0 1rem' }}>
-        {STEPS.map(s => {
+    <div style={{ borderBottom: '1px solid var(--gx-border)', background: 'var(--gx-bg)', overflowX: 'auto' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', padding: '12px 16px', minWidth: 'max-content' }}>
+        {STEPS.flatMap((s, i) => {
           const isActive = s.n === currentStep
           const isDone = s.n < currentStep
-          return (
+          const items = []
+          if (i > 0) {
+            items.push(
+              <div
+                key={`line-${s.n}`}
+                style={{
+                  width: 32,
+                  height: 2,
+                  marginTop: 13,
+                  flexShrink: 0,
+                  background: isDone || isActive ? 'var(--gx-accent)' : 'var(--gx-border)',
+                  transition: 'background 0.2s',
+                }}
+              />
+            )
+          }
+          items.push(
             <button
               key={s.n}
               onClick={() => navigate(`/wizard/${s.n}`)}
-              style={{
-                background: 'none',
-                border: 'none',
-                borderBottom: isActive ? '2px solid var(--gx-accent)' : '2px solid transparent',
-                padding: '10px 14px',
-                fontSize: '0.85rem',
-                fontWeight: isActive ? 600 : 400,
-                color: isActive
-                  ? 'var(--gx-accent)'
-                  : isDone
-                  ? 'var(--gx-text)'
-                  : 'var(--gx-text-muted)',
-                cursor: 'pointer',
-                transition: 'color 0.15s, border-color 0.15s',
-                marginBottom: '-1px',
-              }}
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px' }}
             >
-              {isDone ? `✓ ${s.label}` : s.label}
+              <div style={{
+                width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+                background: isActive || isDone ? 'var(--gx-accent)' : 'var(--gx-bg-alt)',
+                border: `2px solid ${isActive || isDone ? 'var(--gx-accent)' : 'var(--gx-border)'}`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: isActive || isDone ? 'var(--gx-bg)' : 'var(--gx-text-muted)',
+                fontSize: '0.72rem', fontWeight: 700,
+                transition: 'background 0.2s, border-color 0.2s',
+              }}>
+                {isDone ? '✓' : s.n}
+              </div>
+              <span style={{
+                fontSize: '0.68rem',
+                color: isActive ? 'var(--gx-accent)' : isDone ? 'var(--gx-text)' : 'var(--gx-text-muted)',
+                fontWeight: isActive ? 600 : 400,
+                whiteSpace: 'nowrap',
+                maxWidth: 72,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}>
+                {s.label}
+              </span>
             </button>
           )
+          return items
         })}
       </div>
     </div>
   )
+}
+
+function LangRedirect({ lang }: { lang: string }) {
+  const { setLang } = useTranslation()
+  const navigate = useNavigate()
+  useEffect(() => {
+    setLang(lang as keyof typeof LANGUAGES)
+    navigate('/', { replace: true })
+  }, [])
+  return null
 }
 
 function AppInner() {
@@ -99,7 +231,12 @@ function AppInner() {
         appSubtitle={t('app_subtitle')}
         icon={<AppIcon />}
         githubUrl="https://github.com/happykhan/genomicscost"
-        actions={<a href="/about" style={{ color: 'var(--gx-text-muted)', fontSize: '0.85rem' }}>{t('nav_about')}</a>}
+        actions={
+          <>
+            <a href="/about" style={{ color: 'var(--gx-text-muted)', fontSize: '0.85rem' }}>{t('nav_about')}</a>
+            <GlobePicker />
+          </>
+        }
       />
       <WizardTabBar />
       <main className="flex-1">
@@ -113,9 +250,13 @@ function AppInner() {
           <Route path="/wizard/6" element={<WizardShell step={6}><Step6 /></WizardShell>} />
           <Route path="/wizard/7" element={<WizardShell step={7}><Step7 /></WizardShell>} />
           <Route path="/about" element={<About />} />
+          {Object.keys(LANGUAGES).map(code => (
+            <Route key={code} path={`/${code}`} element={<LangRedirect lang={code} />} />
+          ))}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
+      <LangFooter />
     </div>
   )
 }

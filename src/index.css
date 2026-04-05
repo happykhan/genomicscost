@@ -3,15 +3,26 @@
 @import "tailwindcss";
 
 @media print {
+  /* Reset design tokens to light values so var(--gx-*) resolves correctly */
+  :root,
+  [data-theme="dark"] {
+    --gx-bg: #ffffff;
+    --gx-bg-alt: #f8fafc;
+    --gx-surface: #ffffff;
+    --gx-bg-elevated: #ffffff;
+    --gx-text: #0f172a;
+    --gx-text-muted: #475569;
+    --gx-text-bright: #0f172a;
+    --gx-border: #e2e8f0;
+    --gx-accent: #0d9488;
+    --gx-nav-bg: #ffffff;
+  }
+
   body, html {
     background: white;
     color: #0f172a;
   }
-  body * {
-    background: white;
-    color: #0f172a;
-    border-color: #e2e8f0;
-  }
+
   nav, header, button { display: none; }
   table { page-break-inside: avoid; }
   tr { page-break-inside: avoid; }
