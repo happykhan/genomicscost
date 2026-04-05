@@ -27,6 +27,28 @@ const AppIcon = () => (
   </svg>
 )
 
+function LangSelect({ lang, setLang }: { lang: string; setLang: (l: keyof typeof LANGUAGES) => void }) {
+  return (
+    <select
+      value={lang}
+      onChange={e => setLang(e.target.value as keyof typeof LANGUAGES)}
+      style={{
+        background: 'var(--gx-bg-alt)',
+        color: 'var(--gx-text)',
+        border: '1px solid var(--gx-border)',
+        borderRadius: 'var(--gx-radius)',
+        fontSize: '0.8rem',
+        padding: '2px 6px',
+        cursor: 'pointer',
+      }}
+    >
+      {Object.entries(LANGUAGES).map(([code, name]) => (
+        <option key={code} value={code}>{name}</option>
+      ))}
+    </select>
+  )
+}
+
 function AppInner() {
   const { t, lang, setLang } = useTranslation()
 
@@ -40,23 +62,13 @@ function AppInner() {
         actions={
           <>
             <a href="/about" style={{ color: 'var(--gx-text-muted)', fontSize: '0.85rem' }}>{t('nav_about')}</a>
-            <select
-              value={lang}
-              onChange={e => setLang(e.target.value as keyof typeof LANGUAGES)}
-              style={{
-                background: 'var(--gx-bg-alt)',
-                color: 'var(--gx-text)',
-                border: '1px solid var(--gx-border)',
-                borderRadius: 'var(--gx-radius)',
-                fontSize: '0.8rem',
-                padding: '2px 6px',
-                cursor: 'pointer',
-              }}
-            >
-              {Object.entries(LANGUAGES).map(([code, name]) => (
-                <option key={code} value={code}>{name}</option>
-              ))}
-            </select>
+            <LangSelect lang={lang} setLang={setLang} />
+          </>
+        }
+        mobileActions={
+          <>
+            <a href="/about" style={{ color: 'var(--gx-text-muted)', fontSize: '0.9rem', display: 'block', padding: '4px 0' }}>{t('nav_about')}</a>
+            <LangSelect lang={lang} setLang={setLang} />
           </>
         }
       />
