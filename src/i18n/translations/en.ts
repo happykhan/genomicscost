@@ -153,6 +153,35 @@ const en: Record<string, string> = {
   field_currency_code: 'Currency code (e.g. KES, NGN, USD)',
   field_exchange_rate: 'Exchange rate to local currency (1 USD = ?)',
   note_usd_default: 'Set to 1 to keep everything in USD.',
+
+  // About page
+  about_title: 'About this tool',
+  about_subtitle: 'Genomics Costing Tool — web edition',
+  about_what_title: 'What is this?',
+  about_what_body: 'An independent, open-source web app for estimating genomic surveillance laboratory costs. It implements the same calculation methodology as the WHO Genomics Costing Tool, 2nd edition (2026) — but is not affiliated with, endorsed by, or produced by the World Health Organization. The original tool is a Microsoft Excel spreadsheet; this version provides the same calculations through a guided, mobile-friendly interface.',
+  about_purpose_title: 'Purpose',
+  about_purpose_body: 'The tool estimates the cost of establishing and running a genomic surveillance laboratory, including sequencing platforms, reagents, equipment, personnel, facility, bioinformatics, and quality management. It is intended for policymakers, lab leaders, health economists, and donor institutions planning or scaling genomic surveillance programmes.',
+  about_how_title: 'How it works',
+  about_how_body1: 'The tool walks you through 7 steps: lab setup, sequencing platform, consumables, equipment, personnel, facility and bioinformatics, and results. All calculations run in your browser — no data is sent to any server.',
+  about_how_body2: 'The samples-per-run calculation follows the methodology in Annex 2 of the WHO user manual: reads per sample are derived from genome size × coverage, compared against pathogen-type minimum read thresholds, buffered for off-target reads, and constrained by the barcoding limit of the selected library prep kit.',
+  about_limits_title: 'Limitations',
+  about_limits_1: 'Reagent and equipment prices are reference prices from the WHO Excel (2026) and may not reflect local pricing.',
+  about_limits_2: 'The tool supports up to two sequencing platforms simultaneously.',
+  about_limits_3: 'Library kit compatibility is not automatically validated — consult manufacturer documentation.',
+  about_limits_4: 'Establishment cost excludes personnel, reagents, and facility costs.',
+  about_citation_title: 'Citation',
+  about_source_title: 'Source code',
+
+  // Equipment categories
+  cat_sequencing_platform: 'Sequencing platform',
+  cat_lab_equipment: 'Lab equipment',
+  cat_facility: 'Facility equipment',
+  cat_bioinformatics: 'Bioinformatics hardware',
+
+  // Step 1 notes
+  note_genome_size_edit: 'You can edit this if your pathogen has a non-standard genome size.',
+  note_capture_all_mode: 'Capture-all mode: genome size and coverage are not used. Set the minimum reads per sample in Step 2.',
+  label_samples_per_yr: 'samples/yr',
 }
 
 export default en

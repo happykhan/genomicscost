@@ -137,14 +137,14 @@ export default function Step1() {
               style={{ color: 'var(--gx-text-muted)' }}
             />
             <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>
-              You can edit this if your pathogen has a non-standard genome size.
+              {t('note_genome_size_edit')}
             </div>
           </div>
         )}
 
         {isCaptureAll && (
           <div className="p-3 rounded text-sm" style={{ background: 'var(--gx-bg-alt)', border: '1px solid var(--gx-border)', color: 'var(--gx-text-muted)' }}>
-            Capture-all mode: genome size and coverage are not used. Set the minimum reads per sample in Step 2.
+            {t('note_capture_all_mode')}
           </div>
         )}
 

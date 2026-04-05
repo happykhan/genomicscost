@@ -156,3 +156,34 @@ const tr: Record<string, string> = {
 }
 
 export default tr
+
+const trExtra: Record<string, string> = {
+  about_title: 'Bu araç hakkında',
+  about_subtitle: 'Genomik Maliyetlendirme Aracı — web sürümü',
+  about_what_title: 'Bu nedir?',
+  about_what_body: 'Genomik sürveyans laboratuvarı maliyetlerini tahmin etmek için bağımsız, açık kaynaklı bir web uygulaması. DSÖ Genomik Maliyetlendirme Aracı, 2. baskı (2026) ile aynı hesaplama metodolojisini uygular, ancak Dünya Sağlık Örgütü ile hiçbir bağlantısı yoktur.',
+  about_purpose_title: 'Amaç',
+  about_purpose_body: 'Araç, dizileme platformları, reaktifler, ekipman, personel, tesis, biyoinformatik ve kalite yönetimi dahil olmak üzere bir genomik sürveyans laboratuvarının kurulması ve işletilmesinin maliyetini tahmin eder.',
+  about_how_title: 'Nasıl çalışır',
+  about_how_body1: 'Araç sizi 7 adımda yönlendirir. Tüm hesaplamalar tarayıcınızda çalışır — hiçbir veri sunucuya gönderilmez.',
+  about_how_body2: 'Çalışma başına örnek hesaplaması, DSÖ kullanım kılavuzunun Ek 2 metodolojisini izler.',
+  about_limits_title: 'Sınırlamalar',
+  about_limits_1: 'Reaktif ve ekipman fiyatları, DSÖ Excel\'inden (2026) alınan referans fiyatlardır ve yerel fiyatları yansıtmayabilir.',
+  about_limits_2: 'Araç aynı anda iki dizileme platformunu destekler.',
+  about_limits_3: 'Kütüphane hazırlama kiti uyumluluğu otomatik olarak doğrulanmaz.',
+  about_limits_4: 'Kurulum maliyeti personel, reaktif ve tesis maliyetlerini kapsamaz.',
+  about_citation_title: 'Atıf',
+  about_source_title: 'Kaynak kodu',
+  cat_sequencing_platform: 'Dizileme platformu',
+  cat_lab_equipment: 'Laboratuvar ekipmanı',
+  cat_facility: 'Tesis ekipmanı',
+  cat_bioinformatics: 'Biyoinformatik donanımı',
+}
+Object.assign(tr, trExtra)
+
+Object.assign(tr, {
+  note_genome_size_edit: 'Patojeninizin standart dışı bir genom boyutu varsa bunu düzenleyebilirsiniz.',
+  note_capture_all_mode: "Yakalama-tüm modu: genom boyutu ve kapsama kullanılmaz. Adım 2'de örnek başına minimum okumaları ayarlayın.",
+})
+
+Object.assign(tr, { label_samples_per_yr: 'örnek/yıl' })

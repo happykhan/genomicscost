@@ -9,12 +9,11 @@ function fmt(n: number) {
   return n.toLocaleString('en-US', { maximumFractionDigits: 0 })
 }
 
-// Category display labels
-const CAT_LABELS: Record<string, string> = {
-  sequencing_platform: 'Sequencing platform',
-  lab_equipment: 'Lab equipment',
-  facility: 'Facility equipment',
-  bioinformatics: 'Bioinformatics hardware',
+const CAT_LABEL_KEYS: Record<string, string> = {
+  sequencing_platform: 'cat_sequencing_platform',
+  lab_equipment: 'cat_lab_equipment',
+  facility: 'cat_facility',
+  bioinformatics: 'cat_bioinformatics',
 }
 
 export default function Step4() {
@@ -77,7 +76,7 @@ export default function Step4() {
   const categoriesPresent = Array.from(new Set(equipment.map(e => e.category)))
   const grouped = categoriesPresent.map(cat => ({
     cat,
-    label: CAT_LABELS[cat] ?? cat,
+    label: t(CAT_LABEL_KEYS[cat] ?? cat),
     items: equipment.map((e, idx) => ({ ...e, idx })).filter(e => e.category === cat),
   }))
 

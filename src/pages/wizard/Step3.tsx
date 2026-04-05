@@ -64,7 +64,7 @@ export default function Step3() {
           {t('step3_desc')}
         </p>
         <span className="text-xs px-2 py-1 rounded-full flex-shrink-0" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-accent)', border: '1px solid var(--gx-border)' }}>
-          {samplesPerYear.toLocaleString()} samples/yr
+          {samplesPerYear.toLocaleString()} {t('label_samples_per_yr')}
         </span>
       </div>
       <div className="text-xs mb-4 p-3 rounded" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text-muted)', border: '1px solid var(--gx-border)' }}>

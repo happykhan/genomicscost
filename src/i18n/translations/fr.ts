@@ -156,3 +156,34 @@ const fr: Record<string, string> = {
 }
 
 export default fr
+
+const frExtra: Record<string, string> = {
+  about_title: 'À propos de cet outil',
+  about_subtitle: 'Outil de coûts génomiques — édition web',
+  about_what_title: 'Qu\'est-ce que c\'est ?',
+  about_what_body: 'Une application web indépendante et open-source pour estimer les coûts d\'un laboratoire de surveillance génomique. Elle implémente la même méthodologie de calcul que l\'Outil de coûts génomiques de l\'OMS, 2e édition (2026), mais n\'est pas affiliée à l\'Organisation mondiale de la Santé.',
+  about_purpose_title: 'Objectif',
+  about_purpose_body: 'L\'outil estime le coût de création et d\'exploitation d\'un laboratoire de surveillance génomique, incluant les plateformes de séquençage, réactifs, équipements, personnel, locaux, bioinformatique et gestion de la qualité.',
+  about_how_title: 'Comment ça marche',
+  about_how_body1: 'L\'outil vous guide à travers 7 étapes. Tous les calculs s\'exécutent dans votre navigateur — aucune donnée n\'est envoyée à un serveur.',
+  about_how_body2: 'Le calcul des échantillons par passage suit la méthodologie de l\'Annexe 2 du manuel utilisateur de l\'OMS.',
+  about_limits_title: 'Limites',
+  about_limits_1: 'Les prix des réactifs et équipements sont des prix de référence du fichier Excel de l\'OMS (2026) et peuvent ne pas refléter les prix locaux.',
+  about_limits_2: 'L\'outil prend en charge jusqu\'à deux plateformes de séquençage simultanément.',
+  about_limits_3: 'La compatibilité des kits de préparation de bibliothèques n\'est pas validée automatiquement.',
+  about_limits_4: 'Le coût d\'établissement exclut le personnel, les réactifs et les locaux.',
+  about_citation_title: 'Citation',
+  about_source_title: 'Code source',
+  cat_sequencing_platform: 'Plateforme de séquençage',
+  cat_lab_equipment: 'Équipement de laboratoire',
+  cat_facility: 'Équipement des locaux',
+  cat_bioinformatics: 'Matériel bioinformatique',
+}
+Object.assign(fr, frExtra)
+
+Object.assign(fr, {
+  note_genome_size_edit: 'Vous pouvez modifier ceci si votre pathogène a une taille de génome non standard.',
+  note_capture_all_mode: "Mode capture-all : la taille du génome et la couverture ne sont pas utilisées. Définissez les lectures minimales par échantillon à l'Étape 2.",
+})
+
+Object.assign(fr, { label_samples_per_yr: 'échantillons/an' })

@@ -156,3 +156,34 @@ const es: Record<string, string> = {
 }
 
 export default es
+
+const esExtra: Record<string, string> = {
+  about_title: 'Acerca de esta herramienta',
+  about_subtitle: 'Herramienta de costes genómicos — edición web',
+  about_what_title: '¿Qué es esto?',
+  about_what_body: 'Una aplicación web independiente y de código abierto para estimar los costes de un laboratorio de vigilancia genómica. Implementa la misma metodología de cálculo que la Herramienta de costes genómicos de la OMS, 2.ª edición (2026), pero no está afiliada ni avalada por la Organización Mundial de la Salud.',
+  about_purpose_title: 'Propósito',
+  about_purpose_body: 'La herramienta estima el coste de establecer y operar un laboratorio de vigilancia genómica, incluyendo plataformas de secuenciación, reactivos, equipos, personal, instalaciones, bioinformática y gestión de calidad.',
+  about_how_title: 'Cómo funciona',
+  about_how_body1: 'La herramienta le guía a través de 7 pasos. Todos los cálculos se ejecutan en su navegador: no se envían datos a ningún servidor.',
+  about_how_body2: 'El cálculo de muestras por ejecución sigue la metodología del Anexo 2 del manual de usuario de la OMS.',
+  about_limits_title: 'Limitaciones',
+  about_limits_1: 'Los precios de reactivos y equipos son precios de referencia del Excel de la OMS (2026) y pueden no reflejar los precios locales.',
+  about_limits_2: 'La herramienta admite hasta dos plataformas de secuenciación simultáneamente.',
+  about_limits_3: 'La compatibilidad de los kits de preparación de bibliotecas no se valida automáticamente.',
+  about_limits_4: 'El coste de establecimiento excluye personal, reactivos e instalaciones.',
+  about_citation_title: 'Cita',
+  about_source_title: 'Código fuente',
+  cat_sequencing_platform: 'Plataforma de secuenciación',
+  cat_lab_equipment: 'Equipos de laboratorio',
+  cat_facility: 'Equipos de instalaciones',
+  cat_bioinformatics: 'Hardware de bioinformática',
+}
+Object.assign(es, esExtra)
+
+Object.assign(es, {
+  note_genome_size_edit: 'Puede editar esto si su patógeno tiene un tamaño de genoma no estándar.',
+  note_capture_all_mode: 'Modo capture-all: el tamaño del genoma y la cobertura no se usan. Configure las lecturas mínimas por muestra en el Paso 2.',
+})
+
+Object.assign(es, { label_samples_per_yr: 'muestras/año' })

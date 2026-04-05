@@ -4,19 +4,16 @@ import en from './translations/en'
 import ru from './translations/ru'
 import es from './translations/es'
 import fr from './translations/fr'
-import tr from './translations/tr'
-
 export const LANGUAGES: Record<string, string> = {
   en: 'English',
   ru: 'Русский',
   es: 'Español',
   fr: 'Français',
-  tr: 'Türkçe',
 }
 
 type LangCode = keyof typeof LANGUAGES
 
-const TRANSLATIONS: Record<LangCode, Record<string, string>> = { en, ru, es, fr, tr }
+const TRANSLATIONS: Record<LangCode, Record<string, string>> = { en, ru, es, fr }
 
 const STORAGE_KEY = 'gx-lang'
 
