@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { ProjectProvider } from './store/ProjectContext'
-import { LanguageProvider, useTranslation, LANGUAGES } from './i18n'
+import { LanguageProvider, useTranslation } from './i18n'
 import { NavBar } from '@genomicx/ui'
 import Home from './pages/Home'
 import About from './pages/About'
@@ -27,27 +27,6 @@ const AppIcon = () => (
   </svg>
 )
 
-function LangSelect({ lang, setLang }: { lang: string; setLang: (l: keyof typeof LANGUAGES) => void }) {
-  return (
-    <select
-      value={lang}
-      onChange={e => setLang(e.target.value as keyof typeof LANGUAGES)}
-      style={{
-        background: 'var(--gx-bg-alt)',
-        color: 'var(--gx-text)',
-        border: '1px solid var(--gx-border)',
-        borderRadius: 'var(--gx-radius)',
-        fontSize: '0.8rem',
-        padding: '2px 6px',
-        cursor: 'pointer',
-      }}
-    >
-      {Object.entries(LANGUAGES).map(([code, name]) => (
-        <option key={code} value={code}>{name}</option>
-      ))}
-    </select>
-  )
-}
 
 function WizardTabBar() {
   const { t } = useTranslation()
@@ -111,7 +90,7 @@ function WizardTabBar() {
 }
 
 function AppInner() {
-  const { t, lang, setLang } = useTranslation()
+  const { t } = useTranslation()
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--gx-bg)', color: 'var(--gx-text)' }}>
@@ -120,13 +99,8 @@ function AppInner() {
         appSubtitle={t('app_subtitle')}
         icon={<AppIcon />}
         githubUrl="https://github.com/happykhan/genomicscost"
-        actions={
-          <>
-            <a href="/about" style={{ color: 'var(--gx-text-muted)', fontSize: '0.85rem' }}>{t('nav_about')}</a>
-            <LangSelect lang={lang} setLang={setLang} />
-          </>
-        }
-        mobileActions={<LangSelect lang={lang} setLang={setLang} />}
+        actions={<a href="/about" style={{ color: 'var(--gx-text-muted)', fontSize: '0.85rem' }}>{t('nav_about')}</a>}
+        mobileActions={<a href="/about" style={{ color: 'var(--gx-text-muted)', fontSize: '0.9rem' }}>{t('nav_about')}</a>}
       />
       <WizardTabBar />
       <main className="flex-1">

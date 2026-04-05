@@ -1,11 +1,11 @@
 import { useNavigate } from 'react-router-dom'
 import { useProject } from '../store/ProjectContext'
-import { useTranslation } from '../i18n'
+import { useTranslation, LANGUAGES } from '../i18n'
 
 export default function Home() {
   const navigate = useNavigate()
   const { savedProjects, loadProject, deleteProject, newProject } = useProject()
-  const { t } = useTranslation()
+  const { t, lang, setLang } = useTranslation()
 
   const STEP_DESCRIPTIONS = [
     { n: 1, label: t('step1_label'), desc: t('step1_desc') },
@@ -40,13 +40,32 @@ export default function Home() {
         <p className="text-sm mb-8 max-w-xl mx-auto" style={{ color: 'var(--gx-text-muted)' }}>
           {t('home_based_on')}
         </p>
-        <button
-          onClick={handleNewProject}
-          className="px-8 py-3 rounded-lg text-base font-semibold"
-          style={{ background: 'var(--gx-accent)', color: 'var(--gx-bg)', border: 'none', cursor: 'pointer' }}
-        >
-          {t('home_start')}
-        </button>
+        <div className="flex items-center justify-center gap-3 flex-wrap">
+          <button
+            onClick={handleNewProject}
+            className="px-8 py-3 rounded-lg text-base font-semibold"
+            style={{ background: 'var(--gx-accent)', color: 'var(--gx-bg)', border: 'none', cursor: 'pointer' }}
+          >
+            {t('home_start')}
+          </button>
+          <select
+            value={lang}
+            onChange={e => setLang(e.target.value as keyof typeof LANGUAGES)}
+            style={{
+              background: 'var(--gx-bg-alt)',
+              color: 'var(--gx-text)',
+              border: '1px solid var(--gx-border)',
+              borderRadius: '0.5rem',
+              fontSize: '0.9rem',
+              padding: '10px 12px',
+              cursor: 'pointer',
+            }}
+          >
+            {Object.entries(LANGUAGES).map(([code, name]) => (
+              <option key={code} value={code}>{name}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Step overview */}
