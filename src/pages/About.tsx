@@ -18,11 +18,12 @@ export default function About() {
             <section>
               <h2 className="text-base font-medium mb-2" style={{ color: 'var(--gx-text)' }}>What is this?</h2>
               <p>
-                A web-based reimplementation of the{' '}
-                <strong>WHO Genomics Costing Tool, 2nd edition (2026)</strong>, developed in
-                collaboration with APHL, FIND, and the UK Health Security Agency. The original
-                tool is a Microsoft Excel spreadsheet. This version offers the same calculations
-                through a guided, mobile-friendly interface.
+                An independent, open-source web app for estimating genomic surveillance
+                laboratory costs. It implements the same calculation methodology as the{' '}
+                <strong>WHO Genomics Costing Tool, 2nd edition (2026)</strong> — but is not
+                affiliated with, endorsed by, or produced by the World Health Organization.
+                The original tool is a Microsoft Excel spreadsheet; this version provides the
+                same calculations through a guided, mobile-friendly interface.
               </p>
             </section>
 

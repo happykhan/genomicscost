@@ -18,7 +18,7 @@ export default function App() {
       <div className="min-h-screen flex flex-col" style={{ background: 'var(--gx-bg)', color: 'var(--gx-text)' }}>
         <NavBar
           appName="Genomics Costing Tool"
-          appSubtitle="WHO"
+          appSubtitle="Genomic surveillance lab cost estimator"
           githubUrl="https://github.com/happykhan/genomicscost"
           actions={<a href="/about" style={{ color: 'var(--gx-text-muted)', fontSize: '0.85rem' }}>About</a>}
         />
