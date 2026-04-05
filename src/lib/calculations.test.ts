@@ -216,6 +216,46 @@ describe('calculateCosts', () => {
     expect(costs.sequencingReagents).toBe(8 * 1000)
   })
 
+  it('samplesPerRun is used directly — controls not subtracted again', () => {
+    // samplesPerRun is already post-controls (set by calculateSamplesPerRun)
+    // If calcSequencerCosts subtracted controls a second time it would use 29 not 31,
+    // giving ceil(200/29)=7 runs instead of ceil(200/31)=7 — catches only at the boundary.
+    // Use a value where double-subtraction clearly changes run count:
+    // samplesPerRun=12 (already minus 2 controls from gross 14), 200 samples
+    // correct: ceil(200/12)=17 runs × $100 = $1700
+    // wrong (double subtract): ceil(200/10)=20 runs × $100 = $2000
+    const project = {
+      ...createDefaultProject(),
+      samplesPerYear: 200,
+      sequencers: [{
+        platformId: 'illumina',
+        reagentKitName: 'test',
+        reagentKitPrice: 100,
+        samplesPerRun: 12,   // already post-controls
+        coverageX: 100,
+        bufferPct: 20,
+        retestPct: 0,
+        libPrepKitName: '',
+        libPrepCostPerSample: 0,
+        enrichment: false,
+        controlsPerRun: 2,
+        enabled: true,
+        label: 'Sequencer 1',
+        captureAll: false,
+        minReadsPerSample: 100_000,
+      }],
+      consumables: [],
+      equipment: [],
+      personnel: [],
+      facility: [],
+      transport: [],
+      bioinformatics: { type: 'none' as const, cloudPlatform: '', costPerSampleUsd: 0, annualServerCostUsd: 0 },
+      qms: [],
+    }
+    const costs = calculateCosts(project)
+    expect(costs.sequencingReagents).toBe(Math.ceil(200 / 12) * 100) // 1700, not 2000
+  })
+
   it('disabled sequencer contributes zero cost', () => {
     const project = {
       ...createDefaultProject(),

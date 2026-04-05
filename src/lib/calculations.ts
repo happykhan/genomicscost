@@ -52,16 +52,10 @@ export function defaultBufferPct(pathogenType: string): number {
  * Calculate the recommended max samples per sequencing run.
  * Based on Annex 2 of the WHO GCT user manual (2nd ed., 2026).
  *
- * @param genomeSizeMb   Genome size in megabases
- * @param coverageX      Required coverage (e.g. 100)
- * @param readLengthBp   Read length from the sequencing kit (bp)
- * @param kitMaxReads    Max reads per flow cell for the selected kit
- * @param bufferPct      Buffer for off-target reads (%)
- * @param barcodingLimit Max barcodes for the library prep kit (or Infinity)
- * @param pathogenType   'viral' | 'bacterial'
- * @param captureAll     If true, use minReadsPerSample directly
- * @param minReadsCaptureAll  Minimum reads per sample for capture-all mode
- * @param controlsPerRun  Number of control lanes to subtract from samples per run
+ * For kits with max_reads_per_flowcell + read_length_bp (e.g. Illumina, MGI):
+ *   uses reads-based formula with pathogen-specific minimums.
+ * For kits with only max_output_mb (e.g. ONT long-read):
+ *   falls back to Mb-based formula (output / genome × coverage).
  */
 export function calculateSamplesPerRun(
   genomeSizeMb: number,
@@ -74,36 +68,41 @@ export function calculateSamplesPerRun(
   captureAll = false,
   minReadsCaptureAll = 100_000,
   controlsPerRun = 0,
+  maxOutputMb = 0,
 ): number {
-  if (!kitMaxReads) return 1
+  const buffer = 1 + bufferPct / 100
 
-  let readsPerSample: number
+  let grossSamples: number
 
   if (captureAll) {
-    // Feature 7: capture-all mode — use fixed min reads directly
-    readsPerSample = Math.max(1, minReadsCaptureAll)
-  } else {
-    if (!genomeSizeMb || !coverageX || !readLengthBp) return 1
-
-    // Step 1: reads needed for coverage
+    const readsPerSample = Math.max(1, minReadsCaptureAll)
+    const readsWithBuffer = readsPerSample * buffer
+    if (kitMaxReads > 0) {
+      grossSamples = Math.floor(kitMaxReads / readsWithBuffer)
+    } else if (maxOutputMb > 0 && readLengthBp > 0) {
+      const mbPerSample = (readsPerSample * readLengthBp * buffer) / 1e6
+      grossSamples = Math.floor(maxOutputMb / mbPerSample)
+    } else {
+      return 1
+    }
+  } else if (kitMaxReads > 0 && readLengthBp > 0) {
+    // Reads-based path (Annex 2, primary method)
+    if (!genomeSizeMb || !coverageX) return 1
     const outputPerSampleBp = genomeSizeMb * 1e6 * coverageX
     const readsFromCoverage = outputPerSampleBp / readLengthBp
-
-    // Step 2: compare with minimum reads, take the larger
     const minReads = minReadsForPathogen(pathogenType, genomeSizeMb)
-    readsPerSample = Math.max(readsFromCoverage, minReads)
+    const readsPerSample = Math.max(readsFromCoverage, minReads)
+    grossSamples = Math.floor(kitMaxReads / (readsPerSample * buffer))
+  } else if (maxOutputMb > 0) {
+    // Mb-based fallback for kits without discrete read counts (e.g. ONT)
+    if (!genomeSizeMb || !coverageX) return 1
+    const mbPerSample = genomeSizeMb * coverageX * buffer
+    grossSamples = Math.floor(maxOutputMb / mbPerSample)
+  } else {
+    return 1
   }
 
-  // Step 3: apply buffer
-  const readsWithBuffer = readsPerSample * (1 + bufferPct / 100)
-
-  // Step 4: samples per flow cell (gross, before subtracting controls)
-  const grossSamples = Math.floor(kitMaxReads / readsWithBuffer)
-
-  // Step 5: subtract controls
   const effectiveSamples = Math.max(1, grossSamples - Math.max(0, controlsPerRun))
-
-  // Step 6: constrain by barcoding limit
   return Math.max(1, Math.min(effectiveSamples, barcodingLimit || Infinity))
 }
 
@@ -116,8 +115,8 @@ function calcSequencerCosts(
   if (!seq.enabled) return { sequencingReagents: 0, libraryPrep: 0 }
 
   const samplesIncludingRetests = samplesPerYear * (1 + (seq.retestPct ?? 0) / 100)
-  // Feature 3: effective samples per run subtracts controls
-  const effectiveSamplesPerRun = Math.max(1, (seq.samplesPerRun ?? 1) - Math.max(0, seq.controlsPerRun ?? 0))
+  // samplesPerRun is already the effective count after controls (set by calculateSamplesPerRun)
+  const effectiveSamplesPerRun = Math.max(1, seq.samplesPerRun ?? 1)
   const runsNeeded = Math.ceil(samplesIncludingRetests / effectiveSamplesPerRun)
 
   return {

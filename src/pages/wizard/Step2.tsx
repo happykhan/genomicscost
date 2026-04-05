@@ -48,7 +48,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
     const calculated = calculateSamplesPerRun(
       genomeSizeMb,
       sequencer.coverageX,
-      selectedKit.read_length_bp ?? 150,
+      selectedKit.read_length_bp ?? 0,
       selectedKit.max_reads_per_flowcell ?? 0,
       sequencer.bufferPct,
       barcodingLimit,
@@ -56,6 +56,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
       isCaptureAll,
       sequencer.minReadsPerSample ?? 100_000,
       sequencer.controlsPerRun ?? 0,
+      selectedKit.max_output_mb ?? 0,
     )
     updateSequencer(index, { samplesPerRun: calculated })
   }, [ // eslint-disable-line react-hooks/exhaustive-deps

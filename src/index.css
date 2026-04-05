@@ -1,3 +1,27 @@
 @import '@genomicx/ui/styles/tokens.css';
 @import '@genomicx/ui/styles/components.css';
 @import "tailwindcss";
+
+@media print {
+  /* Force light background, dark text */
+  :root {
+    --gx-bg: #ffffff !important;
+    --gx-bg-alt: #f8fafc !important;
+    --gx-text: #0f172a !important;
+    --gx-text-muted: #64748b !important;
+    --gx-border: #e2e8f0 !important;
+    --gx-accent: #0d9488 !important;
+  }
+  body { background: white !important; color: #0f172a !important; }
+
+  /* Hide nav, wizard stepper, buttons */
+  nav, [class*="NavBar"], header { display: none !important; }
+  button { display: none !important; }
+
+  /* Ensure cards print cleanly */
+  .card { border: 1px solid #e2e8f0 !important; background: white !important; }
+
+  /* Avoid page breaks inside tables */
+  table { page-break-inside: avoid; }
+  tr { page-break-inside: avoid; }
+}
