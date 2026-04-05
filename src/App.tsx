@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ProjectProvider } from './store/ProjectContext'
-import { LanguageProvider, useTranslation, LANGUAGES } from './i18n'
+import { LANGUAGES } from './i18n/config'
+import './i18n/config'
 import { NavBar } from '@genomicx/ui'
 import Home from './pages/Home'
 import About from './pages/About'
@@ -29,7 +31,8 @@ const AppIcon = () => (
 )
 
 function GlobePicker() {
-  const { lang, setLang } = useTranslation()
+  const { i18n } = useTranslation()
+  const lang = i18n.language
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -79,7 +82,7 @@ function GlobePicker() {
           {Object.entries(LANGUAGES).map(([code, name]) => (
             <button
               key={code}
-              onClick={() => { setLang(code as keyof typeof LANGUAGES); setOpen(false) }}
+              onClick={() => { i18n.changeLanguage(code); setOpen(false) }}
               style={{
                 display: 'block',
                 width: '100%',
@@ -103,7 +106,8 @@ function GlobePicker() {
 }
 
 function LangFooter() {
-  const { lang, setLang } = useTranslation()
+  const { i18n } = useTranslation()
+  const lang = i18n.language
   return (
     <div className="no-print" style={{
       borderTop: '1px solid var(--gx-border)',
@@ -116,7 +120,7 @@ function LangFooter() {
       {Object.entries(LANGUAGES).map(([code, name]) => (
         <button
           key={code}
-          onClick={() => setLang(code as keyof typeof LANGUAGES)}
+          onClick={() => i18n.changeLanguage(code)}
           style={{
             background: 'none',
             border: 'none',
@@ -212,23 +216,23 @@ function WizardTabBar() {
 }
 
 function LangRedirect({ lang }: { lang: string }) {
-  const { setLang } = useTranslation()
+  const { i18n } = useTranslation()
   const navigate = useNavigate()
   useEffect(() => {
-    setLang(lang as keyof typeof LANGUAGES)
-    navigate('/', { replace: true })
+    i18n.changeLanguage(lang).then(() => navigate('/', { replace: true }))
   }, [])
   return null
 }
 
 function MobileLangPicker() {
-  const { lang, setLang } = useTranslation()
+  const { i18n } = useTranslation()
+  const lang = i18n.language
   return (
     <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', padding: '4px 0' }}>
       {Object.entries(LANGUAGES).map(([code, name]) => (
         <button
           key={code}
-          onClick={() => setLang(code as keyof typeof LANGUAGES)}
+          onClick={() => i18n.changeLanguage(code)}
           style={{
             background: 'none',
             border: 'none',
@@ -284,10 +288,8 @@ function AppInner() {
 
 export default function App() {
   return (
-    <LanguageProvider>
-      <ProjectProvider>
-        <AppInner />
-      </ProjectProvider>
-    </LanguageProvider>
+    <ProjectProvider>
+      <AppInner />
+    </ProjectProvider>
   )
 }

@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import CostSummary from './CostSummary'
 import { useProject } from '../store/ProjectContext'
-import { useTranslation } from '../i18n'
+import { useTranslation } from 'react-i18next'
 
 interface WizardShellProps {
   step: number

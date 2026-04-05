@@ -1,5 +1,5 @@
 import { useProject } from '../../store/ProjectContext'
-import { useTranslation } from '../../i18n'
+import { useTranslation } from 'react-i18next'
 import catalogue from '../../data/catalogue.json'
 import type { EquipmentStatus } from '../../types'
 

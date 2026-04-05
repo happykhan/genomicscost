@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useProject } from '../store/ProjectContext'
-import { useTranslation } from '../i18n'
+import { useTranslation } from 'react-i18next'
 
 export default function Home() {
   const navigate = useNavigate()

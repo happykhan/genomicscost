@@ -1,9 +1,15 @@
-import { afterEach } from 'vitest'
+import { afterEach, beforeAll } from 'vitest'
 import { cleanup } from '@testing-library/react'
+import i18n from './i18n/config'
 
 // Ensure DOM is cleaned up between tests
 afterEach(() => {
   cleanup()
+})
+
+// Reset language to English before each suite
+beforeAll(() => {
+  i18n.changeLanguage('en')
 })
 
 // Expose localStorage as a global in vitest's jsdom environment

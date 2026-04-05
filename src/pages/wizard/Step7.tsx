@@ -1,5 +1,5 @@
 import { useProject } from '../../store/ProjectContext'
-import { useTranslation } from '../../i18n'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { WORKFLOW_STEPS, WORKFLOW_STEP_LABELS } from '../../lib/calculations'
@@ -255,6 +255,7 @@ export default function Step7() {
         </button>
         <button
           onClick={handlePrint}
+          data-testid="print-btn"
           className="px-5 py-2 rounded text-sm font-medium"
           style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
         >

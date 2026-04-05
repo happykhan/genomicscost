@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useProject } from '../../store/ProjectContext'
-import { useTranslation } from '../../i18n'
+import { useTranslation } from 'react-i18next'
 import { createDefaultSequencer } from '../../lib/defaults'
 import { calculateSamplesPerRun } from '../../lib/calculations'
 import catalogue from '../../data/catalogue.json'

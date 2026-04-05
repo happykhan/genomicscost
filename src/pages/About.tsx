@@ -1,4 +1,4 @@
-import { useTranslation } from '../i18n'
+import { useTranslation } from 'react-i18next'
 
 export default function About() {
   const { t } = useTranslation()

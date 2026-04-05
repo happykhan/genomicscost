@@ -1,5 +1,5 @@
 import { useProject } from '../../store/ProjectContext'
-import { useTranslation } from '../../i18n'
+import { useTranslation } from 'react-i18next'
 
 const inputClass = 'border border-[var(--gx-border)] rounded-[var(--gx-radius)] bg-[var(--gx-bg)] text-[var(--gx-text)] p-2 text-sm focus:outline-none focus:border-[var(--gx-accent)]'
 const labelClass = 'text-xs text-[var(--gx-text-muted)] uppercase tracking-wider mb-1 block'
