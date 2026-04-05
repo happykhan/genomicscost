@@ -65,12 +65,7 @@ function AppInner() {
             <LangSelect lang={lang} setLang={setLang} />
           </>
         }
-        mobileActions={
-          <>
-            <a href="/about" style={{ color: 'var(--gx-text-muted)', fontSize: '0.9rem', display: 'block', padding: '4px 0' }}>{t('nav_about')}</a>
-            <LangSelect lang={lang} setLang={setLang} />
-          </>
-        }
+        mobileActions={<LangSelect lang={lang} setLang={setLang} />}
       />
       <main className="flex-1">
         <Routes>
