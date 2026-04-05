@@ -100,7 +100,6 @@ function AppInner() {
         icon={<AppIcon />}
         githubUrl="https://github.com/happykhan/genomicscost"
         actions={<a href="/about" style={{ color: 'var(--gx-text-muted)', fontSize: '0.85rem' }}>{t('nav_about')}</a>}
-        mobileActions={<a href="/about" style={{ color: 'var(--gx-text-muted)', fontSize: '0.9rem' }}>{t('nav_about')}</a>}
       />
       <WizardTabBar />
       <main className="flex-1">
