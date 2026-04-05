@@ -1,12 +1,11 @@
-import { AppFooter } from '@genomicx/ui'
 import { useTranslation } from '../i18n'
 
 export default function About() {
   const { t } = useTranslation()
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'var(--gx-bg)' }}>
-      <main className="flex-1 py-12">
+    <div style={{ background: 'var(--gx-bg)' }}>
+      <main className="py-12">
         <div className="max-w-2xl mx-auto px-6">
 
           <h1 className="text-3xl font-light mb-2" style={{ color: 'var(--gx-text)' }}>
@@ -78,7 +77,6 @@ export default function About() {
           </div>
         </div>
       </main>
-      <AppFooter appName="Genomics Costing Tool" />
     </div>
   )
 }
