@@ -148,7 +148,11 @@ const tr: Record<string, string> = {
   wf_nucleic_acid_extraction: 'Nükleik asit ekstraksiyonu',
   wf_pcr_testing: 'PCR testi',
   wf_general_lab: 'Genel laboratuvar',
-  wf_other: 'Diğer',
+  wf_other: 'Other',
+  field_local_currency: 'Yerel para birimi',
+  field_currency_code: 'Para birimi kodu (ör. KES, NGN, USD)',
+  field_exchange_rate: 'Yerel para birimine döviz kuru (1 USD = ?)',
+  note_usd_default: 'Her şeyi USD cinsinden tutmak için 1 olarak ayarlayın.',
 }
 
 export default tr

@@ -148,7 +148,11 @@ const ru: Record<string, string> = {
   wf_nucleic_acid_extraction: 'Выделение нуклеиновых кислот',
   wf_pcr_testing: 'ПЦР-тестирование',
   wf_general_lab: 'Общая лаборатория',
-  wf_other: 'Прочее',
+  wf_other: 'Other',
+  field_local_currency: 'Местная валюта',
+  field_currency_code: 'Код валюты (напр. KES, NGN, USD)',
+  field_exchange_rate: 'Обменный курс к местной валюте (1 USD = ?)',
+  note_usd_default: 'Установите 1, чтобы оставить всё в долларах США.',
 }
 
 export default ru

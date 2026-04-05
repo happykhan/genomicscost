@@ -149,6 +149,10 @@ const en: Record<string, string> = {
   wf_pcr_testing: 'PCR testing',
   wf_general_lab: 'General lab',
   wf_other: 'Other',
+  field_local_currency: 'Local currency',
+  field_currency_code: 'Currency code (e.g. KES, NGN, USD)',
+  field_exchange_rate: 'Exchange rate to local currency (1 USD = ?)',
+  note_usd_default: 'Set to 1 to keep everything in USD.',
 }
 
 export default en

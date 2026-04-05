@@ -150,10 +150,10 @@ export default function Step1() {
 
         {/* Feature 4: local currency */}
         <div className="pt-2" style={{ borderTop: '1px solid var(--gx-border)' }}>
-          <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--gx-text)' }}>Local currency</h3>
+          <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--gx-text)' }}>{t('field_local_currency')}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className={labelClass}>Currency code (e.g. KES, NGN, USD)</label>
+              <label className={labelClass}>{t('field_currency_code')}</label>
               <input
                 type="text"
                 className={inputClass}
@@ -164,7 +164,7 @@ export default function Step1() {
               />
             </div>
             <div>
-              <label className={labelClass}>Exchange rate to local currency (1 USD = ?)</label>
+              <label className={labelClass}>{t('field_exchange_rate')}</label>
               <input
                 type="number"
                 className={inputClass}
@@ -174,7 +174,7 @@ export default function Step1() {
                 onChange={e => updateProject({ exchangeRate: parseFloat(e.target.value) || 1 })}
               />
               <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>
-                Set to 1 to keep everything in USD.
+                {t('note_usd_default')}
               </div>
             </div>
           </div>

@@ -148,7 +148,11 @@ const fr: Record<string, string> = {
   wf_nucleic_acid_extraction: "Extraction des acides nucléiques",
   wf_pcr_testing: 'Tests PCR',
   wf_general_lab: 'Laboratoire général',
-  wf_other: 'Autre',
+  wf_other: 'Other',
+  field_local_currency: 'Devise locale',
+  field_currency_code: 'Code devise (ex. KES, NGN, USD)',
+  field_exchange_rate: 'Taux de change en devise locale (1 USD = ?)',
+  note_usd_default: 'Mettre 1 pour tout conserver en USD.',
 }
 
 export default fr
