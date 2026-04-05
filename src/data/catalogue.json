@@ -1,0 +1,2375 @@
+{
+  "_meta": {
+    "source": "WHO Genomics Costing Tool, second edition",
+    "extracted": "2026-04-05",
+    "notes": "Costs in USD. Some prices not publicly listed (None) — user must enter."
+  },
+  "platforms": [
+    {
+      "id": "illumina",
+      "name": "Illumina",
+      "reagent_kits": [
+        {
+          "name": "iSeq 100 i1 Reagent v2 (300-cycle)",
+          "unit_price_usd": 526.15,
+          "read_length_bp": 300,
+          "max_reads_per_flowcell": 4000000,
+          "max_output_bytes": 1200000000,
+          "max_output_mb": 1200.0
+        },
+        {
+          "name": "4x iSeq 100 i1 Reagent v2 (300-cycle)",
+          "unit_price_usd": 2183,
+          "read_length_bp": 300,
+          "max_reads_per_flowcell": 4000000,
+          "max_output_bytes": 1200000000,
+          "max_output_mb": 1200.0
+        },
+        {
+          "name": "8x iSeq 100 i1 Reagent v2 (300-cycle)",
+          "unit_price_usd": 4059,
+          "read_length_bp": 300,
+          "max_reads_per_flowcell": 4000000,
+          "max_output_bytes": 1200000000,
+          "max_output_mb": 1200.0
+        },
+        {
+          "name": "MiniSeq High Output Reagent Kit (150-cycles)",
+          "unit_price_usd": 1102,
+          "read_length_bp": 150,
+          "max_reads_per_flowcell": 25000000,
+          "max_output_bytes": 3750000000,
+          "max_output_mb": 3750.0
+        },
+        {
+          "name": "MiniSeq High Output Reagent Kit (300 cycles)",
+          "unit_price_usd": 1768,
+          "read_length_bp": 300,
+          "max_reads_per_flowcell": 25000000,
+          "max_output_bytes": 7500000000,
+          "max_output_mb": 7500.0
+        },
+        {
+          "name": "MiniSeq Mid Output Reagent Kit (300 cycles)",
+          "unit_price_usd": 630,
+          "read_length_bp": 300,
+          "max_reads_per_flowcell": 8000000,
+          "max_output_bytes": 2400000000,
+          "max_output_mb": 2400.0
+        },
+        {
+          "name": "MiSeq Reagent Kit v3 (150-cycle)",
+          "unit_price_usd": 1035,
+          "read_length_bp": 150,
+          "max_reads_per_flowcell": 22000000,
+          "max_output_bytes": 3300000000,
+          "max_output_mb": 3300.0
+        },
+        {
+          "name": "MiSeq Reagent Kit v3 (600 cycle)",
+          "unit_price_usd": 1604,
+          "read_length_bp": 600,
+          "max_reads_per_flowcell": 22000000,
+          "max_output_bytes": 13200000000,
+          "max_output_mb": 13200.0
+        },
+        {
+          "name": "MiSeq Reagent Kit v2 (50-cycles)",
+          "unit_price_usd": 933,
+          "read_length_bp": 50,
+          "max_reads_per_flowcell": 15000000,
+          "max_output_bytes": 750000000,
+          "max_output_mb": 750.0
+        },
+        {
+          "name": "MiSeq Reagent Kit v2 (300 cycle)",
+          "unit_price_usd": 1194,
+          "read_length_bp": 300,
+          "max_reads_per_flowcell": 15000000,
+          "max_output_bytes": 4500000000,
+          "max_output_mb": 4500.0
+        },
+        {
+          "name": "MiSeq Reagent Kit v2 (500-cycles)",
+          "unit_price_usd": 1343,
+          "read_length_bp": 500,
+          "max_reads_per_flowcell": 15000000,
+          "max_output_bytes": 7500000000,
+          "max_output_mb": 7500.0
+        },
+        {
+          "name": "20x MiSeq Reagent Kit v2 (50-cycles)",
+          "unit_price_usd": 17635,
+          "read_length_bp": 50,
+          "max_reads_per_flowcell": 15000000,
+          "max_output_bytes": 750000000,
+          "max_output_mb": 750.0
+        },
+        {
+          "name": "20x MiSeq Reagent Kit v2 (300 cycle)",
+          "unit_price_usd": 22740,
+          "read_length_bp": 300,
+          "max_reads_per_flowcell": 15000000,
+          "max_output_bytes": 4500000000,
+          "max_output_mb": 4500.0
+        },
+        {
+          "name": "20x MiSeq Reagent Kit v2 (500-cycles)",
+          "unit_price_usd": 25179,
+          "read_length_bp": 500,
+          "max_reads_per_flowcell": 15000000,
+          "max_output_bytes": 7500000000,
+          "max_output_mb": 7500.0
+        },
+        {
+          "name": "NextSeq 1000/2000 P1 XLEAP-SBS Reagent Kit (100 Cycles)",
+          "unit_price_usd": 1080,
+          "read_length_bp": 100,
+          "max_reads_per_flowcell": 100000000,
+          "max_output_bytes": 10000000000,
+          "max_output_mb": 10000.0
+        },
+        {
+          "name": "NextSeq 1000/2000 P1 XLEAP-SBS Reagent Kit (300 Cycles)",
+          "unit_price_usd": 2650,
+          "read_length_bp": 300,
+          "max_reads_per_flowcell": 100000000,
+          "max_output_bytes": 30000000000,
+          "max_output_mb": 30000.0
+        },
+        {
+          "name": "NextSeq 1000/2000 P1 XLEAP-SBS Reagent Kit (600 Cycles)",
+          "unit_price_usd": 5400,
+          "read_length_bp": 600,
+          "max_reads_per_flowcell": 100000000,
+          "max_output_bytes": 60000000000,
+          "max_output_mb": 60000.0
+        },
+        {
+          "name": "NextSeq 1000/2000 P2 XLEAP-SBS Reagent Kit (100 Cycles)",
+          "unit_price_usd": 2100,
+          "read_length_bp": 100,
+          "max_reads_per_flowcell": 400000000,
+          "max_output_bytes": 40000000000,
+          "max_output_mb": 40000.0
+        },
+        {
+          "name": "NextSeq 1000/2000 P2 XLEAP-SBS Reagent Kit (200 Cycles)",
+          "unit_price_usd": 4200,
+          "read_length_bp": 200,
+          "max_reads_per_flowcell": 400000000,
+          "max_output_bytes": 80000000000,
+          "max_output_mb": 80000.0
+        },
+        {
+          "name": "NextSeq 1000/2000 P2 XLEAP-SBS Reagent Kit (300 Cycles)",
+          "unit_price_usd": 6200,
+          "read_length_bp": 300,
+          "max_reads_per_flowcell": 400000000,
+          "max_output_bytes": 120000000000,
+          "max_output_mb": 120000.0
+        },
+        {
+          "name": "NextSeq 1000/2000 P2 XLEAP-SBS Reagent Kit (600 Cycles)",
+          "unit_price_usd": 12000,
+          "read_length_bp": 600,
+          "max_reads_per_flowcell": 400000000,
+          "max_output_bytes": 240000000000,
+          "max_output_mb": 240000.0
+        },
+        {
+          "name": "NextSeq 2000 P3 XLEAP-SBS Reagent Kit (100 Cycles)",
+          "unit_price_usd": 2755,
+          "read_length_bp": 100,
+          "max_reads_per_flowcell": 1200000000,
+          "max_output_bytes": 120000000000,
+          "max_output_mb": 120000.0
+        },
+        {
+          "name": "NextSeq 2000 P3 XLEAP-SBS Reagent Kit (200 Cycles)",
+          "unit_price_usd": 5510,
+          "read_length_bp": 200,
+          "max_reads_per_flowcell": 1200000000,
+          "max_output_bytes": 240000000000,
+          "max_output_mb": 240000.0
+        },
+        {
+          "name": "NextSeq 2000 P3 XLEAP-SBS Reagent Kit (300 Cycles)",
+          "unit_price_usd": 8265,
+          "read_length_bp": 300,
+          "max_reads_per_flowcell": 1200000000,
+          "max_output_bytes": 360000000000,
+          "max_output_mb": 360000.0
+        },
+        {
+          "name": "NextSeq 2000 P4 XLEAP-SBS Reagent Kit (100 Cycles)",
+          "unit_price_usd": 6250,
+          "read_length_bp": 100,
+          "max_reads_per_flowcell": 1800000000,
+          "max_output_bytes": 180000000000,
+          "max_output_mb": 180000.0
+        },
+        {
+          "name": "NextSeq 2000 P4 XLEAP-SBS Reagent Kit (200 Cycles)",
+          "unit_price_usd": 12500,
+          "read_length_bp": 200,
+          "max_reads_per_flowcell": 1800000000,
+          "max_output_bytes": 360000000000,
+          "max_output_mb": 360000.0
+        },
+        {
+          "name": "NextSeq 2000 P4 XLEAP-SBS Reagent Kit (300 Cycles)",
+          "unit_price_usd": 18750,
+          "read_length_bp": 300,
+          "max_reads_per_flowcell": 1800000000,
+          "max_output_bytes": 540000000000,
+          "max_output_mb": 540000.0
+        },
+        {
+          "name": "NovaSeq 6000 SP Reagent Kit v1.5 (200 cycle)",
+          "unit_price_usd": 2587.4,
+          "read_length_bp": 200,
+          "max_reads_per_flowcell": 670000000,
+          "max_output_bytes": 134000000000,
+          "max_output_mb": 134000.0
+        },
+        {
+          "name": "NovaSeq 6000 S4 Reagent Kit v1.5 (300 cycles)",
+          "unit_price_usd": 14760,
+          "read_length_bp": 300,
+          "max_reads_per_flowcell": 8000000000,
+          "max_output_bytes": 2400000000000,
+          "max_output_mb": 2400000.0
+        },
+        {
+          "name": "NovaSeq 6000 S4 Reagent Kit v1.5 (200 cycles)",
+          "unit_price_usd": 13248,
+          "read_length_bp": 200,
+          "max_reads_per_flowcell": 8000000000,
+          "max_output_bytes": 1600000000000,
+          "max_output_mb": 1600000.0
+        },
+        {
+          "name": "NovaSeq 6000 S2 Reagent Kit v1.5 (300 cycles)",
+          "unit_price_usd": 9840,
+          "read_length_bp": 300,
+          "max_reads_per_flowcell": 3333333333,
+          "max_output_bytes": 1000000000000,
+          "max_output_mb": 1000000.0
+        },
+        {
+          "name": "NovaSeq 6000 S2 Reagent Kit v1.5 (200 cycles)",
+          "unit_price_usd": 9225,
+          "read_length_bp": 200,
+          "max_reads_per_flowcell": 3335000000,
+          "max_output_bytes": 667000000000,
+          "max_output_mb": 667000.0
+        },
+        {
+          "name": "NovaSeq 6000 S2 Reagent Kit v1.5 (100 cycles)",
+          "unit_price_usd": 7431,
+          "read_length_bp": 100,
+          "max_reads_per_flowcell": 3330000000,
+          "max_output_bytes": 333000000000,
+          "max_output_mb": 333000.0
+        },
+        {
+          "name": "NovaSeq 6000 S1 Reagent Kit v1.5 (300 cycles)",
+          "unit_price_usd": 5381,
+          "read_length_bp": 300,
+          "max_reads_per_flowcell": 1333333333,
+          "max_output_bytes": 400000000000,
+          "max_output_mb": 400000.0
+        },
+        {
+          "name": "NovaSeq 6000 S1 Reagent Kit v1.5 (200 cycles)",
+          "unit_price_usd": 4971,
+          "read_length_bp": 200,
+          "max_reads_per_flowcell": 1330000000,
+          "max_output_bytes": 266000000000,
+          "max_output_mb": 266000.0
+        },
+        {
+          "name": "NovaSeq 6000 S1 Reagent Kit v1.5 (100 cycles)",
+          "unit_price_usd": 3946,
+          "read_length_bp": 100,
+          "max_reads_per_flowcell": 1340000000,
+          "max_output_bytes": 134000000000,
+          "max_output_mb": 134000.0
+        },
+        {
+          "name": "NovaSeq 6000 SP Reagent Kit v1.5 (300 cycles)",
+          "unit_price_usd": 3075,
+          "read_length_bp": 300,
+          "max_reads_per_flowcell": 666666666,
+          "max_output_bytes": 200000000000,
+          "max_output_mb": 200000.0
+        },
+        {
+          "name": "NovaSeq 6000 SP Reagent Kit v1.5 (100 cycles)",
+          "unit_price_usd": 2153,
+          "read_length_bp": 100,
+          "max_reads_per_flowcell": 650000000,
+          "max_output_bytes": 65000000000,
+          "max_output_mb": 65000.0
+        },
+        {
+          "name": "NovaSeq 6000 SP Reagent Kit v1.5 (500 cycles)",
+          "unit_price_usd": 4305,
+          "read_length_bp": 500,
+          "max_reads_per_flowcell": 650000000,
+          "max_output_bytes": 325000000000,
+          "max_output_mb": 325000.0
+        }
+      ]
+    },
+    {
+      "id": "ont",
+      "name": "ONT",
+      "reagent_kits": [
+        {
+          "name": "12x Flongle Flow Cell R10.4.1",
+          "unit_price_usd": 810,
+          "read_length_bp": null,
+          "max_reads_per_flowcell": null,
+          "max_output_bytes": 2800000000,
+          "max_output_mb": 2800.0
+        },
+        {
+          "name": "1x MinION or GridION R9.4.1 or R10.4.1",
+          "unit_price_usd": 700,
+          "read_length_bp": null,
+          "max_reads_per_flowcell": null,
+          "max_output_bytes": 48000000000,
+          "max_output_mb": 48000.0
+        },
+        {
+          "name": "12x MinION or GridION R9.4.1 or R10.4.1",
+          "unit_price_usd": 7200,
+          "read_length_bp": null,
+          "max_reads_per_flowcell": null,
+          "max_output_bytes": 48000000000,
+          "max_output_mb": 48000.0
+        },
+        {
+          "name": "24x MinION or GridION R9.4.1 or R10.4.1",
+          "unit_price_usd": 12000,
+          "read_length_bp": null,
+          "max_reads_per_flowcell": null,
+          "max_output_bytes": 48000000000,
+          "max_output_mb": 48000.0
+        },
+        {
+          "name": "48x MinION or GridION R9.4.1 or R10.4.1",
+          "unit_price_usd": 22800,
+          "read_length_bp": null,
+          "max_reads_per_flowcell": null,
+          "max_output_bytes": 48000000000,
+          "max_output_mb": 48000.0
+        },
+        {
+          "name": "96x MinION or GridION R9.4.1 or R10.4.1",
+          "unit_price_usd": 43200,
+          "read_length_bp": null,
+          "max_reads_per_flowcell": null,
+          "max_output_bytes": 48000000000,
+          "max_output_mb": 48000.0
+        },
+        {
+          "name": "1x Flow Cell (RNA)",
+          "unit_price_usd": 700,
+          "read_length_bp": null,
+          "max_reads_per_flowcell": null,
+          "max_output_bytes": 48000000000,
+          "max_output_mb": 48000.0
+        },
+        {
+          "name": "12x Flow Cell (RNA)",
+          "unit_price_usd": 7200,
+          "read_length_bp": null,
+          "max_reads_per_flowcell": null,
+          "max_output_bytes": 48000000000,
+          "max_output_mb": 48000.0
+        },
+        {
+          "name": "24x Flow Cell (RNA)",
+          "unit_price_usd": 12000,
+          "read_length_bp": null,
+          "max_reads_per_flowcell": null,
+          "max_output_bytes": 48000000000,
+          "max_output_mb": 48000.0
+        },
+        {
+          "name": "48x Flow Cell (RNA)",
+          "unit_price_usd": 22800,
+          "read_length_bp": null,
+          "max_reads_per_flowcell": null,
+          "max_output_bytes": 48000000000,
+          "max_output_mb": 48000.0
+        },
+        {
+          "name": "96x Flow Cell (RNA)",
+          "unit_price_usd": 43200,
+          "read_length_bp": null,
+          "max_reads_per_flowcell": null,
+          "max_output_bytes": 48000000000,
+          "max_output_mb": 48000.0
+        },
+        {
+          "name": "1x PromethION Flow Cell Packs (R10.4.1; 4 flow cells)",
+          "unit_price_usd": 3600,
+          "read_length_bp": null,
+          "max_reads_per_flowcell": null,
+          "max_output_bytes": 290000000000,
+          "max_output_mb": 290000.0
+        },
+        {
+          "name": "3x PromethION Flow Cell Packs (R10.4.1; 12 flow cells)",
+          "unit_price_usd": 10260,
+          "read_length_bp": null,
+          "max_reads_per_flowcell": null,
+          "max_output_bytes": 290000000000,
+          "max_output_mb": 290000.0
+        },
+        {
+          "name": "8x PromethION Flow Cell Packs (R10.4.1; 24 flow cells)",
+          "unit_price_usd": 26240,
+          "read_length_bp": null,
+          "max_reads_per_flowcell": null,
+          "max_output_bytes": 290000000000,
+          "max_output_mb": 290000.0
+        },
+        {
+          "name": "1x PromethION Flow Cell Packs (RNA) - 1 pack (4 flow cells)",
+          "unit_price_usd": 3600,
+          "read_length_bp": null,
+          "max_reads_per_flowcell": null,
+          "max_output_bytes": 290000000000,
+          "max_output_mb": 290000.0
+        },
+        {
+          "name": "3x PromethION Flow Cell Packs (RNA; 12 flow cells)",
+          "unit_price_usd": 10260,
+          "read_length_bp": null,
+          "max_reads_per_flowcell": null,
+          "max_output_bytes": 290000000000,
+          "max_output_mb": 290000.0
+        },
+        {
+          "name": "8x PromethION Flow Cell Packs (RNA; 24 flow cells)",
+          "unit_price_usd": 26240,
+          "read_length_bp": null,
+          "max_reads_per_flowcell": null,
+          "max_output_bytes": 290000000000,
+          "max_output_mb": 290000.0
+        }
+      ]
+    },
+    {
+      "id": "thermofisher",
+      "name": "ThermoFisher",
+      "reagent_kits": [
+        {
+          "name": "Ion 510 & Ion 520 & Ion 530 Kit – Chef (2 seq runs; 8 rxns) and Ion 510 Chip Kit (8 chips)",
+          "unit_price_usd": null,
+          "read_length_bp": 200,
+          "max_reads_per_flowcell": 2500000,
+          "max_output_bytes": 500000000,
+          "max_output_mb": 500.0
+        },
+        {
+          "name": "Ion 510 & Ion 520 & Ion 530 Kit – Chef (2 seq runs; 8 rxns) and Ion 520 Chip Kit (8 chips)",
+          "unit_price_usd": null,
+          "read_length_bp": 400,
+          "max_reads_per_flowcell": 5000000,
+          "max_output_bytes": 2000000000,
+          "max_output_mb": 2000.0
+        },
+        {
+          "name": "Ion 510 & Ion 520 & Ion 530 Kit – Chef (2 seq runs; 8 rxns) and Ion 530 Chip Kit (8 chips)",
+          "unit_price_usd": null,
+          "read_length_bp": 400,
+          "max_reads_per_flowcell": 20000000,
+          "max_output_bytes": 8000000000,
+          "max_output_mb": 8000.0
+        },
+        {
+          "name": "2 x Ion 520 & Ion 530 ExT Kit Chef (4 rxns) and 1 x  Ion 520 Chip Kit (8 chips)",
+          "unit_price_usd": null,
+          "read_length_bp": 400,
+          "max_reads_per_flowcell": 5000000,
+          "max_output_bytes": 2000000000,
+          "max_output_mb": 2000.0
+        },
+        {
+          "name": "2 x Ion 520 & Ion 530 ExT Kit Chef (4 rxns) and 1 x Ion 530 Chip Kit (8 chips)",
+          "unit_price_usd": null,
+          "read_length_bp": 400,
+          "max_reads_per_flowcell": 20000000,
+          "max_output_bytes": 8000000000,
+          "max_output_mb": 8000.0
+        },
+        {
+          "name": "Ion 540 Kit Chef  (2 seq runs; 8 rxns) and Ion 540 Chip Kit (8 chips)",
+          "unit_price_usd": null,
+          "read_length_bp": 200,
+          "max_reads_per_flowcell": 75000000,
+          "max_output_bytes": 15000000000,
+          "max_output_mb": 15000.0
+        }
+      ]
+    },
+    {
+      "id": "mgi",
+      "name": "MGI",
+      "reagent_kits": [
+        {
+          "name": "DNBSEQ-E25RS High-throughput Sequencing Set (FCL PE150)",
+          "unit_price_usd": null,
+          "read_length_bp": 300,
+          "max_reads_per_flowcell": 25000000,
+          "max_output_bytes": 7500000000,
+          "max_output_mb": 7500.0
+        },
+        {
+          "name": "DNBSEQ-E25RS High-throughput Sequencing Set (App-C FCL PE150)",
+          "unit_price_usd": null,
+          "read_length_bp": 300,
+          "max_reads_per_flowcell": 20000000,
+          "max_output_bytes": 6000000000,
+          "max_output_mb": 6000.0
+        },
+        {
+          "name": "DNBSEQ-G99RS High-throughput Sequencing Set (G99 FCL SE100/PE50)",
+          "unit_price_usd": null,
+          "read_length_bp": 100,
+          "max_reads_per_flowcell": 80000000,
+          "max_output_bytes": 8000000000,
+          "max_output_mb": 8000.0
+        },
+        {
+          "name": "DNBSEQ-G99RS High-throughput Sequencing Set (G99 FCL PE150)",
+          "unit_price_usd": null,
+          "read_length_bp": 300,
+          "max_reads_per_flowcell": 80000000,
+          "max_output_bytes": 24000000000,
+          "max_output_mb": 24000.0
+        },
+        {
+          "name": "DNBSEQ-G99RS High-throughput Sequencing Set (G99 App-D FCL PE150)",
+          "unit_price_usd": null,
+          "read_length_bp": 300,
+          "max_reads_per_flowcell": 80000000,
+          "max_output_bytes": 24000000000,
+          "max_output_mb": 24000.0
+        },
+        {
+          "name": "DNBSEQ-G99RS High-throughput Sequencing Set (G99 App-D FCL PE300)",
+          "unit_price_usd": null,
+          "read_length_bp": 600,
+          "max_reads_per_flowcell": 80000000,
+          "max_output_bytes": 48000000000,
+          "max_output_mb": 48000.0
+        },
+        {
+          "name": "DNBSEQ-G99RS High-throughput Sequencing Reagent Set (G99 App-D FCS PE150)",
+          "unit_price_usd": null,
+          "read_length_bp": 300,
+          "max_reads_per_flowcell": 40000000,
+          "max_output_bytes": 12000000000,
+          "max_output_mb": 12000.0
+        },
+        {
+          "name": "DNBSEQ-G50RS High-throughput Sequencing Set (FCL PE100)",
+          "unit_price_usd": null,
+          "read_length_bp": 200,
+          "max_reads_per_flowcell": 500000000,
+          "max_output_bytes": 100000000000,
+          "max_output_mb": 100000.0
+        },
+        {
+          "name": "DNBSEQ-G50RS High-throughput Sequencing Set (FCL PE150)",
+          "unit_price_usd": null,
+          "read_length_bp": 300,
+          "max_reads_per_flowcell": 500000000,
+          "max_output_bytes": 150000000000,
+          "max_output_mb": 150000.0
+        },
+        {
+          "name": "DNBSEQ-G50RS High-throughput Rapid Sequencing Set (FCS PE100)",
+          "unit_price_usd": null,
+          "read_length_bp": 200,
+          "max_reads_per_flowcell": 100000000,
+          "max_output_bytes": 20000000000,
+          "max_output_mb": 20000.0
+        },
+        {
+          "name": "DNBSEQ-G50RS High-throughput Rapid Sequencing Set (FCS PE150)",
+          "unit_price_usd": null,
+          "read_length_bp": 300,
+          "max_reads_per_flowcell": 100000000,
+          "max_output_bytes": 30000000000,
+          "max_output_mb": 30000.0
+        },
+        {
+          "name": "DNBSEQ-G400RS High-throughput Sequencing Set (FCL PE100)",
+          "unit_price_usd": null,
+          "read_length_bp": 200,
+          "max_reads_per_flowcell": 1500000000,
+          "max_output_bytes": 300000000000,
+          "max_output_mb": 300000.0
+        },
+        {
+          "name": "DNBSEQ-G400RS High-throughput Sequencing Set (FCL PE150)",
+          "unit_price_usd": null,
+          "read_length_bp": 300,
+          "max_reads_per_flowcell": 1500000000,
+          "max_output_bytes": 450000000000,
+          "max_output_mb": 450000.0
+        },
+        {
+          "name": "DNBSEQ-G400RS High-throughput Rapid Sequencing Set (SM DB FCS PE150)",
+          "unit_price_usd": null,
+          "read_length_bp": 300,
+          "max_reads_per_flowcell": 550000000,
+          "max_output_bytes": 165000000000,
+          "max_output_mb": 165000.0
+        },
+        {
+          "name": "DNBSEQ-G400RS High-throughput Rapid Sequencing Set  (SM DB FCS PE100)",
+          "unit_price_usd": null,
+          "read_length_bp": 200,
+          "max_reads_per_flowcell": 550000000,
+          "max_output_bytes": 110000000000,
+          "max_output_mb": 110000.0
+        },
+        {
+          "name": "DNBSEQ-G400RS High-throughput Sequencing Reagent Set (G400 App-D FCL PE100)",
+          "unit_price_usd": null,
+          "read_length_bp": 200,
+          "max_reads_per_flowcell": 1800000000,
+          "max_output_bytes": 360000000000,
+          "max_output_mb": 360000.0
+        },
+        {
+          "name": "DNBSEQ-G400RS High-throughput Sequencing Reagent Set (G400 App-D FCL PE150)",
+          "unit_price_usd": null,
+          "read_length_bp": 300,
+          "max_reads_per_flowcell": 1800000000,
+          "max_output_bytes": 540000000000,
+          "max_output_mb": 540000.0
+        },
+        {
+          "name": "DNBSEQ-G400RS High-throughput Rapid Sequencing Set (SM App-A DB FCS PE150)",
+          "unit_price_usd": null,
+          "read_length_bp": 300,
+          "max_reads_per_flowcell": 550000000,
+          "max_output_bytes": 165000000000,
+          "max_output_mb": 165000.0
+        },
+        {
+          "name": "DNBSEQ-G400RS High-throughput Rapid Sequencing Set (SM App-A DB FCS PE100)",
+          "unit_price_usd": null,
+          "read_length_bp": 200,
+          "max_reads_per_flowcell": 550000000,
+          "max_output_bytes": 110000000000,
+          "max_output_mb": 110000.0
+        }
+      ]
+    }
+  ],
+  "library_prep_kits": [
+    {
+      "name": "Illumina: COVIDSeq Assay (96 Samples)",
+      "pathogen_type": "SARS-CoV-2",
+      "compatible_platforms": [
+        "iSeq 100(8)",
+        "MiniSeq(48)",
+        "MiSeq(48)",
+        "NextSeq 1000/2000 (96)"
+      ],
+      "pack_size": 96,
+      "barcoding_limit": 96,
+      "unit_price_usd": 3322,
+      "enrichment_included": "Yes",
+      "catalog_ref": "20049393; 20051772"
+    },
+    {
+      "name": "Illumina DNA Prep, (M) Tagmentation (96 Samples, IPB)",
+      "pathogen_type": "SARS-CoV-2, RSV, Influenza A, Influenza B",
+      "compatible_platforms": [
+        "All Illumina (up to 384)"
+      ],
+      "pack_size": 96,
+      "barcoding_limit": 384,
+      "unit_price_usd": 4153,
+      "enrichment_included": "No",
+      "catalog_ref": "20060059"
+    },
+    {
+      "name": "Illumina: COVIDSeq Test (RUO Version) (3072 Samples)",
+      "pathogen_type": "SAR-CoV-2",
+      "compatible_platforms": [
+        "All Illumina (up to 384)"
+      ],
+      "pack_size": 3072,
+      "barcoding_limit": 384,
+      "unit_price_usd": 35271.6,
+      "enrichment_included": "Yes",
+      "catalog_ref": "20043675"
+    },
+    {
+      "name": "Illumina Microbial Amplicon Prep—Influenza A/B",
+      "pathogen_type": "Influenza A and Influenza B",
+      "compatible_platforms": [
+        "All Illumina (up to 48 samples)"
+      ],
+      "pack_size": 48,
+      "barcoding_limit": 48,
+      "unit_price_usd": 1468.8,
+      "enrichment_included": "Yes",
+      "catalog_ref": "20106305"
+    },
+    {
+      "name": "Illumina Microbial Amplicon Prep",
+      "pathogen_type": "SARS-CoV-2, RSV, Influenza A, Influenza B",
+      "compatible_platforms": [
+        "All Illumina (up to 48 samples)"
+      ],
+      "pack_size": 48,
+      "barcoding_limit": 48,
+      "unit_price_usd": 1428,
+      "enrichment_included": "Yes",
+      "catalog_ref": "20097857"
+    },
+    {
+      "name": "Illumina Respiratory Virus Enrichment Kit",
+      "pathogen_type": "40 common respiratory viruses",
+      "compatible_platforms": [
+        "MiniSeq",
+        "MiSeq System",
+        "NextSeq 550",
+        "NextSeq 2000 (up to 384 samples)"
+      ],
+      "pack_size": 96,
+      "barcoding_limit": 384,
+      "unit_price_usd": 8812.8,
+      "enrichment_included": "Yes",
+      "catalog_ref": "20100469, 20100470, 20100471, 20100472"
+    },
+    {
+      "name": "Nextera XT DNA Library Preparation Kit for Illumina",
+      "pathogen_type": "SARS-CoV-2, RSV, Influenza A, Influenza B",
+      "compatible_platforms": [
+        "All Illumina except NovaSeq (up to 384 samples)"
+      ],
+      "pack_size": 96,
+      "barcoding_limit": 384,
+      "unit_price_usd": 3435,
+      "enrichment_included": "No",
+      "catalog_ref": "FC-131-1096"
+    },
+    {
+      "name": "Illumina: Respiratory Pathogen ID/AMR Enrichment Panel Kit",
+      "pathogen_type": ">280 respiratory pathogens included and >2000 AMR markers",
+      "compatible_platforms": [
+        "MiniSeq",
+        "MiSeq",
+        "NextSeq 550 (up to 384 samples)"
+      ],
+      "pack_size": 96,
+      "barcoding_limit": 384,
+      "unit_price_usd": 13579,
+      "enrichment_included": "Yes",
+      "catalog_ref": "20047050, 20046969, 20047051, 20047052"
+    },
+    {
+      "name": "Illumina Viral Surveillance Panel v2 Kit",
+      "pathogen_type": ">200 DNA/RNA VIRUS",
+      "compatible_platforms": [
+        "All Illumina except NovaSeq (up to 384 samples)"
+      ],
+      "pack_size": 96,
+      "barcoding_limit": 384,
+      "unit_price_usd": 13350,
+      "enrichment_included": "Yes",
+      "catalog_ref": "20108081, 20108082, 20108083, 20108084"
+    },
+    {
+      "name": "NEBNext Ultra II DNA Library Prep with Sample Purification Beads for Illumina",
+      "pathogen_type": "SARS-CoV-2, RSV, Influenza A, Influenza B",
+      "compatible_platforms": [
+        "All Illumina (up to 96 samples)"
+      ],
+      "pack_size": 96,
+      "barcoding_limit": 96,
+      "unit_price_usd": 2532,
+      "enrichment_included": "No",
+      "catalog_ref": "E7103L"
+    },
+    {
+      "name": "Illumina and Genoscreen Deeplex Myc-TB Combo IDP Kit (48 samples)",
+      "pathogen_type": "TB",
+      "compatible_platforms": [
+        "iSeq 100 System (13 samples)",
+        "MiniSeq System (21 samples)",
+        "MiSeq System (45 samples)",
+        "NextSeq 550 (372 samples)"
+      ],
+      "pack_size": 48,
+      "barcoding_limit": 384,
+      "unit_price_usd": 3468,
+      "enrichment_included": "Not applicable",
+      "catalog_ref": "GNSDMTB01"
+    },
+    {
+      "name": "Illumina and Genoscreen Deeplex Myc-TB Combo XT Kit (48 samples)",
+      "pathogen_type": "TB",
+      "compatible_platforms": [
+        "iSeq 100 System (13 samples)",
+        "MiniSeq System (21 samples)",
+        "MiSeq System (45 samples)",
+        "NextSeq 550 (372 samples)"
+      ],
+      "pack_size": 48,
+      "barcoding_limit": 384,
+      "unit_price_usd": 3468,
+      "enrichment_included": "Not applicable",
+      "catalog_ref": "GNSDMTB01"
+    },
+    {
+      "name": "ONT COVID Mini V14: 576 samples",
+      "pathogen_type": "SAR-CoV-2",
+      "compatible_platforms": [
+        "MinION Mk1B MinION Mk1C GridION Mk1"
+      ],
+      "pack_size": 576,
+      "barcoding_limit": 96,
+      "unit_price_usd": 7284,
+      "enrichment_included": "Not applicable",
+      "catalog_ref": "C19MINI114"
+    },
+    {
+      "name": "ONT Direct RNA Sequencing Kit",
+      "pathogen_type": "A protocol for full-length polyadenylated RNA",
+      "compatible_platforms": [
+        "MinION Mk1B MinION Mk1C MinION Mk1D GridION PromethION"
+      ],
+      "pack_size": 6,
+      "barcoding_limit": 24,
+      "unit_price_usd": 599,
+      "enrichment_included": "Not applicable",
+      "catalog_ref": "SQK-RNA004"
+    },
+    {
+      "name": "ONT Ligation Sequencing Kit V14 protocol with Native Barcoding Kit 24 V14",
+      "pathogen_type": "SARS-CoV-2, RSV, Influenza A, Influenza B",
+      "compatible_platforms": [
+        "All ONT"
+      ],
+      "pack_size": 144,
+      "barcoding_limit": 24,
+      "unit_price_usd": 599,
+      "enrichment_included": "Not applicable",
+      "catalog_ref": "SQK-LSK114"
+    },
+    {
+      "name": "ONT Ligation Sequencing Kit V14 protocol with Native Barcoding Kit 96 V14",
+      "pathogen_type": "SARS-CoV-2, RSV, Influenza A, Influenza B",
+      "compatible_platforms": [
+        "All ONT"
+      ],
+      "pack_size": 576,
+      "barcoding_limit": 96,
+      "unit_price_usd": 599,
+      "enrichment_included": "Not applicable",
+      "catalog_ref": "SQK-LSK114"
+    },
+    {
+      "name": "ONT Ligation Sequencing Kit XL V14 protocol with Native Barcoding Kit 96 V14",
+      "pathogen_type": "SARS-CoV-2, RSV, Influenza A, Influenza B",
+      "compatible_platforms": [
+        "All ONT"
+      ],
+      "pack_size": 4608,
+      "barcoding_limit": 96,
+      "unit_price_usd": 4000,
+      "enrichment_included": "Not applicable",
+      "catalog_ref": "SQK-LSK114-XL"
+    },
+    {
+      "name": "16S Barcoding Kit 24 V14",
+      "pathogen_type": "Capture all (bacteria)",
+      "compatible_platforms": [
+        "Flongle MinION Mk1B MinION Mk1C MinION Mk1D GridION"
+      ],
+      "pack_size": 24,
+      "barcoding_limit": 24,
+      "unit_price_usd": 900,
+      "enrichment_included": "Yes",
+      "catalog_ref": "SQK-16S114.24"
+    },
+    {
+      "name": "ONT Rapid Barcoding Kit 24 V14",
+      "pathogen_type": "SARS-CoV-2, RSV, Influenza A, Influenza B",
+      "compatible_platforms": [
+        "All ONT"
+      ],
+      "pack_size": 144,
+      "barcoding_limit": 24,
+      "unit_price_usd": 699,
+      "enrichment_included": "Not applicable",
+      "catalog_ref": "SQK-RBK114.24"
+    },
+    {
+      "name": "ONT Rapid Barcoding Kit 96 V14",
+      "pathogen_type": "SARS-CoV-2, RSV, Influenza A, Influenza B",
+      "compatible_platforms": [
+        "All ONT"
+      ],
+      "pack_size": 288,
+      "barcoding_limit": 96,
+      "unit_price_usd": 990,
+      "enrichment_included": "Not applicable",
+      "catalog_ref": "SQK-RBK114.96"
+    },
+    {
+      "name": "ONT Rapid PCR Barcoding Kit 24 V14 protocol",
+      "pathogen_type": "SARS-CoV-2, RSV, Influenza A, Influenza B",
+      "compatible_platforms": [
+        "All ONT"
+      ],
+      "pack_size": 144,
+      "barcoding_limit": 24,
+      "unit_price_usd": 699,
+      "enrichment_included": "Not applicable",
+      "catalog_ref": "SQK-RPB114.24"
+    },
+    {
+      "name": "TBSeq Mycobacterium nucleic acid and M. tuberculosis drug resistance gene detection kits for ONT",
+      "pathogen_type": "TB",
+      "compatible_platforms": [
+        "MinION GridION"
+      ],
+      "pack_size": 24,
+      "barcoding_limit": 24,
+      "unit_price_usd": null,
+      "enrichment_included": "Not applicable",
+      "catalog_ref": null
+    },
+    {
+      "name": "ONT AmPORE TB",
+      "pathogen_type": "TB",
+      "compatible_platforms": [
+        "GridION"
+      ],
+      "pack_size": 288,
+      "barcoding_limit": 96,
+      "unit_price_usd": 990,
+      "enrichment_included": "Not applicable",
+      "catalog_ref": "SQK-RBK114.96"
+    },
+    {
+      "name": "Thermofisher Ion Xpress Plus Fragment Library Kit",
+      "pathogen_type": "Bacteria",
+      "compatible_platforms": [
+        "Ion S5 series + Ion Chef"
+      ],
+      "pack_size": 10,
+      "barcoding_limit": 16,
+      "unit_price_usd": null,
+      "enrichment_included": "No",
+      "catalog_ref": "4471269"
+    },
+    {
+      "name": "Thermofisher Ion AmpliSeq Library Plus Kit with 24 rxns",
+      "pathogen_type": "RNA viruses",
+      "compatible_platforms": [
+        "Ion S5 series + Ion Chef"
+      ],
+      "pack_size": 24,
+      "barcoding_limit": 96,
+      "unit_price_usd": null,
+      "enrichment_included": "Yes",
+      "catalog_ref": "4488990"
+    },
+    {
+      "name": "MGIEasy Respiratory Microorganisms Genome Library Preparation Set (16 RXN)",
+      "pathogen_type": "INF",
+      "compatible_platforms": [
+        "DNBSEQ-E25",
+        "DNBSEQ-G99",
+        "DNBSEQ-G50",
+        "DNBSEQ-G400"
+      ],
+      "pack_size": 16,
+      "barcoding_limit": 16,
+      "unit_price_usd": null,
+      "enrichment_included": "Yes",
+      "catalog_ref": "940-000549-00"
+    },
+    {
+      "name": "MGIEasy Fast FS DNA Library Prep Set V2.0 (96 RXN)",
+      "pathogen_type": "ALL",
+      "compatible_platforms": [
+        "DNBSEQ-E25",
+        "DNBSEQ-G99",
+        "DNBSEQ-G50",
+        "DNBSEQ-G400",
+        "DNBSEQ-T7"
+      ],
+      "pack_size": 96,
+      "barcoding_limit": 96,
+      "unit_price_usd": null,
+      "enrichment_included": "Yes",
+      "catalog_ref": "940-001194-00"
+    },
+    {
+      "name": "MGI ATOPlex RNA Library Prep Set (96 RXN)",
+      "pathogen_type": "SARS-CoV-2",
+      "compatible_platforms": [
+        "DNBSEQ-E25",
+        "DNBSEQ-G99",
+        "DNBSEQ-G400",
+        "DNBSEQ-T7RS"
+      ],
+      "pack_size": 96,
+      "barcoding_limit": 96,
+      "unit_price_usd": null,
+      "enrichment_included": "Yes",
+      "catalog_ref": "940-000183-00"
+    },
+    {
+      "name": "MGI ATOPlex RNA Multiplex PCR-based Library Preparation Set V3.1 (96 RXN)",
+      "pathogen_type": "SARS-CoV-2",
+      "compatible_platforms": [
+        "DNBSEQ-E25",
+        "DNBSEQ-G99",
+        "DNBSEQ-G50",
+        "DNBSEQ-G400"
+      ],
+      "pack_size": 96,
+      "barcoding_limit": 96,
+      "unit_price_usd": null,
+      "enrichment_included": "Yes",
+      "catalog_ref": "940-000133-00"
+    },
+    {
+      "name": "MGI ATOPlex MTB Library Preparation Set",
+      "pathogen_type": "TB",
+      "compatible_platforms": [
+        "DNBSEQ-E25",
+        "DNBSEQ-G99",
+        "DNBSEQ-G50",
+        "DNBSEQ-G400"
+      ],
+      "pack_size": 96,
+      "barcoding_limit": 96,
+      "unit_price_usd": null,
+      "enrichment_included": "Yes",
+      "catalog_ref": "940-001601-00"
+    },
+    {
+      "name": "DeepChek Assay 13-Plex KB Drug Susceptibility Testing",
+      "pathogen_type": "TB",
+      "compatible_platforms": [
+        "Illumina iSeq 100",
+        "MiniSeq",
+        "MiSeq",
+        "NextSeq",
+        "Thermofisher S5",
+        "PGM",
+        "Oxford Nanopore MinIon",
+        "Gridion…"
+      ],
+      "pack_size": 24,
+      "barcoding_limit": 384,
+      "unit_price_usd": null,
+      "enrichment_included": "Yes",
+      "catalog_ref": "128A24"
+    }
+  ],
+  "reagents": [
+    {
+      "name": "Viral transport media sampling kits with 10 ml tubes and swabs (50-pck)",
+      "category": "consumable",
+      "pack_size": 50,
+      "catalog_ref": null,
+      "quantity_per_sample": 1,
+      "workflow": "sample_receipt"
+    },
+    {
+      "name": "Specimen transport packaging (ambient) (150-pck)",
+      "category": "consumable",
+      "pack_size": 150,
+      "catalog_ref": null,
+      "quantity_per_sample": 1,
+      "workflow": "sample_receipt"
+    },
+    {
+      "name": "Specimen transport packaging (2–8C) (150-pck)",
+      "category": "consumable",
+      "pack_size": 150,
+      "catalog_ref": null,
+      "quantity_per_sample": 1,
+      "workflow": "sample_receipt"
+    },
+    {
+      "name": "Specimen transport packaging (-20C) (150-pck)",
+      "category": "consumable",
+      "pack_size": 150,
+      "catalog_ref": null,
+      "quantity_per_sample": 1,
+      "workflow": "sample_receipt"
+    },
+    {
+      "name": "Cold packs (24-pck)",
+      "category": "consumable",
+      "pack_size": 24,
+      "catalog_ref": null,
+      "quantity_per_sample": null,
+      "workflow": "sample_receipt"
+    },
+    {
+      "name": "PCR plates (10/pack) 96-well reaction plate",
+      "category": "consumable",
+      "pack_size": 10,
+      "catalog_ref": null,
+      "quantity_per_sample": null,
+      "workflow": "pcr_testing"
+    },
+    {
+      "name": "PCR plate covers adhesive film (1 cover per plate)",
+      "category": "consumable",
+      "pack_size": 100,
+      "catalog_ref": null,
+      "quantity_per_sample": null,
+      "workflow": "pcr_testing"
+    },
+    {
+      "name": "Pipette filter tips 10uL (96 tips x 10 racks)",
+      "category": "consumable",
+      "pack_size": 960,
+      "catalog_ref": null,
+      "quantity_per_sample": 8,
+      "workflow": null
+    },
+    {
+      "name": "Pipette filter tips 100µL, sterile (pack of 960)",
+      "category": "consumable",
+      "pack_size": 960,
+      "catalog_ref": null,
+      "quantity_per_sample": 5,
+      "workflow": null
+    },
+    {
+      "name": "Pipette filter tips 200uL  (96 tips x 10 racks)",
+      "category": "consumable",
+      "pack_size": 960,
+      "catalog_ref": null,
+      "quantity_per_sample": 8,
+      "workflow": null
+    },
+    {
+      "name": "Pipette filter tips 1000uL  (96 tips x 10 racks)",
+      "category": "consumable",
+      "pack_size": 960,
+      "catalog_ref": null,
+      "quantity_per_sample": 5,
+      "workflow": null
+    },
+    {
+      "name": "0.2mL PCR tubes, thin-walled (1000; strips)",
+      "category": "consumable",
+      "pack_size": 1000,
+      "catalog_ref": null,
+      "quantity_per_sample": 6,
+      "workflow": "pcr_testing"
+    },
+    {
+      "name": "1.5mL PCR tubes, LoBind (250)",
+      "category": "consumable",
+      "pack_size": 250,
+      "catalog_ref": null,
+      "quantity_per_sample": 2,
+      "workflow": "pcr_testing"
+    },
+    {
+      "name": "50mL conical tubes (100)",
+      "category": "consumable",
+      "pack_size": 100,
+      "catalog_ref": null,
+      "quantity_per_sample": 0.5,
+      "workflow": null
+    },
+    {
+      "name": "Conical centrifuge tubes 15mL (packs of 500)",
+      "category": "consumable",
+      "pack_size": 500,
+      "catalog_ref": null,
+      "quantity_per_sample": 1,
+      "workflow": null
+    },
+    {
+      "name": "Heat sealing film foil (pack of 100)",
+      "category": "consumable",
+      "pack_size": 100,
+      "catalog_ref": null,
+      "quantity_per_sample": 0.016667,
+      "workflow": null
+    },
+    {
+      "name": "PolarSafe aluminum cooling block, 15-well for 1.5/2.0 mL tubes",
+      "category": "equipment",
+      "pack_size": null,
+      "catalog_ref": null,
+      "quantity_per_sample": null,
+      "workflow": null
+    },
+    {
+      "name": "RNA extraction kit (250 reactions)",
+      "category": "reagent",
+      "pack_size": 250,
+      "catalog_ref": null,
+      "quantity_per_sample": 1,
+      "workflow": "nucleic_acid_extraction"
+    },
+    {
+      "name": "PCR testing kit (96 reactions)",
+      "category": "reagent",
+      "pack_size": 96,
+      "catalog_ref": null,
+      "quantity_per_sample": 1,
+      "workflow": "pcr_testing"
+    },
+    {
+      "name": "Primers for preamplification (500 rxns)",
+      "category": "reagent",
+      "pack_size": 500,
+      "catalog_ref": null,
+      "quantity_per_sample": 1,
+      "workflow": "pcr_testing"
+    },
+    {
+      "name": "Fluorometer DNA HS assay kit (500)",
+      "category": "reagent",
+      "pack_size": 500,
+      "catalog_ref": null,
+      "quantity_per_sample": 1,
+      "workflow": null
+    },
+    {
+      "name": "Fluorometer assay tubes (500)",
+      "category": "consumable",
+      "pack_size": 500,
+      "catalog_ref": null,
+      "quantity_per_sample": 1,
+      "workflow": null
+    },
+    {
+      "name": "Gel sizing DNA ladder",
+      "category": "reagent",
+      "pack_size": 1,
+      "catalog_ref": null,
+      "quantity_per_sample": 0.00125,
+      "workflow": null
+    },
+    {
+      "name": "Agarose gels 2% (20 gels)",
+      "category": "reagent",
+      "pack_size": 20,
+      "catalog_ref": null,
+      "quantity_per_sample": null,
+      "workflow": null
+    },
+    {
+      "name": "DNA loading buffer",
+      "category": "reagent",
+      "pack_size": 20,
+      "catalog_ref": null,
+      "quantity_per_sample": 0.05,
+      "workflow": null
+    },
+    {
+      "name": "Reagent reservoir, sterile (pack of 50)",
+      "category": "consumable",
+      "pack_size": 50,
+      "catalog_ref": null,
+      "quantity_per_sample": null,
+      "workflow": null
+    },
+    {
+      "name": "NaOH, 1N 100mL",
+      "category": "reagent",
+      "pack_size": null,
+      "catalog_ref": null,
+      "quantity_per_sample": null,
+      "workflow": null
+    },
+    {
+      "name": "Bleach, lab grade (4-6%, 1L)",
+      "category": "reagent",
+      "pack_size": null,
+      "catalog_ref": null,
+      "quantity_per_sample": null,
+      "workflow": "general_lab"
+    },
+    {
+      "name": "Tween 20, 500 mL",
+      "category": "reagent",
+      "pack_size": 500,
+      "catalog_ref": null,
+      "quantity_per_sample": 0.125,
+      "workflow": null
+    },
+    {
+      "name": "Ethanol, 99% lab grade, 1L",
+      "category": "reagent",
+      "pack_size": 1,
+      "catalog_ref": null,
+      "quantity_per_sample": 0.0009,
+      "workflow": null
+    },
+    {
+      "name": "(Molecular grade) nuclease free H2O",
+      "category": "reagent",
+      "pack_size": 1,
+      "catalog_ref": null,
+      "quantity_per_sample": 0.005,
+      "workflow": null
+    },
+    {
+      "name": "Universal One-Step RT-qPCR Kit (200 rxns)",
+      "category": "reagent",
+      "pack_size": 200,
+      "catalog_ref": "E3005S",
+      "quantity_per_sample": null,
+      "workflow": "pcr_testing"
+    },
+    {
+      "name": "Q5 Hot Start HiFi DNA Polymerase (500 units)",
+      "category": "reagent",
+      "pack_size": 500,
+      "catalog_ref": "M0493L",
+      "quantity_per_sample": null,
+      "workflow": "pcr_testing"
+    },
+    {
+      "name": "10mM dNTP (5x1mL)",
+      "category": "reagent",
+      "pack_size": 3333,
+      "catalog_ref": "18427089",
+      "quantity_per_sample": null,
+      "workflow": "pcr_testing"
+    },
+    {
+      "name": "dS DNA HS assay kit for fluoremeter (500)",
+      "category": "reagent",
+      "pack_size": 500,
+      "catalog_ref": "Qubit Q32854",
+      "quantity_per_sample": null,
+      "workflow": null
+    },
+    {
+      "name": "High sensitivity DNA assay kit for bioanalyser (110 samples)",
+      "category": "reagent",
+      "pack_size": 110,
+      "catalog_ref": "Agilent 5067-4626",
+      "quantity_per_sample": null,
+      "workflow": null
+    },
+    {
+      "name": "ONT Flow cell wash kit",
+      "category": "reagent",
+      "pack_size": 1,
+      "catalog_ref": "EXP-WSH004",
+      "quantity_per_sample": null,
+      "workflow": null
+    },
+    {
+      "name": "Nitrile gloves(1000)",
+      "category": "consumable",
+      "pack_size": 1000,
+      "catalog_ref": "10",
+      "quantity_per_sample": null,
+      "workflow": "general_lab"
+    },
+    {
+      "name": "Laboratory coat/gown (5 pieces; assume 6 pp & NGS team of 4 in low throughput lab; double team size for high)",
+      "category": "consumable",
+      "pack_size": 10,
+      "catalog_ref": "5",
+      "quantity_per_sample": null,
+      "workflow": "general_lab"
+    },
+    {
+      "name": "Tube Racks (floating, 1 rack 24 rxn)",
+      "category": "equipment",
+      "pack_size": null,
+      "catalog_ref": null,
+      "quantity_per_sample": null,
+      "workflow": null
+    },
+    {
+      "name": "RNAse away",
+      "category": "reagent",
+      "pack_size": 250,
+      "catalog_ref": null,
+      "quantity_per_sample": 1,
+      "workflow": "nucleic_acid_extraction"
+    },
+    {
+      "name": "Paper towels (25 pack of 135 sheets;assume 1 per washing station-with 5 stations in small lab; 1 pack used weekly)",
+      "category": "consumable",
+      "pack_size": 25,
+      "catalog_ref": null,
+      "quantity_per_sample": 0.015,
+      "workflow": "general_lab"
+    },
+    {
+      "name": "Isopropanol, 70% (Case 4x3.8L)",
+      "category": "consumable",
+      "pack_size": 15,
+      "catalog_ref": null,
+      "quantity_per_sample": 0.01,
+      "workflow": "general_lab"
+    },
+    {
+      "name": "Autoclave bags, large (200 pack)",
+      "category": "consumable",
+      "pack_size": 200,
+      "catalog_ref": "1",
+      "quantity_per_sample": null,
+      "workflow": "general_lab"
+    },
+    {
+      "name": "Autoclave bags, (small, 1000bgs)",
+      "category": "consumable",
+      "pack_size": 1000,
+      "catalog_ref": "4",
+      "quantity_per_sample": null,
+      "workflow": "general_lab"
+    },
+    {
+      "name": "Permanent Marker (case of 10)",
+      "category": "consumable",
+      "pack_size": 10,
+      "catalog_ref": "2",
+      "quantity_per_sample": null,
+      "workflow": null
+    },
+    {
+      "name": "Disinfectant/Soap",
+      "category": "consumable",
+      "pack_size": null,
+      "catalog_ref": null,
+      "quantity_per_sample": null,
+      "workflow": null
+    },
+    {
+      "name": "Bleach (for decontamination of lab space)",
+      "category": "consumable",
+      "pack_size": null,
+      "catalog_ref": null,
+      "quantity_per_sample": null,
+      "workflow": "general_lab"
+    },
+    {
+      "name": "Disinfectant Wipes (85wipesx6canisters)",
+      "category": "consumable",
+      "pack_size": null,
+      "catalog_ref": null,
+      "quantity_per_sample": null,
+      "workflow": null
+    },
+    {
+      "name": "Lens paper (2000/pack)",
+      "category": "consumable",
+      "pack_size": null,
+      "catalog_ref": null,
+      "quantity_per_sample": null,
+      "workflow": "general_lab"
+    },
+    {
+      "name": "Lab Tape (1-pack)",
+      "category": "consumable",
+      "pack_size": null,
+      "catalog_ref": null,
+      "quantity_per_sample": null,
+      "workflow": "general_lab"
+    }
+  ],
+  "equipment": [
+    {
+      "name": "Other sequencing platform",
+      "category": "sequencing_platform",
+      "workflow_step": "Sequencing",
+      "unit_cost_usd": null,
+      "catalog_ref": null,
+      "recommended_quantity": null,
+      "comment": null
+    },
+    {
+      "name": "Illumina iSeq 100",
+      "category": "sequencing_platform",
+      "workflow_step": "Sequencing",
+      "unit_cost_usd": 19900,
+      "catalog_ref": "20021532",
+      "recommended_quantity": null,
+      "comment": null
+    },
+    {
+      "name": "Illumina MiniSeq",
+      "category": "sequencing_platform",
+      "workflow_step": "Sequencing",
+      "unit_cost_usd": 49500,
+      "catalog_ref": "SY-420-1001",
+      "recommended_quantity": null,
+      "comment": null
+    },
+    {
+      "name": "Illumina MiSeq",
+      "category": "sequencing_platform",
+      "workflow_step": "Sequencing",
+      "unit_cost_usd": 99000,
+      "catalog_ref": "SY-410-1003",
+      "recommended_quantity": null,
+      "comment": null
+    },
+    {
+      "name": "Illumina NextSeq 1000",
+      "category": "sequencing_platform",
+      "workflow_step": "Sequencing",
+      "unit_cost_usd": 210000,
+      "catalog_ref": "20038898",
+      "recommended_quantity": null,
+      "comment": null
+    },
+    {
+      "name": "Illumina NextSeq 2000",
+      "category": "sequencing_platform",
+      "workflow_step": "Sequencing",
+      "unit_cost_usd": 335000,
+      "catalog_ref": "20038897",
+      "recommended_quantity": null,
+      "comment": null
+    },
+    {
+      "name": "Illumina NovaSeq 6000",
+      "category": "sequencing_platform",
+      "workflow_step": "Sequencing",
+      "unit_cost_usd": 837250,
+      "catalog_ref": "20012850",
+      "recommended_quantity": null,
+      "comment": null
+    },
+    {
+      "name": "ONT Flongle (Starter Pack)",
+      "category": "sequencing_platform",
+      "workflow_step": "Sequencing",
+      "unit_cost_usd": 1460,
+      "catalog_ref": "FLGIntSP",
+      "recommended_quantity": null,
+      "comment": "(1 Flongle adapter, 1 Flongle sequencing expansion, 12 Flongle Flow cells)"
+    },
+    {
+      "name": "ONT MinION Mk1B",
+      "category": "sequencing_platform",
+      "workflow_step": "Sequencing",
+      "unit_cost_usd": 1000,
+      "catalog_ref": null,
+      "recommended_quantity": null,
+      "comment": null
+    },
+    {
+      "name": "ONT MinION Mk1C",
+      "category": "sequencing_platform",
+      "workflow_step": "Sequencing",
+      "unit_cost_usd": 5250,
+      "catalog_ref": null,
+      "recommended_quantity": null,
+      "comment": null
+    },
+    {
+      "name": "ONT GridION (Project Pack)",
+      "category": "sequencing_platform",
+      "workflow_step": "Sequencing",
+      "unit_cost_usd": 67000,
+      "catalog_ref": "GRDProject",
+      "recommended_quantity": null,
+      "comment": null
+    },
+    {
+      "name": "ONT PromethION 2 Solo (Starter Pack)",
+      "category": "sequencing_platform",
+      "workflow_step": "Sequencing",
+      "unit_cost_usd": 9555,
+      "catalog_ref": "P2SoloBasicSP",
+      "recommended_quantity": null,
+      "comment": null
+    },
+    {
+      "name": "ONT PromethION 24 (Project Pack XL)",
+      "category": "sequencing_platform",
+      "workflow_step": "Sequencing",
+      "unit_cost_usd": 436000,
+      "catalog_ref": "PRM24XL",
+      "recommended_quantity": null,
+      "comment": null
+    },
+    {
+      "name": "ThermoFisher Ion GeneStudio S5 System",
+      "category": "sequencing_platform",
+      "workflow_step": "Sequencing",
+      "unit_cost_usd": null,
+      "catalog_ref": "A38194",
+      "recommended_quantity": null,
+      "comment": "15GB max throughput; one Ion chip"
+    },
+    {
+      "name": "ThermoFisher Ion GeneStudio S5 Plus System",
+      "category": "sequencing_platform",
+      "workflow_step": "Sequencing",
+      "unit_cost_usd": null,
+      "catalog_ref": "A38195",
+      "recommended_quantity": null,
+      "comment": "30GB max throughput; two Ion chips"
+    },
+    {
+      "name": "ThermoFisher Ion GeneStudio S5 Prime System",
+      "category": "sequencing_platform",
+      "workflow_step": "Sequencing",
+      "unit_cost_usd": null,
+      "catalog_ref": "A38196",
+      "recommended_quantity": null,
+      "comment": "50GB max throughput; two Ion chips"
+    },
+    {
+      "name": "MGI DNBSEQ-E25RS (standard model)",
+      "category": "sequencing_platform",
+      "workflow_step": "Sequencing",
+      "unit_cost_usd": null,
+      "catalog_ref": "900-000537-00",
+      "recommended_quantity": null,
+      "comment": "25M reads, 7.5Gb for PE150 ru; 1 flow cell/run; DNBSEQ-E25ARS (900-000538-00) advanced model with bioformatics module"
+    },
+    {
+      "name": "MGI DNBSEQ-G99ARS (with bioinformatics module)",
+      "category": "sequencing_platform",
+      "workflow_step": "Sequencing",
+      "unit_cost_usd": null,
+      "catalog_ref": "900-000609-00",
+      "recommended_quantity": null,
+      "comment": "FCL (80 M reads). FCS (40 M reads)-new, FUL(160 M reads)- new;  max 2 flow cells/run. Without bioinformatics module - DNBSEQ-G99RS (900-000607-00)"
+    },
+    {
+      "name": "MGI DNBSEQ-G50RS (Config 2)",
+      "category": "sequencing_platform",
+      "workflow_step": "Sequencing",
+      "unit_cost_usd": null,
+      "catalog_ref": "900-000354-00",
+      "recommended_quantity": null,
+      "comment": "FCS (100 M reads), FCL (500 M reads); 1 flow cell/run"
+    },
+    {
+      "name": "MGI DNBSEQ-G400RS",
+      "category": "sequencing_platform",
+      "workflow_step": "Sequencing",
+      "unit_cost_usd": null,
+      "catalog_ref": "900-000170-00",
+      "recommended_quantity": null,
+      "comment": "FCS (550 M reads, 2 lanes), FCL(1500 M-1800 M reads, 4 lanes); max 2 flow cells/run"
+    },
+    {
+      "name": "PCR workstation",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 3837.57,
+      "catalog_ref": null,
+      "recommended_quantity": 2,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Plate magnet (for 96 well plate)",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 1323.3,
+      "catalog_ref": null,
+      "recommended_quantity": 2,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Magnetic rack (for 12 1.5–2.0 mL tubes)",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 374.133,
+      "catalog_ref": null,
+      "recommended_quantity": 4,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "PCR cooling plates/strip holders",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 84.21,
+      "catalog_ref": null,
+      "recommended_quantity": 4,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Dry bath (heat block)",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 324.81,
+      "catalog_ref": null,
+      "recommended_quantity": 1,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Biosafety cabinet, class II, type A2",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 12030,
+      "catalog_ref": null,
+      "recommended_quantity": 1,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Water bath 5L",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 668.868,
+      "catalog_ref": null,
+      "recommended_quantity": 1,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Autoclave benchtop",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 4210.5,
+      "catalog_ref": null,
+      "recommended_quantity": 1,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Vortex",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 351.276,
+      "catalog_ref": null,
+      "recommended_quantity": 2,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Analytical balance",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 994.881,
+      "catalog_ref": null,
+      "recommended_quantity": 1,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "(-)20  freezer",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 1039.392,
+      "catalog_ref": null,
+      "recommended_quantity": 1,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "(-)80  freezer",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 13719.012,
+      "catalog_ref": null,
+      "recommended_quantity": 1,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Refrigerator (4C)",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 1200,
+      "catalog_ref": null,
+      "recommended_quantity": 1,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Gel electrophoresis apparatus",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 2977.425,
+      "catalog_ref": null,
+      "recommended_quantity": 1,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Uninterrupted power supply (1500V)",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 1000,
+      "catalog_ref": null,
+      "recommended_quantity": 1,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Uninterrupted power supply (600V);",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 600,
+      "catalog_ref": null,
+      "recommended_quantity": 1,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Thermal cycler (conventional)",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 9000,
+      "catalog_ref": null,
+      "recommended_quantity": 1,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Thermal cycler (realtime)",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 18000,
+      "catalog_ref": null,
+      "recommended_quantity": 1,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Water purification system",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 8408.97,
+      "catalog_ref": null,
+      "recommended_quantity": 1,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Single channel pipette 100–1000μL",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 234.585,
+      "catalog_ref": null,
+      "recommended_quantity": 3,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Single channel pipette 20–200μL",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 269.472,
+      "catalog_ref": null,
+      "recommended_quantity": 3,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Single channel pipette 2–20μL",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 257.442,
+      "catalog_ref": null,
+      "recommended_quantity": 3,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Single channel pipette 1–10μL",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 269.472,
+      "catalog_ref": null,
+      "recommended_quantity": 3,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Single channel pipette 0.2–2μL",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 234.585,
+      "catalog_ref": null,
+      "recommended_quantity": 3,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "8-channel multichannel pipettes 10–100μL",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 678.492,
+      "catalog_ref": null,
+      "recommended_quantity": 3,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Tube racks",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 39.699,
+      "catalog_ref": null,
+      "recommended_quantity": 5,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Cooling block (tube strips)",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 291.126,
+      "catalog_ref": null,
+      "recommended_quantity": 2,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Cooling block (96 well plate)",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 175.74,
+      "catalog_ref": null,
+      "recommended_quantity": 1,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Ice bucket",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 173.9,
+      "catalog_ref": null,
+      "recommended_quantity": 1,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Fluorometer, single assay",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 3035,
+      "catalog_ref": null,
+      "recommended_quantity": 1,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Fluorometer, strip tube capable",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 6600,
+      "catalog_ref": null,
+      "recommended_quantity": 0,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Air conditioners",
+      "category": "facility",
+      "workflow_step": null,
+      "unit_cost_usd": 500,
+      "catalog_ref": null,
+      "recommended_quantity": 3,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Temperature logger",
+      "category": "facility",
+      "workflow_step": null,
+      "unit_cost_usd": 170.4,
+      "catalog_ref": null,
+      "recommended_quantity": 3,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Centrifuge (plate)",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 670.5,
+      "catalog_ref": null,
+      "recommended_quantity": 2,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Microcentrifuge (can hold  24 tubes of 1.5/2.0 mL)",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 5760,
+      "catalog_ref": null,
+      "recommended_quantity": 2,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Centrifuge, refrigerated",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 5554.8,
+      "catalog_ref": null,
+      "recommended_quantity": 2,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Liquid handler – extraction",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 120000,
+      "catalog_ref": null,
+      "recommended_quantity": 0,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Liquid handler – PCR",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 48000,
+      "catalog_ref": null,
+      "recommended_quantity": 0,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Bioanalyzer/TapeStation",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 42000,
+      "catalog_ref": null,
+      "recommended_quantity": 1,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Liquid handler – library preparation",
+      "category": "lab_equipment",
+      "workflow_step": null,
+      "unit_cost_usd": 96000,
+      "catalog_ref": null,
+      "recommended_quantity": 0,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    },
+    {
+      "name": "Desktop computer",
+      "category": "bioinformatics",
+      "workflow_step": null,
+      "unit_cost_usd": 478.8,
+      "catalog_ref": null,
+      "recommended_quantity": 1,
+      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
+    }
+  ],
+  "personnel_roles": [
+    {
+      "role": "Clinical microbiologist"
+    },
+    {
+      "role": "Laboratory manager"
+    },
+    {
+      "role": "Bioinformatician"
+    },
+    {
+      "role": "Molecular biologist"
+    },
+    {
+      "role": "Laboratory technician"
+    }
+  ],
+  "bioinformatics_cloud": {
+    "cloud_platforms": [
+      {
+        "name": "Illumina BaseSpace software and cloud storage",
+        "description": "Single user annual licence",
+        "pricing_model": "variable"
+      },
+      {
+        "name": "Illumina BaseSpace additional cloud storage",
+        "description": "For added storage beyond 1 TB over 1 year. If this is utilized, enter 0.36 as Price (USD)",
+        "pricing_model": "variable"
+      },
+      {
+        "name": "Qiagen CLC Genomics Workbench software",
+        "description": "Single user annual licence",
+        "pricing_model": "variable"
+      },
+      {
+        "name": "Terra.Bio computing and cloud storage",
+        "description": "Computing and storage cost. If this is utilized, enter 0.5 (SARS-CoV-2 analysis)",
+        "pricing_model": "variable"
+      },
+      {
+        "name": "NextFlow tower software",
+        "description": "Software plus computational",
+        "pricing_model": "variable"
+      },
+      {
+        "name": "External HDD for storage",
+        "description": "External HDD – 1TB for storage",
+        "pricing_model": "variable"
+      },
+      {
+        "name": "Outsourced",
+        "description": "If outsourced, enter total fee in Price (USD) column and enter Quantity as 1",
+        "pricing_model": "variable"
+      },
+      {
+        "name": "Amazon Web Services (AWS)",
+        "description": null,
+        "pricing_model": "variable"
+      },
+      {
+        "name": "Seqera",
+        "description": null,
+        "pricing_model": "variable"
+      },
+      {
+        "name": "Deeplex WebApp",
+        "description": null,
+        "pricing_model": "variable"
+      },
+      {
+        "name": "Geneious",
+        "description": null,
+        "pricing_model": "variable"
+      }
+    ],
+    "inhouse_components": [
+      {
+        "name": "Server for bioinformatic storage and processing",
+        "description": "High-processing server"
+      },
+      {
+        "name": "HPE DL380 Gen10 8SFF CTO server (server chassis)",
+        "description": null
+      },
+      {
+        "name": "Intel Xeon-Gold 6234 (3.3GHz/8-core/130W) FIO processor kit for HPE ProLiant DL380 Gen10",
+        "description": null
+      },
+      {
+        "name": "HPE 32GB (1x32GB) Dual Rank x4 DDR4-2933 CAS-21-21-21 registered smart memory kit",
+        "description": null
+      },
+      {
+        "name": "HPE NS204i-p x2 Lanes NVMe PCIe3 x8 OS Boot Device (boot drives – solid state storage)",
+        "description": null
+      },
+      {
+        "name": "NVIDIA A100 40GB PCIe computational accelerator for HPE  (GPU)",
+        "description": null
+      },
+      {
+        "name": "HPE Smart Array P408i-a SR Gen10 (8 internal lanes/2GB cache) 12G SAS modular controller",
+        "description": null
+      },
+      {
+        "name": "HPE DL Gen10 x16/x16 GPU riser kit",
+        "description": null
+      },
+      {
+        "name": "HPE 96W Smart Storage lithium-ion battery with 145mm cable kit (storage battery)",
+        "description": null
+      },
+      {
+        "name": "HPE ethernet 10Gb 2-port FLR-SFP+ BCM57414 adapter (networking)",
+        "description": null
+      },
+      {
+        "name": "HPE BladeSystem c-Class 10Gb SFP+ SR transceiver (networking)",
+        "description": null
+      },
+      {
+        "name": "HPE DL38X Gen10 high performance temperature fan kit  (cooling)",
+        "description": null
+      },
+      {
+        "name": "HPE 800W Flex Slot Platinum Hot Plug Low Halogen power supply kit",
+        "description": null
+      },
+      {
+        "name": "HPE 2U Large Form Factor Easy Install Rail kit (rack mount)",
+        "description": null
+      },
+      {
+        "name": "HPE DL380 Gen10 High Performance Heat Sink kit (cooling)",
+        "description": null
+      },
+      {
+        "name": "Computer workstation for bioinformatic analysis processing and storage",
+        "description": "Low/mid processing workstation"
+      },
+      {
+        "name": "Intel Xeon processor 6226R 2.9GHz 2933MHz 16C 150W CPU",
+        "description": null
+      },
+      {
+        "name": "Intel Xeon processor 6226R 2.9GHz 2933MHz 16C 150W CPU",
+        "description": null
+      }
+    ]
+  },
+  "qms_activities": [
+    {
+      "activity": "ISO 15189 accreditation",
+      "default_cost_usd": 4000,
+      "default_quantity": 1,
+      "comment": null
+    },
+    {
+      "activity": "External quality assessment – PCR",
+      "default_cost_usd": 900,
+      "default_quantity": 1,
+      "comment": null
+    },
+    {
+      "activity": "External quality assessment – NGS",
+      "default_cost_usd": 2300,
+      "default_quantity": 1,
+      "comment": "Quarterly distribution, including logistics"
+    },
+    {
+      "activity": "Annual BSC certification",
+      "default_cost_usd": null,
+      "default_quantity": null,
+      "comment": "Cost per BSC, including travel costs for the engineer"
+    },
+    {
+      "activity": "Reference material: ATCC, Zeptometrix, Biohub, NCPV, NCTC, etc.",
+      "default_cost_usd": null,
+      "default_quantity": null,
+      "comment": null
+    },
+    {
+      "activity": "Internal quality control material",
+      "default_cost_usd": null,
+      "default_quantity": null,
+      "comment": null
+    },
+    {
+      "activity": "Bioinformatics pipeline validation service (e.g. PHA4GE)",
+      "default_cost_usd": null,
+      "default_quantity": null,
+      "comment": null
+    }
+  ],
+  "pathogens": [
+    {
+      "name": "influenza virus",
+      "type": "Virus",
+      "genome_type": "RNA",
+      "genome_size_mb": 0.0145,
+      "required_coverage_x": 100
+    },
+    {
+      "name": "monkeypox virus",
+      "type": "Virus",
+      "genome_type": "DNA",
+      "genome_size_mb": 0.2,
+      "required_coverage_x": 100
+    },
+    {
+      "name": "dengue virus",
+      "type": "Virus",
+      "genome_type": "RNA",
+      "genome_size_mb": 0.0107,
+      "required_coverage_x": 100
+    },
+    {
+      "name": "chikungunya virus",
+      "type": "Virus",
+      "genome_type": "RNA",
+      "genome_size_mb": 0.012,
+      "required_coverage_x": 100
+    },
+    {
+      "name": "respiratory syncytial virus (RSV)",
+      "type": "Virus",
+      "genome_type": "RNA",
+      "genome_size_mb": 0.0152,
+      "required_coverage_x": 100
+    },
+    {
+      "name": "Zika virus",
+      "type": "Virus",
+      "genome_type": "RNA",
+      "genome_size_mb": 0.0108,
+      "required_coverage_x": 100
+    },
+    {
+      "name": "Ebola virus",
+      "type": "Virus",
+      "genome_type": "RNA",
+      "genome_size_mb": 0.0189,
+      "required_coverage_x": 100
+    },
+    {
+      "name": "human immunodeficiency virus (HIV)",
+      "type": "Virus",
+      "genome_type": "RNA",
+      "genome_size_mb": 0.00975,
+      "required_coverage_x": 100
+    },
+    {
+      "name": "Crimean-Congo haemorrhagic fever virus (CCHF)",
+      "type": "Virus",
+      "genome_type": "RNA",
+      "genome_size_mb": 0.0192,
+      "required_coverage_x": 100
+    },
+    {
+      "name": "human adenovirus (ADV)",
+      "type": "Virus",
+      "genome_type": "DNA",
+      "genome_size_mb": 0.045,
+      "required_coverage_x": 100
+    },
+    {
+      "name": "poliovirus",
+      "type": "Virus",
+      "genome_type": "RNA",
+      "genome_size_mb": 0.0075,
+      "required_coverage_x": 100
+    },
+    {
+      "name": "severe acute respiratory syndrome coronavirus 2 (SARS-CoV-2)",
+      "type": "Virus",
+      "genome_type": "RNA",
+      "genome_size_mb": 0.03,
+      "required_coverage_x": 10
+    },
+    {
+      "name": "Other virus",
+      "type": "Virus",
+      "genome_type": null,
+      "genome_size_mb": null,
+      "required_coverage_x": null
+    },
+    {
+      "name": "Mycobacterium tuberculosis (WGS)",
+      "type": "Bacteria",
+      "genome_type": "DNA",
+      "genome_size_mb": 4.4,
+      "required_coverage_x": 50
+    },
+    {
+      "name": "Mycobacterium tuberculosis (tNGS)",
+      "type": "Bacteria",
+      "genome_type": "DNA",
+      "genome_size_mb": null,
+      "required_coverage_x": 300
+    },
+    {
+      "name": "Salmonella spp.",
+      "type": "Bacteria",
+      "genome_type": "DNA",
+      "genome_size_mb": 4.8,
+      "required_coverage_x": 50
+    },
+    {
+      "name": "Escherichia coli",
+      "type": "Bacteria",
+      "genome_type": "DNA",
+      "genome_size_mb": 5,
+      "required_coverage_x": 50
+    },
+    {
+      "name": "Other bacteria",
+      "type": "Bacteria",
+      "genome_type": null,
+      "genome_size_mb": null,
+      "required_coverage_x": null
+    }
+  ]
+}
