@@ -16,65 +16,11 @@ function MobileCostPerSample() {
 export default function WizardShell({ step, children }: WizardShellProps) {
   const navigate = useNavigate()
   const { t } = useTranslation()
-
-  const STEPS = [
-    { n: 1, label: t('step1_label') },
-    { n: 2, label: t('step2_label') },
-    { n: 3, label: t('step3_label') },
-    { n: 4, label: t('step4_label') },
-    { n: 5, label: t('step5_label') },
-    { n: 6, label: t('step6_label') },
-    { n: 7, label: t('step7_label') },
-  ]
-
   const canBack = step > 1
   const canNext = step < 7
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6 pb-20 lg:pb-6">
-      {/* Progress bar */}
-      <div className="mb-8">
-        <div className="flex items-center">
-          {STEPS.map((s, i) => (
-            <div key={s.n} className="flex items-center flex-1">
-              <button
-                onClick={() => navigate(`/wizard/${s.n}`)}
-                className="flex flex-col items-center gap-1 flex-1"
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-              >
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all"
-                  style={{
-                    background: s.n === step
-                      ? 'var(--gx-accent)'
-                      : s.n < step
-                        ? 'var(--gx-accent)'
-                        : 'var(--gx-bg-alt)',
-                    color: s.n <= step ? 'var(--gx-bg)' : 'var(--gx-text-muted)',
-                    border: `2px solid ${s.n <= step ? 'transparent' : 'var(--gx-border)'}`,
-                    opacity: s.n < step ? 0.7 : 1,
-                  }}
-                >
-                  {s.n < step ? '✓' : s.n}
-                </div>
-                <span
-                  className="text-xs hidden sm:block"
-                  style={{ color: s.n === step ? 'var(--gx-accent)' : 'var(--gx-text-muted)' }}
-                >
-                  {s.label}
-                </span>
-              </button>
-              {i < STEPS.length - 1 && (
-                <div
-                  className="h-0.5 w-4 sm:w-6 flex-shrink-0"
-                  style={{ background: s.n < step ? 'var(--gx-accent)' : 'var(--gx-border)' }}
-                />
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Main layout: content + sidebar */}
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Wizard content */}

@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { ProjectProvider } from './store/ProjectContext'
 import { LanguageProvider, useTranslation, LANGUAGES } from './i18n'
 import { NavBar } from '@genomicx/ui'
@@ -49,6 +49,67 @@ function LangSelect({ lang, setLang }: { lang: string; setLang: (l: keyof typeof
   )
 }
 
+function WizardTabBar() {
+  const { t } = useTranslation()
+  const location = useLocation()
+  const navigate = useNavigate()
+  const match = location.pathname.match(/^\/wizard\/(\d+)$/)
+  if (!match) return null
+  const currentStep = parseInt(match[1])
+
+  const STEPS = [
+    { n: 1, label: t('step1_label') },
+    { n: 2, label: t('step2_label') },
+    { n: 3, label: t('step3_label') },
+    { n: 4, label: t('step4_label') },
+    { n: 5, label: t('step5_label') },
+    { n: 6, label: t('step6_label') },
+    { n: 7, label: t('step7_label') },
+  ]
+
+  return (
+    <div
+      style={{
+        borderBottom: '1px solid var(--gx-border)',
+        background: 'var(--gx-bg)',
+        overflowX: 'auto',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      <div style={{ display: 'flex', minWidth: 'max-content', padding: '0 1rem' }}>
+        {STEPS.map(s => {
+          const isActive = s.n === currentStep
+          const isDone = s.n < currentStep
+          return (
+            <button
+              key={s.n}
+              onClick={() => navigate(`/wizard/${s.n}`)}
+              style={{
+                background: 'none',
+                border: 'none',
+                borderBottom: isActive ? '2px solid var(--gx-accent)' : '2px solid transparent',
+                padding: '10px 14px',
+                fontSize: '0.85rem',
+                fontWeight: isActive ? 600 : 400,
+                color: isActive
+                  ? 'var(--gx-accent)'
+                  : isDone
+                  ? 'var(--gx-text)'
+                  : 'var(--gx-text-muted)',
+                cursor: 'pointer',
+                transition: 'color 0.15s, border-color 0.15s',
+                marginBottom: '-1px',
+              }}
+            >
+              {isDone ? `✓ ${s.label}` : s.label}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 function AppInner() {
   const { t, lang, setLang } = useTranslation()
 
@@ -67,6 +128,7 @@ function AppInner() {
         }
         mobileActions={<LangSelect lang={lang} setLang={setLang} />}
       />
+      <WizardTabBar />
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<Home />} />
