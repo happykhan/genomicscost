@@ -221,6 +221,31 @@ function LangRedirect({ lang }: { lang: string }) {
   return null
 }
 
+function MobileLangPicker() {
+  const { lang, setLang } = useTranslation()
+  return (
+    <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', padding: '4px 0' }}>
+      {Object.entries(LANGUAGES).map(([code, name]) => (
+        <button
+          key={code}
+          onClick={() => setLang(code as keyof typeof LANGUAGES)}
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '0.82rem',
+            color: code === lang ? 'var(--gx-accent)' : 'var(--gx-text-muted)',
+            fontWeight: code === lang ? 600 : 400,
+            padding: '2px 6px',
+          }}
+        >
+          {name}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 function AppInner() {
   const { t } = useTranslation()
 
@@ -231,12 +256,8 @@ function AppInner() {
         appSubtitle={t('app_subtitle')}
         icon={<AppIcon />}
         githubUrl="https://github.com/happykhan/genomicscost"
-        actions={
-          <>
-            <a href="/about" style={{ color: 'var(--gx-text-muted)', fontSize: '0.85rem' }}>{t('nav_about')}</a>
-            <GlobePicker />
-          </>
-        }
+        actions={<GlobePicker />}
+        mobileActions={<MobileLangPicker />}
       />
       <WizardTabBar />
       <main className="flex-1">
