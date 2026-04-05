@@ -13,8 +13,8 @@ export default function Home() {
     { n: 3, label: t('step3_label'), desc: t('step3_desc') },
     { n: 4, label: t('step4_label'), desc: t('step4_desc') },
     { n: 5, label: t('step5_label'), desc: t('step5_desc') },
-    { n: 6, label: t('step6_label'), desc: '' },
-    { n: 7, label: t('step7_label'), desc: '' },
+    { n: 6, label: t('step6_label'), desc: t('step6_desc') },
+    { n: 7, label: t('step7_label'), desc: t('step7_desc') },
   ]
 
   function handleNewProject() {
@@ -52,7 +52,7 @@ export default function Home() {
       {/* Step overview */}
       <div className="card p-6 mb-10">
         <h2 className="text-sm uppercase tracking-wider mb-4 font-semibold" style={{ color: 'var(--gx-text-muted)' }}>
-          What you'll configure
+          {t('home_what_configure')}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {STEP_DESCRIPTIONS.map(s => (
@@ -90,10 +90,10 @@ export default function Home() {
               >
                 <div>
                   <div className="font-medium text-sm" style={{ color: 'var(--gx-text)' }}>
-                    {p.name || 'Unnamed project'}
+                    {p.name || t('label_unnamed_project')}
                   </div>
                   <div className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)' }}>
-                    {p.country || 'No country'} · {p.pathogenName || 'No pathogen'} · {p.samplesPerYear} samples/yr · {p.year}
+                    {p.country || t('label_no_country')} · {p.pathogenName || t('label_no_pathogen')} · {p.samplesPerYear} {t('label_samples_per_yr')} · {p.year}
                   </div>
                 </div>
                 <div className="flex gap-2 flex-shrink-0">
@@ -102,7 +102,7 @@ export default function Home() {
                     className="px-3 py-1.5 rounded text-xs font-medium"
                     style={{ background: 'var(--gx-accent)', color: 'var(--gx-bg)', border: 'none', cursor: 'pointer' }}
                   >
-                    Open
+                    {t('btn_open')}
                   </button>
                   <button
                     onClick={() => deleteProject(p.id)}

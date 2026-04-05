@@ -1,4 +1,5 @@
 import { useProject } from '../store/ProjectContext'
+import { useTranslation } from 'react-i18next'
 
 function fmt(n: number): string {
   return n.toLocaleString('en-US', { maximumFractionDigits: 0 })
@@ -6,18 +7,19 @@ function fmt(n: number): string {
 
 export default function CostSummary() {
   const { costs } = useProject()
+  const { t } = useTranslation()
 
   const rows = [
-    { label: 'Sequencing reagents', value: costs.sequencingReagents },
-    { label: 'Library prep', value: costs.libraryPrep },
-    { label: 'Consumables', value: costs.consumables },
-    { label: 'Equipment (amortised)', value: costs.equipment },
-    { label: 'Personnel', value: costs.personnel },
-    { label: 'Training', value: costs.training },
-    { label: 'Facility', value: costs.facility },
-    { label: 'Transport', value: costs.transport },
-    { label: 'Bioinformatics', value: costs.bioinformatics },
-    { label: 'QMS', value: costs.qms },
+    { label: t('label_sequencing_reagents'), value: costs.sequencingReagents },
+    { label: t('label_library_prep'), value: costs.libraryPrep },
+    { label: t('label_consumables'), value: costs.consumables },
+    { label: t('label_equipment'), value: costs.equipment },
+    { label: t('label_personnel'), value: costs.personnel },
+    { label: t('label_training'), value: costs.training },
+    { label: t('label_facility'), value: costs.facility },
+    { label: t('label_transport'), value: costs.transport },
+    { label: t('label_bioinformatics'), value: costs.bioinformatics },
+    { label: t('label_qms'), value: costs.qms },
   ].filter(r => r.value > 0)
 
   return (
@@ -27,7 +29,7 @@ export default function CostSummary() {
         style={{ background: 'var(--gx-accent)', color: 'var(--gx-bg)' }}
       >
         <div className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ opacity: 0.8 }}>
-          Cost per sample
+          {t('label_cost_per_sample')}
         </div>
         <div className="text-3xl font-bold">
           ${fmt(costs.costPerSample)}
@@ -42,7 +44,7 @@ export default function CostSummary() {
           </div>
         ))}
         <div className="flex justify-between items-center text-sm pt-2 font-semibold">
-          <span>Total annual</span>
+          <span>{t('label_total_annual')}</span>
           <span>${fmt(costs.total)}</span>
         </div>
       </div>
@@ -50,7 +52,7 @@ export default function CostSummary() {
       {costs.establishmentCost > 0 && (
         <div className="card p-3 text-sm" style={{ border: '1px solid var(--gx-border)' }}>
           <div className="text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--gx-text-muted)' }}>
-            Establishment (one-off)
+            {t('label_establishment')}
           </div>
           <div className="font-semibold">${fmt(costs.establishmentCost)}</div>
         </div>

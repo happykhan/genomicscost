@@ -49,23 +49,52 @@ export default function Step7() {
 
   function handleSave() {
     saveProject()
-    toast.success('Project saved')
+    toast.success(t('toast_project_saved'))
   }
 
   function handlePrint() {
     window.print()
   }
 
+  function handleExportCSV() {
+    const sep = ','
+    const lines: string[] = [
+      `${t('col_category')}${sep}${t('col_annual_usd')}${sep}${t('col_pct_of_total')}`,
+      ...rows.map(r => `${r.label}${sep}${r.value}${sep}${pct(r.value, costs.total)}`),
+      `${t('label_annual_total')}${sep}${costs.total}${sep}100`,
+      '',
+      `${t('label_cost_per_sample')}${sep}${costs.costPerSample}`,
+    ]
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${project.name || 'genomics-cost'}-results.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  function handleShare() {
+    try {
+      const encoded = btoa(encodeURIComponent(JSON.stringify(project)))
+      const url = `${window.location.origin}/#share=${encoded}`
+      navigator.clipboard.writeText(url)
+      toast.success(t('toast_link_copied'))
+    } catch {
+      toast.error('Could not copy link')
+    }
+  }
+
   return (
-    <div>
+    <div className="gx-print-region">
       <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>{t('step7_title')}</h2>
       <p className="text-sm mb-6" style={{ color: 'var(--gx-text-muted)' }}>
-        {project.name || 'Unnamed project'} · {project.country || 'No country'} · {project.year}
+        {project.name || t('label_unnamed_project')} · {project.country || t('label_no_country')} · {project.year}
       </p>
 
       {/* Main cost per sample card */}
       <div
-        className="rounded-xl p-8 text-center mb-8"
+        className="rounded-xl p-8 text-center mb-8 gx-cost-hero"
         style={{ background: 'var(--gx-accent)', color: 'var(--gx-bg)' }}
       >
         <div className="text-sm font-medium mb-2" style={{ opacity: 0.85 }}>
@@ -80,13 +109,13 @@ export default function Step7() {
           </div>
         )}
         <div className="text-sm mt-1" style={{ opacity: 0.75 }}>
-          {samplesPerYear} samples/year · {project.pathogenName || 'No pathogen'}
+          {samplesPerYear} {t('label_samples_per_yr')} · {project.pathogenName || t('label_no_pathogen')}
         </div>
       </div>
 
-      {/* Breakdown chart */}
-      <div className="card p-5 mb-6">
-        <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--gx-text)' }}>Cost breakdown</h3>
+      {/* Breakdown chart — hidden in print (tables below have the same data) */}
+      <div className="card p-5 mb-6 no-print">
+        <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--gx-text)' }}>{t('label_cost_breakdown')}</h3>
         <div className="flex flex-col gap-2">
           {rows.map(row => (
             <div key={row.label} className="flex items-center gap-3">
@@ -119,12 +148,12 @@ export default function Step7() {
         <table className="w-full text-sm">
           <thead>
             <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
-              <th className="text-left px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Category</th>
-              <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Annual (USD)</th>
+              <th className="text-left px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_category')}</th>
+              <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual_usd')}</th>
               {showLocalCurrency && (
-                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Annual ({currency})</th>
+                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual_currency', { currency })}</th>
               )}
-              <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>% of total</th>
+              <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_pct_of_total')}</th>
             </tr>
           </thead>
           <tbody>
@@ -162,14 +191,14 @@ export default function Step7() {
         <table className="w-full text-sm">
           <thead>
             <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
-              <th className="text-left px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Workflow step</th>
-              <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Annual (USD)</th>
+              <th className="text-left px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_workflow_step')}</th>
+              <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual_usd')}</th>
               {showLocalCurrency && (
-                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Annual ({currency})</th>
+                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual_currency', { currency })}</th>
               )}
-              <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Cost/sample (USD)</th>
+              <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_cost_per_sample_usd')}</th>
               {showLocalCurrency && (
-                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Cost/sample ({currency})</th>
+                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_cost_per_sample_currency', { currency })}</th>
               )}
               <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>%</th>
             </tr>
@@ -201,7 +230,7 @@ export default function Step7() {
               )
             })}
             <tr style={{ borderTop: '2px solid var(--gx-border)', fontWeight: 700 }}>
-              <td className="px-4 py-2" style={{ color: 'var(--gx-text)' }}>Total</td>
+              <td className="px-4 py-2" style={{ color: 'var(--gx-text)' }}>{t('label_total')}</td>
               <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-accent)' }}>${fmt(workflowTotal)}</td>
               {showLocalCurrency && (
                 <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-accent)' }}>
@@ -228,7 +257,7 @@ export default function Step7() {
           <div>
             <div className="text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>{t('label_establishment_cost')}</div>
             <div className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)' }}>
-              Capital equipment to be purchased before operations begin
+              {t('label_establishment_cost_desc')}
             </div>
           </div>
           <div>
@@ -262,6 +291,21 @@ export default function Step7() {
           {t('btn_print')}
         </button>
         <button
+          onClick={handleExportCSV}
+          data-testid="csv-btn"
+          className="px-5 py-2 rounded text-sm font-medium"
+          style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
+        >
+          {t('btn_export_csv')}
+        </button>
+        <button
+          onClick={handleShare}
+          className="px-5 py-2 rounded text-sm font-medium"
+          style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
+        >
+          {t('btn_share')}
+        </button>
+        <button
           onClick={() => navigate('/wizard/1')}
           className="px-5 py-2 rounded text-sm font-medium"
           style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
@@ -273,7 +317,7 @@ export default function Step7() {
           className="px-5 py-2 rounded text-sm font-medium"
           style={{ background: 'none', color: 'var(--gx-text-muted)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
         >
-          Home
+          {t('btn_home')}
         </button>
       </div>
     </div>

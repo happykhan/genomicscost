@@ -220,7 +220,7 @@ function LangRedirect({ lang }: { lang: string }) {
   const navigate = useNavigate()
   useEffect(() => {
     i18n.changeLanguage(lang).then(() => navigate('/', { replace: true }))
-  }, [])
+  }, [lang, i18n, navigate])
   return null
 }
 

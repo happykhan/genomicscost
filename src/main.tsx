@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast'
 import './index.css'
 import App from './App.tsx'
 
+// eslint-disable-next-line react-refresh/only-export-components
 function Root() {
   useEffect(() => {
     const saved = (localStorage.getItem('gx-theme') as 'light' | 'dark') || 'dark'

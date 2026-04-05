@@ -104,7 +104,7 @@ export default function Step5() {
                     ${fmt(annualCost)}
                   </div>
                   <div className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)' }}>
-                    + ${fmt(training)} training
+                    {t('label_plus_training', { amount: fmt(training) })}
                   </div>
                 </div>
 
@@ -132,10 +132,10 @@ export default function Step5() {
         </button>
         <div className="text-sm font-semibold flex gap-4">
           <span>
-            Salaries: <span style={{ color: 'var(--gx-accent)' }}>${fmt(salaryTotal)}</span>
+            {t('label_salaries')}: <span style={{ color: 'var(--gx-accent)' }}>${fmt(salaryTotal)}</span>
           </span>
           <span>
-            Training: <span style={{ color: 'var(--gx-accent)' }}>${fmt(trainingTotal)}</span>
+            {t('label_training')}: <span style={{ color: 'var(--gx-accent)' }}>${fmt(trainingTotal)}</span>
           </span>
           <span>
             {t('label_total_personnel')}: <span style={{ color: 'var(--gx-accent)' }}>${fmt(salaryTotal + trainingTotal)}</span>

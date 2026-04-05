@@ -115,8 +115,8 @@ export default function Step1() {
             value={isCaptureAll ? '__capture_all__' : project.pathogenName}
             onChange={e => handlePathogenChange(e.target.value)}
           >
-            <option value="">Select a pathogen…</option>
-            <option value="__capture_all__">Multiple pathogens (capture-all)</option>
+            <option value="">{t('opt_select_pathogen')}</option>
+            <option value="__capture_all__">{t('opt_capture_all_display')}</option>
             {filteredPathogens.map(p => (
               <option key={p.name} value={p.name}>{p.name}</option>
             ))}
@@ -126,7 +126,7 @@ export default function Step1() {
         {/* Feature 7: hide genome size / coverage for capture-all; show min reads instead */}
         {!isCaptureAll && (
           <div>
-            <label className={labelClass}>{t('field_genome_size')} — auto-filled from pathogen</label>
+            <label className={labelClass}>{t('field_genome_size')} {t('label_genome_size_auto')}</label>
             <input
               type="number"
               className={inputClass}

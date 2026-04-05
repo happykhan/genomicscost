@@ -3,7 +3,7 @@
 @import "tailwindcss";
 
 @media print {
-  /* Reset design tokens to light values so var(--gx-*) resolves correctly */
+  /* Reset dark-mode tokens so var(--gx-*) resolves to light values */
   :root,
   [data-theme="dark"] {
     --gx-bg: #ffffff;
@@ -18,15 +18,46 @@
     --gx-nav-bg: #ffffff;
   }
 
-  body, html {
-    background: white;
-    color: #0f172a;
+  html, body {
+    background: white !important;
+    color: #0f172a !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 
-  nav, header, button, .no-print { display: none !important; }
+  /*
+   * Visibility isolation — the most reliable way to print a specific section.
+   * Hides everything on the page, then reveals only .gx-print-region.
+   */
+  body { visibility: hidden !important; }
+
+  .gx-print-region {
+    visibility: visible !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 24px;
+    background: white;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .gx-print-region * { visibility: visible !important; }
+
+  /* Hide action buttons and decorative elements inside the print region */
+  .gx-print-region button,
+  .gx-print-region .no-print { display: none !important; }
+
+  /* Hero cost card */
+  .gx-cost-hero {
+    background: #0d9488 !important;
+    color: #ffffff !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .gx-cost-hero * { color: #ffffff !important; }
+
+  /* Table layout */
   table { page-break-inside: avoid; }
   tr { page-break-inside: avoid; }
-  /* Single-column layout for print */
-  .lg\:flex-row { flex-direction: column !important; }
-  .lg\:w-72 { display: none !important; }
 }

@@ -51,7 +51,7 @@ export default function Step6() {
     <div>
       <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>{t('step6_title')}</h2>
       <p className="text-sm mb-6" style={{ color: 'var(--gx-text-muted)' }}>
-        Overhead costs, sample transport and your bioinformatics approach.
+        {t('step6_desc')}
       </p>
 
       {/* ── Facility ── */}
@@ -61,10 +61,10 @@ export default function Step6() {
           <table className="w-full text-sm">
             <thead>
               <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
-                <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Label</th>
+                <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_label')}</th>
                 <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_monthly_cost')}</th>
                 <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_pct_sequencing')}</th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Annual attr. ($)</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual_attr')}</th>
                 <th className="px-3 py-2"></th>
               </tr>
             </thead>
@@ -93,7 +93,7 @@ export default function Step6() {
         </div>
         <div className="flex justify-between items-center">
           <button onClick={addFacilityRow} className="px-3 py-1.5 rounded text-xs font-medium" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>{t('btn_add')}</button>
-          <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total: <strong style={{ color: 'var(--gx-accent)' }}>${fmt(facilityTotal)}</strong></div>
+          <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_total')}: <strong style={{ color: 'var(--gx-accent)' }}>${fmt(facilityTotal)}</strong></div>
         </div>
       </section>
 
@@ -104,7 +104,7 @@ export default function Step6() {
           <table className="w-full text-sm">
             <thead>
               <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
-                <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Label</th>
+                <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_label')}</th>
                 <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual_cost_transport')}</th>
                 <th className="px-3 py-2"></th>
               </tr>
@@ -128,7 +128,7 @@ export default function Step6() {
         </div>
         <div className="flex justify-between items-center">
           <button onClick={addTransportRow} className="px-3 py-1.5 rounded text-xs font-medium" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>{t('btn_add')}</button>
-          <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total: <strong style={{ color: 'var(--gx-accent)' }}>${fmt(transportTotal)}</strong></div>
+          <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_total')}: <strong style={{ color: 'var(--gx-accent)' }}>${fmt(transportTotal)}</strong></div>
         </div>
       </section>
 
@@ -138,7 +138,7 @@ export default function Step6() {
         <div className="card p-4 flex flex-col gap-4">
           {/* Type radio */}
           <div>
-            <label className={labelClass}>Approach</label>
+            <label className={labelClass}>{t('label_approach')}</label>
             <div className="flex gap-4">
               {(['cloud', 'inhouse', 'none'] as const).map(type => (
                 <label key={type} className="flex items-center gap-2 cursor-pointer text-sm">
@@ -204,7 +204,7 @@ export default function Step6() {
 
       {/* ── QMS ── */}
       <section>
-        <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--gx-text)' }}>{t('field_qms')} (optional)</h3>
+        <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--gx-text)' }}>{t('field_qms')} {t('label_optional')}</h3>
         <div className="card overflow-hidden mb-2">
           <table className="w-full text-sm">
             <thead>
@@ -238,7 +238,7 @@ export default function Step6() {
           </table>
         </div>
         <div className="text-xs text-right" style={{ color: 'var(--gx-text-muted)' }}>
-          Total QMS: <strong style={{ color: 'var(--gx-accent)' }}>${fmt(qmsTotal)}</strong>
+          {t('label_total')} QMS: <strong style={{ color: 'var(--gx-accent)' }}>${fmt(qmsTotal)}</strong>
         </div>
       </section>
     </div>

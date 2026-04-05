@@ -80,8 +80,21 @@ function persistProjects(projects: Project[]): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(projects))
 }
 
+function loadInitialProject(): Project {
+  try {
+    const hash = window.location.hash
+    const match = hash.match(/^#share=(.+)$/)
+    if (match) {
+      const decoded = JSON.parse(decodeURIComponent(atob(match[1])))
+      window.history.replaceState(null, '', window.location.pathname)
+      return migrateProject(decoded)
+    }
+  } catch { /* malformed share URL — fall through */ }
+  return migrateProject(createDefaultProject())
+}
+
 export function ProjectProvider({ children }: { children: React.ReactNode }) {
-  const [project, setProject] = useState<Project>(() => migrateProject(createDefaultProject()))
+  const [project, setProject] = useState<Project>(loadInitialProject)
   const [savedProjects, setSavedProjects] = useState<Project[]>(loadSavedProjects)
 
   const costs = useMemo(() => calculateCosts(project), [project])
@@ -139,6 +152,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useProject(): ProjectContextValue {
   const ctx = useContext(ProjectContext)
   if (!ctx) throw new Error('useProject must be used inside ProjectProvider')

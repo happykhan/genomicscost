@@ -191,7 +191,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
             <div className="text-xs mt-1 flex gap-4" style={{ color: 'var(--gx-text-muted)' }}>
               {selectedKit.max_reads_per_flowcell
                 ? <span>{t('label_max_reads')}: {selectedKit.max_reads_per_flowcell.toLocaleString()}</span>
-                : <span>Max output: {selectedKit.max_output_mb.toLocaleString()} Mb</span>
+                : <span>{t('label_max_output')}: {selectedKit.max_output_mb.toLocaleString()} Mb</span>
               }
               {selectedKit.read_length_bp && <span>{t('label_read_length')}: {selectedKit.read_length_bp} bp</span>}
               {selectedKit.unit_price_usd && <span>{t('label_list_price')}: ${selectedKit.unit_price_usd.toLocaleString()}</span>}
@@ -224,7 +224,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
               onChange={e => updateSequencer(index, { minReadsPerSample: parseInt(e.target.value) || 100_000 })}
             />
             <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>
-              Used instead of genome size × coverage for multi-pathogen capture panels.
+              {t('note_min_reads_usage')}
             </div>
           </div>
         ) : (
@@ -238,6 +238,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
                 min={1}
                 onChange={e => updateSequencer(index, { coverageX: parseInt(e.target.value) || 1 })}
               />
+              <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>{t('note_coverage_help')}</div>
             </div>
             <div>
               <label className={labelClass}>{t('field_samples_per_run')}</label>
@@ -291,6 +292,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
               onChange={e => updateSequencer(index, { bufferPct: parseInt(e.target.value) })}
               style={{ width: '100%', accentColor: 'var(--gx-accent)' }}
             />
+            <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>{t('note_buffer_pct_help')}</div>
           </div>
 
           {/* Retest % slider */}
@@ -305,6 +307,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
               onChange={e => updateSequencer(index, { retestPct: parseInt(e.target.value) })}
               style={{ width: '100%', accentColor: 'var(--gx-accent)' }}
             />
+            <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>{t('note_retest_pct_help')}</div>
           </div>
 
           {/* Feature 3: controls per run */}
@@ -319,7 +322,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
               onChange={e => updateSequencer(index, { controlsPerRun: parseInt(e.target.value) || 0 })}
             />
             <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>
-              Subtracted from samples per run
+              {t('note_controls_subtracted')}
             </div>
           </div>
         </div>
@@ -332,7 +335,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
             value={sequencer.libPrepKitName}
             onChange={e => updateSequencer(index, { libPrepKitName: e.target.value })}
           >
-            <option value="">None / custom</option>
+            <option value="">{t('opt_none_custom')}</option>
             {libPrepKits.map(k => (
               <option key={k.name} value={k.name}>{k.name}</option>
             ))}

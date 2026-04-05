@@ -60,7 +60,7 @@ export default function WizardShell({ step, children }: WizardShellProps) {
         <div className="hidden lg:block lg:w-72 flex-shrink-0">
           <div className="lg:sticky lg:top-4">
             <h3 className="text-xs uppercase tracking-wider mb-3" style={{ color: 'var(--gx-text-muted)' }}>
-              Live cost estimate
+              {t('label_live_cost_estimate')}
             </h3>
             <CostSummary />
           </div>
