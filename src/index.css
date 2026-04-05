@@ -23,7 +23,10 @@
     color: #0f172a;
   }
 
-  nav, header, button { display: none; }
+  nav, header, button, .no-print { display: none !important; }
   table { page-break-inside: avoid; }
   tr { page-break-inside: avoid; }
+  /* Single-column layout for print */
+  .lg\:flex-row { flex-direction: column !important; }
+  .lg\:w-72 { display: none !important; }
 }

@@ -105,7 +105,7 @@ function GlobePicker() {
 function LangFooter() {
   const { lang, setLang } = useTranslation()
   return (
-    <div style={{
+    <div className="no-print" style={{
       borderTop: '1px solid var(--gx-border)',
       padding: '12px 24px',
       display: 'flex',
@@ -153,7 +153,7 @@ function WizardTabBar() {
   ]
 
   return (
-    <div style={{ borderBottom: '1px solid var(--gx-border)', background: 'var(--gx-bg)', overflowX: 'auto' }}>
+    <div className="no-print" style={{ borderBottom: '1px solid var(--gx-border)', background: 'var(--gx-bg)', overflowX: 'auto' }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', padding: '12px 16px', minWidth: 'max-content' }}>
         {STEPS.flatMap((s, i) => {
           const isActive = s.n === currentStep

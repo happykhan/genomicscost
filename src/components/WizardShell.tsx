@@ -69,7 +69,7 @@ export default function WizardShell({ step, children }: WizardShellProps) {
 
       {/* Mobile cost summary bottom bar */}
       <div
-        className="lg:hidden fixed bottom-0 left-0 right-0 px-4 py-2 z-10 flex items-center justify-between"
+        className="no-print lg:hidden fixed bottom-0 left-0 right-0 px-4 py-2 z-10 flex items-center justify-between"
         style={{ background: 'var(--gx-bg-alt)', borderTop: '1px solid var(--gx-border)' }}
       >
         <span className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_cost_per_sample')}</span>
