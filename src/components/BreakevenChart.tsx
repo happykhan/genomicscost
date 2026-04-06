@@ -27,7 +27,9 @@ export default function BreakevenChart({ establishmentCost, annualRunningCost }:
   }))
 
   const yMax = points[points.length - 1].cumulative * 1.15
-  const toPixX = (year: number) => PAD.left + ((year - 1) / (YEARS.length - 1)) * PW
+  // Add half-bar padding on each side so year-1 bar doesn't overlap the y-axis
+  const X_PAD = PW / (YEARS.length * 2)
+  const toPixX = (year: number) => PAD.left + X_PAD + ((year - 1) / (YEARS.length - 1)) * (PW - X_PAD * 2)
   const toPixY = (v: number) => PAD.top + PH - (v / yMax) * PH
 
   // y-axis ticks
