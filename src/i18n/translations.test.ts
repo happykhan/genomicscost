@@ -86,6 +86,18 @@ const REQUIRED_KEYS = [
   'label_year',
   'label_platform',
   'label_runs_per_yr',
+  // Print report sections
+  'label_sequencing_platform_summary',
+  'label_key_assumptions',
+  'label_personnel_roster',
+  'label_disclaimer_note',
+  'label_disclaimer_text',
+  'label_salary_attributed',
+  'label_capture_all_mode_short',
+  'label_year_n',
+  'label_reagent_kit_cost_per_run',
+  'label_lib_prep_cost_per_sample',
+  'label_sequencer_n',
 ]
 
 describe('i18n — all locales have required keys', () => {
