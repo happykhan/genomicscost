@@ -405,7 +405,7 @@ export default function Step7() {
 
       {/* Additional charts: throughput curve, breakeven, sequencer comparison */}
       {costs.total > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 gx-print-page-break gx-print-charts-grid">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 gx-print-charts-grid">
           <ThroughputCurve project={project} costPerSample={costs.costPerSample} />
           <BreakevenChart
             establishmentCost={costs.establishmentCost}
