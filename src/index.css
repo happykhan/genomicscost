@@ -65,8 +65,24 @@
   .gx-cost-number { font-size: 1.6rem !important; line-height: 1.2 !important; }
 
   /* Compact tables */
-  .gx-print-region table { font-size: 0.78rem !important; }
-  .gx-print-region td, .gx-print-region th { padding: 3px 8px !important; }
+  .gx-print-region table { font-size: 0.75rem !important; }
+  .gx-print-region td, .gx-print-region th { padding: 2px 6px !important; }
+
+  /* Tighten card spacing so both tables fit on page 1 */
+  .gx-print-region .card { margin-bottom: 8px !important; }
+  .gx-print-region .mb-6 { margin-bottom: 8px !important; }
+  .gx-print-region .mb-8 { margin-bottom: 8px !important; }
+  .gx-print-region .p-5, .gx-print-region .p-4 { padding: 8px 12px !important; }
+  .gx-print-region .p-8 { padding: 8px 16px !important; }
+
+  /* Donut/chart grids: force 2 columns and tighter gaps in print */
+  .gx-print-charts-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+    margin-bottom: 0 !important;
+  }
+  .gx-print-charts-grid .card { padding: 6px 8px !important; }
 
   /* Reveal print-only sections */
   .gx-only-print { display: block !important; }

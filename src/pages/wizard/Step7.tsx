@@ -376,7 +376,7 @@ export default function Step7() {
         }))
         const fmtUsd2 = (n: number) => `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
         return (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 gx-print-page-break">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 gx-print-page-break gx-print-charts-grid">
             <DonutChart
               title={t('chart_cost_per_sample_by_category')}
               data={perSampleCatData}
@@ -405,7 +405,7 @@ export default function Step7() {
 
       {/* Additional charts: throughput curve, breakeven, sequencer comparison */}
       {costs.total > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 gx-print-page-break gx-print-charts-grid">
           <ThroughputCurve project={project} costPerSample={costs.costPerSample} />
           <BreakevenChart
             establishmentCost={costs.establishmentCost}
@@ -442,7 +442,125 @@ export default function Step7() {
       )}
 
       {/* Print-only shopping list */}
-      <div className="gx-only-print gx-print-page-break" style={{ marginTop: 24 }}>
+      <div className="gx-only-print gx-print-page-break" style={{ marginTop: 0 }}>
+
+        {/* Sequencing platform summary */}
+        {project.sequencers.filter(s => s.enabled).length > 0 && (
+          <div style={{ marginBottom: 16 }}>
+            <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>
+              {t('label_sequencing_platform_summary')}
+            </h3>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem' }}>
+              <thead>
+                <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                  <th style={{ textAlign: 'left', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('label_platform')}</th>
+                  <th style={{ textAlign: 'left', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('field_reagent_kit')}</th>
+                  <th style={{ textAlign: 'left', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('field_lib_prep_kit')}</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('field_samples_per_run')}</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('label_runs_per_yr')}</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('field_coverage')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {project.sequencers.filter(s => s.enabled).map((s, i) => {
+                  const runsNeeded = s.samplesPerRun > 0 && samplesPerYear > 0
+                    ? Math.ceil(samplesPerYear / s.samplesPerRun) : '—'
+                  return (
+                    <tr key={i} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                      <td style={{ padding: '4px 8px', color: '#0f172a', fontWeight: 600 }}>{s.platformId}</td>
+                      <td style={{ padding: '4px 8px', color: '#0f172a' }}>{s.reagentKitName || '—'}</td>
+                      <td style={{ padding: '4px 8px', color: '#0f172a' }}>{s.libPrepKitName || '—'}</td>
+                      <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a' }}>{s.samplesPerRun}</td>
+                      <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a' }}>{runsNeeded}</td>
+                      <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a' }}>
+                        {s.captureAll ? t('label_capture_all_mode_short') : `${s.coverageX}×`}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Key assumptions */}
+        <div style={{ marginBottom: 16, display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+          <div>
+            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', marginBottom: 6 }}>
+              {t('label_key_assumptions')}
+            </div>
+            <table style={{ borderCollapse: 'collapse', fontSize: '0.78rem' }}>
+              <tbody>
+                {project.sequencers.filter(s => s.enabled).map((s, i) => (
+                  <tr key={i}>
+                    <td style={{ padding: '2px 8px 2px 0', color: '#475569' }}>
+                      {project.sequencers.filter(s => s.enabled).length > 1 ? `${t('label_sequencer_n', { n: i + 1 })} ` : ''}{t('field_buffer_pct')}
+                    </td>
+                    <td style={{ padding: '2px 0', color: '#0f172a', fontWeight: 500 }}>{s.bufferPct}%</td>
+                  </tr>
+                ))}
+                {project.sequencers.filter(s => s.enabled).map((s, i) => (
+                  <tr key={`retest-${i}`}>
+                    <td style={{ padding: '2px 8px 2px 0', color: '#475569' }}>
+                      {project.sequencers.filter(s => s.enabled).length > 1 ? `${t('label_sequencer_n', { n: i + 1 })} ` : ''}{t('field_retest_pct')}
+                    </td>
+                    <td style={{ padding: '2px 0', color: '#0f172a', fontWeight: 500 }}>{s.retestPct}%</td>
+                  </tr>
+                ))}
+                {project.sequencers.filter(s => s.enabled).map((s, i) => (
+                  <tr key={`controls-${i}`}>
+                    <td style={{ padding: '2px 8px 2px 0', color: '#475569' }}>
+                      {project.sequencers.filter(s => s.enabled).length > 1 ? `${t('label_sequencer_n', { n: i + 1 })} ` : ''}{t('field_controls_per_run')}
+                    </td>
+                    <td style={{ padding: '2px 0', color: '#0f172a', fontWeight: 500 }}>{s.controlsPerRun}</td>
+                  </tr>
+                ))}
+                <tr>
+                  <td style={{ padding: '2px 8px 2px 0', color: '#475569' }}>{t('field_exchange_rate')}</td>
+                  <td style={{ padding: '2px 0', color: '#0f172a', fontWeight: 500 }}>
+                    1 USD = {project.exchangeRate} {project.currency}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Personnel roster */}
+        {project.personnel.length > 0 && (
+          <div style={{ marginBottom: 16 }}>
+            <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>
+              {t('label_personnel_roster')}
+            </h3>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem' }}>
+              <thead>
+                <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                  <th style={{ textAlign: 'left', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_role')}</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_salary')}</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_pct_time')}</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('label_salary_attributed')}</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_training')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {project.personnel.map((p, i) => (
+                  <tr key={i} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                    <td style={{ padding: '4px 8px', color: '#0f172a' }}>{p.role}</td>
+                    <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a' }}>${fmt(p.annualSalaryUsd)}</td>
+                    <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a' }}>{p.pctTime}%</td>
+                    <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a', fontWeight: 600 }}>
+                      ${fmt(p.annualSalaryUsd * p.pctTime / 100)}
+                    </td>
+                    <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a' }}>
+                      {p.trainingCostUsd > 0 ? `$${fmt(p.trainingCostUsd)}` : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
         {/* Equipment to purchase */}
         {project.equipment.filter(e => e.status === 'buy').length > 0 && (
           <div style={{ marginBottom: 20 }}>
@@ -507,8 +625,14 @@ export default function Step7() {
           </div>
         )}
 
+        {/* Disclaimer */}
+        <div style={{ marginTop: 12, marginBottom: 8, padding: '8px 12px', background: '#f8fafc', borderRadius: 4, border: '1px solid #e2e8f0' }}>
+          <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569', marginBottom: 4 }}>{t('label_disclaimer_note')}</div>
+          <div style={{ fontSize: '0.68rem', color: '#64748b', lineHeight: 1.5 }}>{t('label_disclaimer_text')}</div>
+        </div>
+
         {/* Print footer */}
-        <div style={{ marginTop: 16, paddingTop: 8, borderTop: '1px solid #e2e8f0', fontSize: '0.7rem', color: '#94a3b8', display: 'flex', justifyContent: 'space-between' }}>
+        <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid #e2e8f0', fontSize: '0.7rem', color: '#94a3b8', display: 'flex', justifyContent: 'space-between' }}>
           <span>{t('label_print_generated')}</span>
           <span>{new Date().toLocaleDateString()}</span>
         </div>

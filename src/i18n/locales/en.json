@@ -247,5 +247,12 @@
   "label_runs_per_yr": "Runs/year",
   "label_reagent_kit_cost_per_run": "Reagent kit cost/run",
   "label_lib_prep_cost_per_sample": "Lib prep cost/sample",
-  "label_sequencer_n": "Sequencer {{n}}"
+  "label_sequencer_n": "Sequencer {{n}}",
+  "label_sequencing_platform_summary": "Sequencing Platform Summary",
+  "label_key_assumptions": "Key Assumptions",
+  "label_personnel_roster": "Personnel Roster",
+  "label_disclaimer_note": "Notes & Disclaimer",
+  "label_disclaimer_text": "This report was generated using the Genomics Costing Tool, an independent open-source implementation of the WHO Genomics Costing Tool methodology (2nd edition, 2026). All costs are estimates based on user-entered data and reference prices. Actual costs will vary by country, supplier, and institutional context. This tool is not affiliated with or endorsed by the World Health Organization.",
+  "label_salary_attributed": "Salary attributed",
+  "label_capture_all_mode_short": "Capture-all"
 }
