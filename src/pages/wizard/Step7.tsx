@@ -102,7 +102,7 @@ export default function Step7() {
         <div className="text-sm font-medium mb-2" style={{ opacity: 0.85 }}>
           {t('label_cost_per_sample')}
         </div>
-        <div className="text-6xl font-bold mb-1">
+        <div className="text-6xl font-bold mb-1 gx-cost-number">
           ${fmt(costs.costPerSample)}
         </div>
         {showLocalCurrency && (
@@ -274,6 +274,79 @@ export default function Step7() {
           </div>
         </div>
       )}
+
+      {/* Print-only shopping list */}
+      <div className="gx-only-print" style={{ marginTop: 24 }}>
+        {/* Equipment to purchase */}
+        {project.equipment.filter(e => e.status === 'buy').length > 0 && (
+          <div style={{ marginBottom: 20 }}>
+            <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>
+              {t('label_equipment_to_buy')}
+            </h3>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem' }}>
+              <thead>
+                <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                  <th style={{ textAlign: 'left', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_item')}</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_qty')}</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_price_each')}</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_total_cost')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {project.equipment.filter(e => e.status === 'buy').map((e, i) => (
+                  <tr key={i} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                    <td style={{ padding: '4px 8px', color: '#0f172a' }}>{e.name}</td>
+                    <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a' }}>{e.quantity}</td>
+                    <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a' }}>${fmt(e.unitCostUsd)}</td>
+                    <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a', fontWeight: 600 }}>${fmt(e.unitCostUsd * e.quantity)}</td>
+                  </tr>
+                ))}
+                <tr style={{ borderTop: '2px solid #e2e8f0', fontWeight: 700 }}>
+                  <td colSpan={3} style={{ padding: '4px 8px', color: '#0f172a' }}>{t('label_establishment_cost')}</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0d9488' }}>${fmt(costs.establishmentCost)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Annual consumables */}
+        {project.consumables.filter(c => c.enabled).length > 0 && (
+          <div style={{ marginBottom: 20 }}>
+            <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>
+              {t('label_consumables_to_stock')}
+            </h3>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem' }}>
+              <thead>
+                <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                  <th style={{ textAlign: 'left', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_item')}</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_qty_sample')}</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_unit_cost')}</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_annual')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {project.consumables.filter(c => c.enabled).map((c, i) => (
+                  <tr key={i} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                    <td style={{ padding: '4px 8px', color: '#0f172a' }}>{c.name}</td>
+                    <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a' }}>{c.quantityPerSample}</td>
+                    <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a' }}>${fmtCurrency(c.unitCostUsd, 2)}</td>
+                    <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a', fontWeight: 600 }}>
+                      ${fmt(c.unitCostUsd * c.quantityPerSample * samplesPerYear)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Print footer */}
+        <div style={{ marginTop: 16, paddingTop: 8, borderTop: '1px solid #e2e8f0', fontSize: '0.7rem', color: '#94a3b8', display: 'flex', justifyContent: 'space-between' }}>
+          <span>{t('label_print_generated')}</span>
+          <span>{new Date().toLocaleDateString()}</span>
+        </div>
+      </div>
 
       {/* Action buttons */}
       <div className="flex flex-wrap gap-3 mt-4">

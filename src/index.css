@@ -2,7 +2,11 @@
 @import '@genomicx/ui/styles/components.css';
 @import "tailwindcss";
 
+/* Show only when printing */
+.gx-only-print { display: none !important; }
+
 @media print {
+  @page { margin: 15mm 20mm; }
   /* Reset dark-mode tokens so var(--gx-*) resolves to light values */
   :root,
   [data-theme="dark"] {
@@ -48,14 +52,24 @@
   .gx-print-region button,
   .gx-print-region .no-print { display: none !important; }
 
-  /* Hero cost card */
+  /* Hero cost card — compact in print */
   .gx-cost-hero {
     background: #0d9488 !important;
     color: #ffffff !important;
+    padding: 12px 20px !important;
+    margin-bottom: 12px !important;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
   .gx-cost-hero * { color: #ffffff !important; }
+  .gx-cost-number { font-size: 2rem !important; line-height: 1.2 !important; }
+
+  /* Compact tables */
+  .gx-print-region table { font-size: 0.78rem !important; }
+  .gx-print-region td, .gx-print-region th { padding: 3px 8px !important; }
+
+  /* Reveal print-only sections */
+  .gx-only-print { display: block !important; }
 
   /* Table layout */
   table { page-break-inside: avoid; }

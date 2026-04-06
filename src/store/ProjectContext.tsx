@@ -80,6 +80,8 @@ function persistProjects(projects: Project[]): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(projects))
 }
 
+export let shareProjectLoaded = false
+
 function loadInitialProject(): Project {
   try {
     const hash = window.location.hash
@@ -87,6 +89,7 @@ function loadInitialProject(): Project {
     if (match) {
       const decoded = JSON.parse(decodeURIComponent(escape(atob(match[1]))))
       window.history.replaceState(null, '', window.location.pathname)
+      shareProjectLoaded = true
       return migrateProject(decoded)
     }
   } catch { /* malformed share URL — fall through */ }

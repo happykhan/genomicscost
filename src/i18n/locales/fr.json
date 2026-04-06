@@ -192,5 +192,9 @@
   "toast_link_copied": "Lien copié !",
   "note_coverage_help": "Nombre minimum de fois que chaque position du génome doit être séquencée.",
   "note_buffer_pct_help": "Capacité réservée pour les lectures hors cible ou de faible qualité — réduit les échantillons effectifs par run.",
-  "note_retest_pct_help": "Proportion attendue d'échantillons nécessitant une répétition du séquençage."
+  "note_retest_pct_help": "Proportion attendue d'échantillons nécessitant une répétition du séquençage.",
+  "label_equipment_to_buy": "Équipements à acheter",
+  "label_consumables_to_stock": "Consommables annuels",
+  "label_print_generated": "Généré par l'Outil de calcul des coûts génomiques",
+  "col_total_cost": "Coût total ($)"
 }

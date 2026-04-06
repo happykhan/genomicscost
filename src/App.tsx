@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ProjectProvider } from './store/ProjectContext'
+import { ProjectProvider, shareProjectLoaded } from './store/ProjectContext'
 import { LANGUAGES } from './i18n/config'
 import './i18n/config'
 import { NavBar } from '@genomicx/ui'
@@ -158,7 +158,8 @@ function WizardTabBar() {
 
   return (
     <div className="no-print" style={{ borderBottom: '1px solid var(--gx-border)', background: 'var(--gx-bg)', overflowX: 'auto' }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', padding: '12px 16px', minWidth: 'max-content' }}>
+      <div style={{ maxWidth: '80rem', margin: '0 auto', padding: '0 16px' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', padding: '12px 0', minWidth: 'max-content' }}>
         {STEPS.flatMap((s, i) => {
           const isActive = s.n === currentStep
           const isDone = s.n < currentStep
@@ -211,6 +212,7 @@ function WizardTabBar() {
           return items
         })}
       </div>
+      </div>
     </div>
   )
 }
@@ -252,6 +254,14 @@ function MobileLangPicker() {
 
 function AppInner() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (shareProjectLoaded) {
+      navigate('/wizard/7', { replace: true })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--gx-bg)', color: 'var(--gx-text)' }}>

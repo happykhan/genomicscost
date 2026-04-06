@@ -192,5 +192,9 @@
   "toast_link_copied": "¡Enlace copiado!",
   "note_coverage_help": "Número mínimo de veces que cada posición del genoma debe ser secuenciada.",
   "note_buffer_pct_help": "Capacidad reservada para lecturas fuera del objetivo o de baja calidad — reduce las muestras efectivas por corrida.",
-  "note_retest_pct_help": "Proporción esperada de muestras que necesitarán ser re-secuenciadas."
+  "note_retest_pct_help": "Proporción esperada de muestras que necesitarán ser re-secuenciadas.",
+  "label_equipment_to_buy": "Equipos a adquirir",
+  "label_consumables_to_stock": "Consumibles anuales",
+  "label_print_generated": "Generado por la Herramienta de costeo genómico",
+  "col_total_cost": "Costo total ($)"
 }
