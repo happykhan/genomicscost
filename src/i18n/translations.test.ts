@@ -77,6 +77,15 @@ const REQUIRED_KEYS = [
   'chart_total_annual_by_category',
   'chart_cost_per_sample_by_workflow',
   'chart_total_annual_by_workflow',
+  'chart_throughput_curve',
+  'chart_breakeven',
+  'chart_sequencer_compare',
+  'label_current',
+  'label_running_cost',
+  'label_cumulative_cost',
+  'label_year',
+  'label_platform',
+  'label_runs_per_yr',
 ]
 
 describe('i18n — all locales have required keys', () => {

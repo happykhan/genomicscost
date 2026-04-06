@@ -234,5 +234,18 @@
   "chart_cost_per_sample_by_category": "Cost per sample — by category",
   "chart_total_annual_by_category": "Total annual cost — by category",
   "chart_cost_per_sample_by_workflow": "Cost per sample — by workflow step",
-  "chart_total_annual_by_workflow": "Total annual cost — by workflow step"
+  "chart_total_annual_by_workflow": "Total annual cost — by workflow step",
+  "chart_throughput_curve": "Cost per sample vs. annual throughput",
+  "chart_breakeven": "Cumulative cost over 5 years",
+  "chart_sequencer_compare": "Sequencer comparison",
+  "label_current": "current",
+  "label_running_cost": "Running cost",
+  "label_cumulative_cost": "Cumulative cost",
+  "label_year": "Year",
+  "label_year_n": "Yr {{n}}",
+  "label_platform": "Platform",
+  "label_runs_per_yr": "Runs/year",
+  "label_reagent_kit_cost_per_run": "Reagent kit cost/run",
+  "label_lib_prep_cost_per_sample": "Lib prep cost/sample",
+  "label_sequencer_n": "Sequencer {{n}}"
 }

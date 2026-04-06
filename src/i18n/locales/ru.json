@@ -234,5 +234,18 @@
   "chart_cost_per_sample_by_category": "Стоимость на образец — по категориям",
   "chart_total_annual_by_category": "Суммарные годовые затраты — по категориям",
   "chart_cost_per_sample_by_workflow": "Стоимость на образец — по этапам",
-  "chart_total_annual_by_workflow": "Суммарные годовые затраты — по этапам"
+  "chart_total_annual_by_workflow": "Суммарные годовые затраты — по этапам",
+  "chart_throughput_curve": "Стоимость на образец vs. годовая производительность",
+  "chart_breakeven": "Накопленные затраты за 5 лет",
+  "chart_sequencer_compare": "Сравнение секвенаторов",
+  "label_current": "текущий",
+  "label_running_cost": "Операционные затраты",
+  "label_cumulative_cost": "Накопленные затраты",
+  "label_year": "Год",
+  "label_year_n": "Год {{n}}",
+  "label_platform": "Платформа",
+  "label_runs_per_yr": "Запусков/год",
+  "label_reagent_kit_cost_per_run": "Стоимость набора/запуск",
+  "label_lib_prep_cost_per_sample": "Подготовка библ./образец",
+  "label_sequencer_n": "Секвенатор {{n}}"
 }

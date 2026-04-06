@@ -9,6 +9,9 @@ import PriceEditor from '../../components/PriceEditor'
 import { fmt, fmtCurrency } from '../../lib/format'
 import { downloadCSV } from '../../lib/download'
 import DonutChart from '../../components/DonutChart'
+import ThroughputCurve from '../../components/ThroughputCurve'
+import BreakevenChart from '../../components/BreakevenChart'
+import SequencerCompare from '../../components/SequencerCompare'
 
 const CAT_COLORS = ['#0d9488', '#4f8ef7', '#f97316', '#8b5cf6', '#22c55e', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#64748b']
 const WF_COLORS  = ['#0d9488', '#3b82f6', '#f97316', '#8b5cf6', '#22c55e', '#ec4899']
@@ -399,6 +402,22 @@ export default function Step7() {
           </div>
         )
       })()}
+
+      {/* Additional charts: throughput curve, breakeven, sequencer comparison */}
+      {costs.total > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          <ThroughputCurve project={project} costPerSample={costs.costPerSample} />
+          <BreakevenChart
+            establishmentCost={costs.establishmentCost}
+            annualRunningCost={costs.total}
+          />
+          {project.sequencers.filter(s => s.enabled).length >= 2 && (
+            <div className="sm:col-span-2">
+              <SequencerCompare project={project} />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Establishment cost */}
       {costs.establishmentCost > 0 && (

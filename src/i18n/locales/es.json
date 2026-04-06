@@ -234,5 +234,18 @@
   "chart_cost_per_sample_by_category": "Costo por muestra — por categoría",
   "chart_total_annual_by_category": "Costo anual total — por categoría",
   "chart_cost_per_sample_by_workflow": "Costo por muestra — por etapa",
-  "chart_total_annual_by_workflow": "Costo anual total — por etapa"
+  "chart_total_annual_by_workflow": "Costo anual total — por etapa",
+  "chart_throughput_curve": "Costo por muestra vs. rendimiento anual",
+  "chart_breakeven": "Costo acumulado en 5 años",
+  "chart_sequencer_compare": "Comparación de secuenciadores",
+  "label_current": "actual",
+  "label_running_cost": "Costo operativo",
+  "label_cumulative_cost": "Costo acumulado",
+  "label_year": "Año",
+  "label_year_n": "Año {{n}}",
+  "label_platform": "Plataforma",
+  "label_runs_per_yr": "Corridas/año",
+  "label_reagent_kit_cost_per_run": "Costo kit reactivo/corrida",
+  "label_lib_prep_cost_per_sample": "Costo prep lib/muestra",
+  "label_sequencer_n": "Secuenciador {{n}}"
 }
