@@ -76,7 +76,9 @@ export default function Step7() {
 
   function handleShare() {
     try {
-      const encoded = btoa(encodeURIComponent(JSON.stringify(project)))
+      // unescape(encodeURIComponent()) converts UTF-8 to Latin-1 bytes safe for btoa
+      // ~3× shorter than btoa(encodeURIComponent()) which double-encodes ASCII chars
+      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(project))))
       const url = `${window.location.origin}/#share=${encoded}`
       navigator.clipboard.writeText(url)
       toast.success(t('toast_link_copied'))

@@ -85,7 +85,7 @@ function loadInitialProject(): Project {
     const hash = window.location.hash
     const match = hash.match(/^#share=(.+)$/)
     if (match) {
-      const decoded = JSON.parse(decodeURIComponent(atob(match[1])))
+      const decoded = JSON.parse(decodeURIComponent(escape(atob(match[1]))))
       window.history.replaceState(null, '', window.location.pathname)
       return migrateProject(decoded)
     }
