@@ -199,5 +199,14 @@
   "col_total_cost": "Coût total ($)",
   "label_report_title": "Évaluation des coûts du laboratoire de surveillance génomique",
   "label_report_subtitle": "Rapport d'estimation des coûts annuels",
-  "btn_export_excel": "Exporter Excel"
+  "btn_export_excel": "Exporter Excel",
+  "btn_edit_prices": "Modifier les prix",
+  "btn_download_price_template": "Télécharger le modèle de prix",
+  "btn_import_prices": "Importer les prix (CSV)",
+  "btn_cancel": "Annuler",
+  "label_price_editor_title": "Éditeur de prix en masse",
+  "label_price_editor_desc": "Modifiez les prix des équipements, consommables et personnel. Enregistrer s'applique au projet en cours.",
+  "note_price_csv_tip": "Télécharger le modèle → modifier dans Excel → importer",
+  "toast_prices_saved": "Prix mis à jour",
+  "toast_prices_imported": "{{count}} prix importés"
 }

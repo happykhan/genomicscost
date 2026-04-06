@@ -199,5 +199,14 @@
   "col_total_cost": "Total cost ($)",
   "label_report_title": "Genomic Surveillance Laboratory Cost Assessment",
   "label_report_subtitle": "Annual Cost Estimation Report",
-  "btn_export_excel": "Export Excel"
+  "btn_export_excel": "Export Excel",
+  "btn_edit_prices": "Edit prices",
+  "btn_download_price_template": "Download price template",
+  "btn_import_prices": "Import prices (CSV)",
+  "btn_cancel": "Cancel",
+  "label_price_editor_title": "Bulk price editor",
+  "label_price_editor_desc": "Edit prices for equipment, consumables and personnel. Save applies to the current project.",
+  "note_price_csv_tip": "Download template → edit in Excel → import back",
+  "toast_prices_saved": "Prices updated",
+  "toast_prices_imported": "{{count}} prices imported"
 }

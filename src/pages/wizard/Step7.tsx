@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import { useProject } from '../../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { WORKFLOW_STEPS, WORKFLOW_STEP_LABELS } from '../../lib/calculations'
 import LZString from 'lz-string'
+import PriceEditor from '../../components/PriceEditor'
 
 function fmt(n: number) {
   return n.toLocaleString('en-US', { maximumFractionDigits: 0 })
@@ -22,6 +24,7 @@ export default function Step7() {
   const { project, costs, saveProject } = useProject()
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const [showPriceEditor, setShowPriceEditor] = useState(false)
   const { exchangeRate, currency, samplesPerYear } = project
   const showLocalCurrency = exchangeRate !== 1 || currency !== 'USD'
 
@@ -491,6 +494,13 @@ export default function Step7() {
           {t('btn_edit')}
         </button>
         <button
+          onClick={() => setShowPriceEditor(true)}
+          className="px-5 py-2 rounded text-sm font-medium"
+          style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
+        >
+          {t('btn_edit_prices')}
+        </button>
+        <button
           onClick={() => navigate('/')}
           className="px-5 py-2 rounded text-sm font-medium"
           style={{ background: 'none', color: 'var(--gx-text-muted)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
@@ -498,6 +508,8 @@ export default function Step7() {
           {t('btn_home')}
         </button>
       </div>
+
+      {showPriceEditor && <PriceEditor onClose={() => setShowPriceEditor(false)} />}
     </div>
   )
 }

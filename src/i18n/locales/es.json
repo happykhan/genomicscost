@@ -199,5 +199,14 @@
   "col_total_cost": "Costo total ($)",
   "label_report_title": "Evaluación de costos del laboratorio de vigilancia genómica",
   "label_report_subtitle": "Informe de estimación de costos anuales",
-  "btn_export_excel": "Exportar Excel"
+  "btn_export_excel": "Exportar Excel",
+  "btn_edit_prices": "Editar precios",
+  "btn_download_price_template": "Descargar plantilla de precios",
+  "btn_import_prices": "Importar precios (CSV)",
+  "btn_cancel": "Cancelar",
+  "label_price_editor_title": "Editor de precios en masa",
+  "label_price_editor_desc": "Edite precios de equipos, consumibles y personal. Guardar aplica al proyecto actual.",
+  "note_price_csv_tip": "Descargar plantilla → editar en Excel → importar",
+  "toast_prices_saved": "Precios actualizados",
+  "toast_prices_imported": "{{count}} precios importados"
 }

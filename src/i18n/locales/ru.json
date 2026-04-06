@@ -199,5 +199,14 @@
   "col_total_cost": "Итоговая стоимость ($)",
   "label_report_title": "Оценка затрат лаборатории геномного надзора",
   "label_report_subtitle": "Отчёт об оценке годовых затрат",
-  "btn_export_excel": "Экспорт Excel"
+  "btn_export_excel": "Экспорт Excel",
+  "btn_edit_prices": "Редактировать цены",
+  "btn_download_price_template": "Скачать шаблон цен",
+  "btn_import_prices": "Импортировать цены (CSV)",
+  "btn_cancel": "Отмена",
+  "label_price_editor_title": "Массовый редактор цен",
+  "label_price_editor_desc": "Редактируйте цены оборудования, расходных материалов и персонала. Сохранение применяется к текущему проекту.",
+  "note_price_csv_tip": "Скачать шаблон → изменить в Excel → импортировать",
+  "toast_prices_saved": "Цены обновлены",
+  "toast_prices_imported": "Импортировано цен: {{count}}"
 }
