@@ -376,7 +376,7 @@ export default function Step7() {
         }))
         const fmtUsd2 = (n: number) => `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
         return (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 gx-print-page-break">
             <DonutChart
               title={t('chart_cost_per_sample_by_category')}
               data={perSampleCatData}
@@ -442,7 +442,7 @@ export default function Step7() {
       )}
 
       {/* Print-only shopping list */}
-      <div className="gx-only-print" style={{ marginTop: 24 }}>
+      <div className="gx-only-print gx-print-page-break" style={{ marginTop: 24 }}>
         {/* Equipment to purchase */}
         {project.equipment.filter(e => e.status === 'buy').length > 0 && (
           <div style={{ marginBottom: 20 }}>

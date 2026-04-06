@@ -71,6 +71,9 @@
   /* Reveal print-only sections */
   .gx-only-print { display: block !important; }
 
+  /* Explicit page breaks */
+  .gx-print-page-break { break-before: page !important; page-break-before: always !important; }
+
   /* Prevent tables and their card wrappers from breaking across pages */
   table { break-inside: avoid; page-break-inside: avoid; }
   tr { break-inside: avoid; page-break-inside: avoid; }
