@@ -99,6 +99,9 @@
     word-spacing: normal !important;
   }
 
+  /* Each section in the print-only block stays intact, rolls to next page if needed */
+  .gx-only-print > div { break-inside: avoid; page-break-inside: avoid; }
+
   /* Prevent tables and their card wrappers from breaking across pages */
   table { break-inside: avoid; page-break-inside: avoid; }
   tr { break-inside: avoid; page-break-inside: avoid; }
