@@ -61,8 +61,8 @@
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
-  .gx-cost-hero * { color: #ffffff !important; }
-  .gx-cost-number { font-size: 2rem !important; line-height: 1.2 !important; }
+  .gx-cost-hero * { color: #ffffff !important; font-size: 0.78rem !important; }
+  .gx-cost-number { font-size: 1.6rem !important; line-height: 1.2 !important; }
 
   /* Compact tables */
   .gx-print-region table { font-size: 0.78rem !important; }
