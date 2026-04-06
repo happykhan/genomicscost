@@ -71,7 +71,8 @@
   /* Reveal print-only sections */
   .gx-only-print { display: block !important; }
 
-  /* Table layout */
-  table { page-break-inside: avoid; }
-  tr { page-break-inside: avoid; }
+  /* Prevent tables and their card wrappers from breaking across pages */
+  table { break-inside: avoid; page-break-inside: avoid; }
+  tr { break-inside: avoid; page-break-inside: avoid; }
+  .gx-print-region .card { break-inside: avoid; page-break-inside: avoid; }
 }
