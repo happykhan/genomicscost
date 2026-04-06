@@ -90,6 +90,15 @@
   /* Explicit page breaks */
   .gx-print-page-break { break-before: page !important; page-break-before: always !important; }
 
+  /* Protect SVG text from print CSS resets (prevents character-per-line rendering) */
+  .gx-print-region svg text {
+    writing-mode: horizontal-tb !important;
+    text-orientation: mixed !important;
+    white-space: nowrap !important;
+    letter-spacing: normal !important;
+    word-spacing: normal !important;
+  }
+
   /* Prevent tables and their card wrappers from breaking across pages */
   table { break-inside: avoid; page-break-inside: avoid; }
   tr { break-inside: avoid; page-break-inside: avoid; }
