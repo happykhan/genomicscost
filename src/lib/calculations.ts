@@ -188,8 +188,10 @@ export function calculateCosts(project: Project): CostBreakdown {
   let annualBioinformatics = 0
   if (bioinformatics.type === 'cloud') {
     annualBioinformatics = samplesPerYear * (bioinformatics.costPerSampleUsd ?? 0)
-  } else if (bioinformatics.type === 'inhouse' || bioinformatics.type === 'hybrid') {
+  } else if (bioinformatics.type === 'inhouse') {
     annualBioinformatics = bioinformatics.annualServerCostUsd ?? 0
+  } else if (bioinformatics.type === 'hybrid') {
+    annualBioinformatics = samplesPerYear * (bioinformatics.costPerSampleUsd ?? 0) + (bioinformatics.annualServerCostUsd ?? 0)
   }
 
   // QMS: cost × quantity × pctSequencing (% attributed to this sequencing programme)

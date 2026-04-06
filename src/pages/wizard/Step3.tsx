@@ -1,6 +1,7 @@
 import { useProject } from '../../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
 import catalogue from '../../data/catalogue.json'
+import { fmt } from '../../lib/format'
 
 const inputClass = 'border border-[var(--gx-border)] rounded-[var(--gx-radius)] bg-[var(--gx-bg)] text-[var(--gx-text)] p-2 text-sm focus:outline-none focus:border-[var(--gx-accent)]'
 
@@ -10,10 +11,6 @@ const WORKFLOW_KEYS: Record<string, string> = {
   pcr_testing: 'wf_pcr_testing',
   general_lab: 'wf_general_lab',
   null: 'wf_other',
-}
-
-function fmt(n: number) {
-  return n.toLocaleString('en-US', { maximumFractionDigits: 0 })
 }
 
 export default function Step3() {

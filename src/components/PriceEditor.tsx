@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { useProject } from '../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
+import { downloadCSV } from '../lib/download'
 
 type Tab = 'equipment' | 'consumables' | 'personnel'
 
@@ -34,13 +35,7 @@ export default function PriceEditor({ onClose }: PriceEditorProps) {
     equipment.forEach(e => rows.push(`equipment,${csvEsc(e.name)},${e.unitCostUsd},unitCostUsd`))
     consumables.forEach(c => rows.push(`consumable,${csvEsc(c.name)},${c.unitCostUsd},unitCostUsd`))
     personnel.forEach(p => rows.push(`personnel,${csvEsc(p.role)},${p.annualSalaryUsd},annualSalaryUsd`))
-    const blob = new Blob([rows.join('\n')], { type: 'text/csv' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${project.name || 'genomics-cost'}-prices.csv`
-    a.click()
-    URL.revokeObjectURL(url)
+    downloadCSV(rows.join('\n'), `${project.name || 'genomics-cost'}-prices.csv`)
   }
 
   function csvEsc(s: string) {
@@ -83,7 +78,7 @@ export default function PriceEditor({ onClose }: PriceEditorProps) {
         setPersonnel(newPersonnel)
         toast.success(t('toast_prices_imported', { count: updated }))
       } catch {
-        toast.error('Could not parse CSV')
+        toast.error(t('error_parse_csv'))
       }
       if (fileRef.current) fileRef.current.value = ''
     }

@@ -2,12 +2,10 @@ import { useProject } from '../../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
 import catalogue from '../../data/catalogue.json'
 import type { EquipmentStatus } from '../../types'
+import Tooltip from '../../components/Tooltip'
+import { fmt } from '../../lib/format'
 
 const inputClass = 'border border-[var(--gx-border)] rounded-[var(--gx-radius)] bg-[var(--gx-bg)] text-[var(--gx-text)] p-2 text-sm focus:outline-none focus:border-[var(--gx-accent)]'
-
-function fmt(n: number) {
-  return n.toLocaleString('en-US', { maximumFractionDigits: 0 })
-}
 
 const CAT_LABEL_KEYS: Record<string, string> = {
   sequencing_platform: 'cat_sequencing_platform',
@@ -145,7 +143,7 @@ export default function Step4() {
                         />
                       </div>
                       <div className="flex items-center gap-1">
-                        <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_price_each')}</label>
+                        <label className="text-xs" style={{ color: 'var(--gx-text-muted)', display: 'flex', alignItems: 'center' }}>{t('col_price_each')}<Tooltip content={t('tooltip_unit_cost_equip')} /></label>
                         <input
                           type="number"
                           value={item.unitCostUsd}
@@ -157,7 +155,7 @@ export default function Step4() {
                       </div>
                       {/* Feature 2: editable lifespan */}
                       <div className="flex items-center gap-1">
-                        <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_life_yr')}</label>
+                        <label className="text-xs" style={{ color: 'var(--gx-text-muted)', display: 'flex', alignItems: 'center' }}>{t('col_life_yr')}<Tooltip content={t('tooltip_life_yr')} /></label>
                         <input
                           type="number"
                           value={item.lifespanYears ?? 5}

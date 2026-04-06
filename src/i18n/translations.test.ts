@@ -57,6 +57,26 @@ const REQUIRED_KEYS = [
   'note_coverage_help',
   'note_buffer_pct_help',
   'note_retest_pct_help',
+  // Price editor keys
+  'btn_edit_prices',
+  'btn_export_excel',
+  'label_price_editor_title',
+  'toast_prices_saved',
+  // Error keys
+  'error_copy_link',
+  'error_parse_csv',
+  // Tooltip keys (sample)
+  'tooltip_pathogen_type',
+  'tooltip_coverage',
+  'tooltip_buffer_pct',
+  'tooltip_annual_salary',
+  'tooltip_facility_monthly',
+  'tooltip_bioinformatics',
+  // Chart keys
+  'chart_cost_per_sample_by_category',
+  'chart_total_annual_by_category',
+  'chart_cost_per_sample_by_workflow',
+  'chart_total_annual_by_workflow',
 ]
 
 describe('i18n — all locales have required keys', () => {

@@ -1,12 +1,10 @@
 import { useProject } from '../../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
+import Tooltip from '../../components/Tooltip'
+import { fmt } from '../../lib/format'
 
 const inputClass = 'border border-[var(--gx-border)] rounded-[var(--gx-radius)] bg-[var(--gx-bg)] text-[var(--gx-text)] p-2 text-sm focus:outline-none focus:border-[var(--gx-accent)]'
 const labelClass = 'text-xs text-[var(--gx-text-muted)] uppercase tracking-wider mb-1 block'
-
-function fmt(n: number) {
-  return n.toLocaleString('en-US', { maximumFractionDigits: 0 })
-}
 
 export default function Step5() {
   const { project, updateProject } = useProject()
@@ -59,7 +57,7 @@ export default function Step5() {
 
                 {/* Salary */}
                 <div style={{ width: 140 }}>
-                  <label className={labelClass}>{t('col_salary')}</label>
+                  <label className={labelClass}>{t('col_salary')}<Tooltip content={t('tooltip_annual_salary')} /></label>
                   <input
                     type="number"
                     value={person.annualSalaryUsd}
@@ -72,7 +70,7 @@ export default function Step5() {
 
                 {/* % time slider */}
                 <div className="flex-1 min-w-48">
-                  <label className={labelClass}>{t('col_pct_time')} — {person.pctTime}%</label>
+                  <label className={labelClass}>{t('col_pct_time')} — {person.pctTime}%<Tooltip content={t('tooltip_pct_time')} /></label>
                   <input
                     type="range"
                     min={0}
@@ -86,7 +84,7 @@ export default function Step5() {
 
                 {/* Feature 1: Training cost per year */}
                 <div style={{ width: 130 }}>
-                  <label className={labelClass}>{t('col_training')}</label>
+                  <label className={labelClass}>{t('col_training')}<Tooltip content={t('tooltip_training_cost')} /></label>
                   <input
                     type="number"
                     value={training}

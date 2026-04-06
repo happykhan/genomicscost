@@ -1,9 +1,6 @@
 import { useProject } from '../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
-
-function fmt(n: number): string {
-  return n.toLocaleString('en-US', { maximumFractionDigits: 0 })
-}
+import { fmt } from '../lib/format'
 
 export default function CostSummary() {
   const { costs } = useProject()

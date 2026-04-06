@@ -1,13 +1,11 @@
 import { useProject } from '../../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
 import catalogue from '../../data/catalogue.json'
+import Tooltip from '../../components/Tooltip'
+import { fmt } from '../../lib/format'
 
 const inputClass = 'border border-[var(--gx-border)] rounded-[var(--gx-radius)] bg-[var(--gx-bg)] text-[var(--gx-text)] p-2 text-sm focus:outline-none focus:border-[var(--gx-accent)]'
 const labelClass = 'text-xs text-[var(--gx-text-muted)] uppercase tracking-wider mb-1 block'
-
-function fmt(n: number) {
-  return n.toLocaleString('en-US', { maximumFractionDigits: 0 })
-}
 
 const CLOUD_PLATFORMS = catalogue.bioinformatics_cloud.cloud_platforms.map(p => p.name)
 
@@ -62,8 +60,8 @@ export default function Step6() {
             <thead>
               <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
                 <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_label')}</th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_monthly_cost')}</th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_pct_sequencing')}</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}><span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>{t('col_monthly_cost')}<Tooltip content={t('tooltip_facility_monthly')} /></span></th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}><span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>{t('col_pct_sequencing')}<Tooltip content={t('tooltip_facility_pct')} /></span></th>
                 <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual_attr')}</th>
                 <th className="px-3 py-2"></th>
               </tr>
@@ -105,7 +103,7 @@ export default function Step6() {
             <thead>
               <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
                 <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_label')}</th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual_cost_transport')}</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}><span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>{t('col_annual_cost_transport')}<Tooltip content={t('tooltip_transport_cost')} /></span></th>
                 <th className="px-3 py-2"></th>
               </tr>
             </thead>
@@ -138,9 +136,9 @@ export default function Step6() {
         <div className="card p-4 flex flex-col gap-4">
           {/* Type radio */}
           <div>
-            <label className={labelClass}>{t('label_approach')}</label>
+            <label className={labelClass}>{t('label_approach')}<Tooltip content={t('tooltip_bioinformatics')} /></label>
             <div className="flex gap-4">
-              {(['cloud', 'inhouse', 'none'] as const).map(type => (
+              {(['cloud', 'inhouse', 'hybrid', 'none'] as const).map(type => (
                 <label key={type} className="flex items-center gap-2 cursor-pointer text-sm">
                   <input
                     type="radio"
@@ -151,7 +149,7 @@ export default function Step6() {
                     style={{ accentColor: 'var(--gx-accent)' }}
                   />
                   <span style={{ color: 'var(--gx-text)' }}>
-                    {type === 'cloud' ? t('opt_cloud') : type === 'inhouse' ? t('opt_inhouse') : t('opt_none')}
+                    {type === 'cloud' ? t('opt_cloud') : type === 'inhouse' ? t('opt_inhouse') : type === 'hybrid' ? t('opt_hybrid') : t('opt_none')}
                   </span>
                 </label>
               ))}
@@ -186,7 +184,7 @@ export default function Step6() {
             </div>
           )}
 
-          {bioinformatics.type === 'inhouse' && (
+          {(bioinformatics.type === 'inhouse' || bioinformatics.type === 'hybrid') && (
             <div>
               <label className={labelClass}>{t('field_annual_server')}</label>
               <input
@@ -197,6 +195,34 @@ export default function Step6() {
                 className={inputClass}
                 style={{ width: 200 }}
               />
+            </div>
+          )}
+
+          {bioinformatics.type === 'hybrid' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass}>{t('field_cloud_platform')}</label>
+                <select
+                  className={inputClass}
+                  value={bioinformatics.cloudPlatform}
+                  onChange={e => updateProject({ bioinformatics: { ...bioinformatics, cloudPlatform: e.target.value } })}
+                  style={{ width: '100%' }}
+                >
+                  {CLOUD_PLATFORMS.map(p => <option key={p} value={p}>{p}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className={labelClass}>{t('field_cost_per_sample')}</label>
+                <input
+                  type="number"
+                  value={bioinformatics.costPerSampleUsd}
+                  min={0}
+                  step={0.1}
+                  onChange={e => updateProject({ bioinformatics: { ...bioinformatics, costPerSampleUsd: parseFloat(e.target.value) || 0 } })}
+                  className={inputClass}
+                  style={{ width: '100%' }}
+                />
+              </div>
             </div>
           )}
         </div>

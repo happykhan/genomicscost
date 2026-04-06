@@ -6,14 +6,12 @@ import toast from 'react-hot-toast'
 import { WORKFLOW_STEPS, WORKFLOW_STEP_LABELS } from '../../lib/calculations'
 import LZString from 'lz-string'
 import PriceEditor from '../../components/PriceEditor'
+import { fmt, fmtCurrency } from '../../lib/format'
+import { downloadCSV } from '../../lib/download'
+import DonutChart from '../../components/DonutChart'
 
-function fmt(n: number) {
-  return n.toLocaleString('en-US', { maximumFractionDigits: 0 })
-}
-
-function fmtCurrency(n: number, decimals = 0) {
-  return n.toLocaleString('en-US', { maximumFractionDigits: decimals, minimumFractionDigits: decimals })
-}
+const CAT_COLORS = ['#0d9488', '#4f8ef7', '#f97316', '#8b5cf6', '#22c55e', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#64748b']
+const WF_COLORS  = ['#0d9488', '#3b82f6', '#f97316', '#8b5cf6', '#22c55e', '#ec4899']
 
 function pct(part: number, total: number) {
   if (!total) return 0
@@ -69,13 +67,7 @@ export default function Step7() {
       '',
       `${t('label_cost_per_sample')}${sep}${costs.costPerSample}`,
     ]
-    const blob = new Blob([lines.join('\n')], { type: 'text/csv' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${project.name || 'genomics-cost'}-results.csv`
-    a.click()
-    URL.revokeObjectURL(url)
+    downloadCSV(lines.join('\n'), `${project.name || 'genomics-cost'}-results.csv`)
   }
 
   async function handleExportExcel() {
@@ -136,7 +128,7 @@ export default function Step7() {
       navigator.clipboard.writeText(url)
       toast.success(t('toast_link_copied'))
     } catch {
-      toast.error('Could not copy link')
+      toast.error(t('error_copy_link'))
     }
   }
 
@@ -351,6 +343,62 @@ export default function Step7() {
           </tbody>
         </table>
       </div>
+
+      {/* Charts — 4 donut charts matching WHO Excel Results tab */}
+      {costs.total > 0 && (() => {
+        const catData = [
+          { label: t('label_sequencing_reagents'), value: costs.sequencingReagents, color: CAT_COLORS[0] },
+          { label: t('label_library_prep'),         value: costs.libraryPrep,         color: CAT_COLORS[1] },
+          { label: t('label_consumables'),           value: costs.consumables,          color: CAT_COLORS[2] },
+          { label: t('label_equipment'),             value: costs.equipment,            color: CAT_COLORS[3] },
+          { label: t('label_personnel'),             value: costs.personnel,            color: CAT_COLORS[4] },
+          { label: t('label_training'),              value: costs.training,             color: CAT_COLORS[5] },
+          { label: t('label_facility'),              value: costs.facility,             color: CAT_COLORS[6] },
+          { label: t('label_transport'),             value: costs.transport,            color: CAT_COLORS[7] },
+          { label: t('label_bioinformatics'),        value: costs.bioinformatics,       color: CAT_COLORS[8] },
+          { label: t('label_qms'),                   value: costs.qms,                  color: CAT_COLORS[9] },
+        ]
+        const perSampleCatData = catData.map(d => ({
+          ...d,
+          value: samplesPerYear > 0 ? d.value / samplesPerYear : 0,
+        }))
+        const wfData = workflowRows.map((row, i) => ({
+          label: row.label,
+          value: row.value,
+          color: WF_COLORS[i % WF_COLORS.length],
+        }))
+        const perSampleWfData = wfData.map(d => ({
+          ...d,
+          value: samplesPerYear > 0 ? d.value / samplesPerYear : 0,
+        }))
+        const fmtUsd2 = (n: number) => `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+        return (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+            <DonutChart
+              title={t('chart_cost_per_sample_by_category')}
+              data={perSampleCatData}
+              centerText={`$${fmtCurrency(costs.costPerSample, 2)}`}
+              formatValue={fmtUsd2}
+            />
+            <DonutChart
+              title={t('chart_total_annual_by_category')}
+              data={catData}
+              centerText={`$${fmt(costs.total)}`}
+            />
+            <DonutChart
+              title={t('chart_cost_per_sample_by_workflow')}
+              data={perSampleWfData}
+              centerText={`$${fmtCurrency(samplesPerYear > 0 ? workflowTotal / samplesPerYear : 0, 2)}`}
+              formatValue={fmtUsd2}
+            />
+            <DonutChart
+              title={t('chart_total_annual_by_workflow')}
+              data={wfData}
+              centerText={`$${fmt(workflowTotal)}`}
+            />
+          </div>
+        )
+      })()}
 
       {/* Establishment cost */}
       {costs.establishmentCost > 0 && (

@@ -1,6 +1,7 @@
 import { useProject } from '../../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
 import catalogue from '../../data/catalogue.json'
+import Tooltip from '../../components/Tooltip'
 
 const inputClass = 'border border-[var(--gx-border)] rounded-[var(--gx-radius)] bg-[var(--gx-bg)] text-[var(--gx-text)] p-2 text-sm focus:outline-none focus:border-[var(--gx-accent)] w-full'
 const labelClass = 'text-xs text-[var(--gx-text-muted)] uppercase tracking-wider mb-1 block'
@@ -76,7 +77,7 @@ export default function Step1() {
             />
           </div>
           <div>
-            <label className={labelClass}>{t('field_samples_per_year')}</label>
+            <label className={labelClass}>{t('field_samples_per_year')}<Tooltip content={t('tooltip_samples_per_year')} /></label>
             <input
               type="number"
               className={inputClass}
@@ -88,7 +89,7 @@ export default function Step1() {
         </div>
 
         <div>
-          <label className={labelClass}>{t('field_pathogen_type')}</label>
+          <label className={labelClass}>{t('field_pathogen_type')}<Tooltip content={t('tooltip_pathogen_type')} /></label>
           <div className="flex gap-3">
             {(['viral', 'bacterial'] as const).map(type => (
               <label key={type} className="flex items-center gap-2 cursor-pointer text-sm">
@@ -109,7 +110,7 @@ export default function Step1() {
         </div>
 
         <div>
-          <label className={labelClass}>{t('field_pathogen_name')}</label>
+          <label className={labelClass}>{t('field_pathogen_name')}<Tooltip content={t('tooltip_pathogen_name')} /></label>
           <select
             className={inputClass}
             value={isCaptureAll ? '__capture_all__' : project.pathogenName}
@@ -126,7 +127,7 @@ export default function Step1() {
         {/* Feature 7: hide genome size / coverage for capture-all; show min reads instead */}
         {!isCaptureAll && (
           <div>
-            <label className={labelClass}>{t('field_genome_size')} {t('label_genome_size_auto')}</label>
+            <label className={labelClass}>{t('field_genome_size')} {t('label_genome_size_auto')}<Tooltip content={t('tooltip_genome_size')} /></label>
             <input
               type="number"
               className={inputClass}

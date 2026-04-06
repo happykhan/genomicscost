@@ -5,6 +5,7 @@ import { createDefaultSequencer } from '../../lib/defaults'
 import { calculateSamplesPerRun } from '../../lib/calculations'
 import catalogue from '../../data/catalogue.json'
 import type { SequencerConfig } from '../../types'
+import Tooltip from '../../components/Tooltip'
 
 const inputClass = 'border border-[var(--gx-border)] rounded-[var(--gx-radius)] bg-[var(--gx-bg)] text-[var(--gx-text)] p-2 text-sm focus:outline-none focus:border-[var(--gx-accent)] w-full'
 const labelClass = 'text-xs text-[var(--gx-text-muted)] uppercase tracking-wider mb-1 block'
@@ -214,7 +215,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
         {/* Feature 7: capture-all mode — show min reads instead of coverage */}
         {isCaptureAll ? (
           <div>
-            <label className={labelClass}>{t('field_min_reads')}</label>
+            <label className={labelClass}>{t('field_min_reads')}<Tooltip content={t('tooltip_min_reads')} /></label>
             <input
               type="number"
               className={inputClass}
@@ -230,7 +231,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className={labelClass}>{t('field_coverage')}</label>
+              <label className={labelClass}>{t('field_coverage')}<Tooltip content={t('tooltip_coverage')} /></label>
               <input
                 type="number"
                 className={inputClass}
@@ -282,7 +283,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* Buffer % slider */}
           <div>
-            <label className={labelClass}>{t('field_buffer_pct')} — {sequencer.bufferPct}%</label>
+            <label className={labelClass}>{t('field_buffer_pct')} — {sequencer.bufferPct}%<Tooltip content={t('tooltip_buffer_pct')} /></label>
             <input
               type="range"
               min={0}
@@ -297,7 +298,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
 
           {/* Retest % slider */}
           <div>
-            <label className={labelClass}>{t('field_retest_pct')} — {sequencer.retestPct}%</label>
+            <label className={labelClass}>{t('field_retest_pct')} — {sequencer.retestPct}%<Tooltip content={t('tooltip_retest_pct')} /></label>
             <input
               type="range"
               min={0}
@@ -312,7 +313,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
 
           {/* Feature 3: controls per run */}
           <div>
-            <label className={labelClass}>{t('field_controls_per_run')}</label>
+            <label className={labelClass}>{t('field_controls_per_run')}<Tooltip content={t('tooltip_controls_per_run')} /></label>
             <input
               type="number"
               className={inputClass}
@@ -329,7 +330,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
 
         {/* Library prep kit */}
         <div>
-          <label className={labelClass}>{t('field_lib_prep_kit')}</label>
+          <label className={labelClass}>{t('field_lib_prep_kit')}<Tooltip content={t('tooltip_lib_prep_kit')} /></label>
           <select
             className={inputClass}
             value={sequencer.libPrepKitName}
@@ -365,6 +366,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
               style={{ accentColor: 'var(--gx-accent)', width: 16, height: 16 }}
             />
             <span style={{ color: 'var(--gx-text)' }}>{t('field_enrichment')}</span>
+            <Tooltip content={t('tooltip_enrichment')} />
           </label>
         </div>
       </div>

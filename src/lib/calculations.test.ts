@@ -373,6 +373,24 @@ describe('calculateCosts', () => {
     expect(costs.bioinformatics).toBe(600)
   })
 
+  it('hybrid bioinformatics: cloud cost + server cost', () => {
+    const project = {
+      ...createDefaultProject(),
+      samplesPerYear: 200,
+      sequencers: [],
+      consumables: [],
+      equipment: [],
+      personnel: [],
+      facility: [],
+      transport: [],
+      bioinformatics: { type: 'hybrid' as const, cloudPlatform: 'BaseSpace', costPerSampleUsd: 3, annualServerCostUsd: 6_000 },
+      qms: [],
+    }
+    const costs = calculateCosts(project)
+    // cloud: 200 × $3 = $600; server: $6,000; total bio = $6,600
+    expect(costs.bioinformatics).toBe(6_600)
+  })
+
   it('inhouse bioinformatics: annualServerCostUsd', () => {
     const project = {
       ...createDefaultProject(),
