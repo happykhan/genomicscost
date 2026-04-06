@@ -196,5 +196,8 @@
   "label_equipment_to_buy": "Оборудование для закупки",
   "label_consumables_to_stock": "Годовые расходные материалы",
   "label_print_generated": "Сформировано инструментом расчёта стоимости геномики",
-  "col_total_cost": "Итоговая стоимость ($)"
+  "col_total_cost": "Итоговая стоимость ($)",
+  "label_report_title": "Оценка затрат лаборатории геномного надзора",
+  "label_report_subtitle": "Отчёт об оценке годовых затрат",
+  "btn_export_excel": "Экспорт Excel"
 }

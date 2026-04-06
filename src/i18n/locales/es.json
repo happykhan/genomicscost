@@ -196,5 +196,8 @@
   "label_equipment_to_buy": "Equipos a adquirir",
   "label_consumables_to_stock": "Consumibles anuales",
   "label_print_generated": "Generado por la Herramienta de costeo genómico",
-  "col_total_cost": "Costo total ($)"
+  "col_total_cost": "Costo total ($)",
+  "label_report_title": "Evaluación de costos del laboratorio de vigilancia genómica",
+  "label_report_subtitle": "Informe de estimación de costos anuales",
+  "btn_export_excel": "Exportar Excel"
 }

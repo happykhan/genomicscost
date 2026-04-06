@@ -196,5 +196,8 @@
   "label_equipment_to_buy": "Équipements à acheter",
   "label_consumables_to_stock": "Consommables annuels",
   "label_print_generated": "Généré par l'Outil de calcul des coûts génomiques",
-  "col_total_cost": "Coût total ($)"
+  "col_total_cost": "Coût total ($)",
+  "label_report_title": "Évaluation des coûts du laboratoire de surveillance génomique",
+  "label_report_subtitle": "Rapport d'estimation des coûts annuels",
+  "btn_export_excel": "Exporter Excel"
 }

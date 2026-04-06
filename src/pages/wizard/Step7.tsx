@@ -74,6 +74,57 @@ export default function Step7() {
     URL.revokeObjectURL(url)
   }
 
+  async function handleExportExcel() {
+    const XLSX = await import('xlsx')
+    const wb = XLSX.utils.book_new()
+
+    // Summary sheet
+    const summaryData = [
+      [t('label_report_title')],
+      [project.name || t('label_unnamed_project'), project.country || '', project.year],
+      [],
+      [t('col_category'), t('col_annual_usd'), t('col_pct_of_total')],
+      ...rows.map(r => [r.label, r.value, pct(r.value, costs.total)]),
+      [],
+      [t('label_annual_total'), costs.total, 100],
+      [t('label_cost_per_sample'), costs.costPerSample],
+      [t('label_establishment_cost'), costs.establishmentCost],
+    ]
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summaryData), 'Summary')
+
+    // Workflow sheet
+    const wfData = [
+      [t('col_workflow_step'), t('col_annual_usd'), t('col_cost_per_sample_usd'), '%'],
+      ...workflowRows.map(r => {
+        const perSample = samplesPerYear > 0 ? r.value / samplesPerYear : 0
+        return [r.label, r.value, perSample, pct(r.value, workflowTotal)]
+      }),
+    ]
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wfData), 'Workflow')
+
+    // Equipment sheet
+    const eqData = [
+      [t('col_item'), 'Status', t('col_qty'), t('col_price_each'), t('col_life_yr'), t('col_annual')],
+      ...project.equipment.map(e => [
+        e.name, e.status, e.quantity, e.unitCostUsd, e.lifespanYears,
+        e.status === 'buy' ? (e.unitCostUsd * e.quantity) / e.lifespanYears : 0,
+      ]),
+    ]
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(eqData), 'Equipment')
+
+    // Personnel sheet
+    const persData = [
+      [t('col_role'), t('col_salary'), t('col_pct_time'), t('col_training'), t('col_annual_cost')],
+      ...project.personnel.map(p => [
+        p.role, p.annualSalaryUsd, p.pctTime, p.trainingCostUsd,
+        (p.annualSalaryUsd * p.pctTime / 100) + p.trainingCostUsd,
+      ]),
+    ]
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(persData), 'Personnel')
+
+    XLSX.writeFile(wb, `${project.name || 'genomics-cost'}-results.xlsx`)
+  }
+
   function handleShare() {
     try {
       // unescape(encodeURIComponent()) converts UTF-8 to Latin-1 bytes safe for btoa
@@ -89,10 +140,56 @@ export default function Step7() {
 
   return (
     <div className="gx-print-region">
-      <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>{t('step7_title')}</h2>
-      <p className="text-sm mb-6" style={{ color: 'var(--gx-text-muted)' }}>
-        {project.name || t('label_unnamed_project')} · {project.country || t('label_no_country')} · {project.year}
-      </p>
+      {/* Screen header */}
+      <div className="no-print">
+        <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>{t('step7_title')}</h2>
+        <p className="text-sm mb-6" style={{ color: 'var(--gx-text-muted)' }}>
+          {project.name || t('label_unnamed_project')} · {project.country || t('label_no_country')} · {project.year}
+        </p>
+      </div>
+
+      {/* Print-only report header */}
+      <div className="gx-only-print" style={{ marginBottom: 24 }}>
+        <div style={{
+          background: '#0d9488',
+          color: '#ffffff',
+          padding: '14px 20px',
+          borderRadius: '6px 6px 0 0',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}>
+          <span style={{ fontWeight: 700, fontSize: '0.9rem', letterSpacing: '0.02em' }}>{t('app_name')}</span>
+          <span style={{ fontSize: '0.72rem', opacity: 0.85 }}>{t('label_print_generated')}</span>
+        </div>
+        <div style={{
+          border: '1px solid #0d9488',
+          borderTop: 'none',
+          borderRadius: '0 0 6px 6px',
+          padding: '16px 20px 14px',
+          background: '#f8fafc',
+        }}>
+          <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0f172a', marginBottom: 6 }}>
+            {t('label_report_title')}
+          </div>
+          <div style={{ fontSize: '0.82rem', color: '#475569', marginBottom: 10 }}>
+            {t('label_report_subtitle')}
+          </div>
+          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', fontSize: '0.78rem' }}>
+            {project.name && (
+              <span><strong style={{ color: '#0f172a' }}>Project:</strong> <span style={{ color: '#475569' }}>{project.name}</span></span>
+            )}
+            {project.country && (
+              <span><strong style={{ color: '#0f172a' }}>Country:</strong> <span style={{ color: '#475569' }}>{project.country}</span></span>
+            )}
+            <span><strong style={{ color: '#0f172a' }}>Year:</strong> <span style={{ color: '#475569' }}>{project.year}</span></span>
+            {project.pathogenName && (
+              <span><strong style={{ color: '#0f172a' }}>Pathogen:</strong> <span style={{ color: '#475569' }}>{project.pathogenName}</span></span>
+            )}
+            <span><strong style={{ color: '#0f172a' }}>Samples/yr:</strong> <span style={{ color: '#475569' }}>{samplesPerYear.toLocaleString()}</span></span>
+          </div>
+        </div>
+      </div>
 
       {/* Main cost per sample card */}
       <div
@@ -372,6 +469,13 @@ export default function Step7() {
           style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
         >
           {t('btn_export_csv')}
+        </button>
+        <button
+          onClick={handleExportExcel}
+          className="px-5 py-2 rounded text-sm font-medium"
+          style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
+        >
+          {t('btn_export_excel')}
         </button>
         <button
           onClick={handleShare}
