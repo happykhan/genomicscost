@@ -61,8 +61,12 @@ function GlobePicker() {
           fontSize: '0.8rem',
         }}
       >
-        <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor">
-          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.33 6h2.01A13.27 13.27 0 006 10c0 1.4.18 2.74.5 4H4.33A7.96 7.96 0 012 10c0-1.44.38-2.8 1.05-4H4.33zm1.5 0h8.34c.37 1.26.58 2.6.58 4s-.21 2.74-.58 4H5.83A12.14 12.14 0 015.25 10c0-1.4.2-2.74.58-4zm9.84 0h.02C16.62 7.2 17 8.56 17 10s-.38 2.8-1.05 4h-1.62c.32-1.26.5-2.6.5-4s-.18-2.74-.5-4h-.67zM10 2.08c.9 0 2.1 1.46 2.84 3.92H7.16C7.9 3.54 9.1 2.08 10 2.08zm0 15.84c-.9 0-2.1-1.46-2.84-3.92h5.68C12.1 16.46 10.9 17.92 10 17.92z" clipRule="evenodd"/>
+        <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="10" cy="10" r="7.5"/>
+          <ellipse cx="10" cy="10" rx="3" ry="7.5"/>
+          <line x1="2.5" y1="10" x2="17.5" y2="10"/>
+          <path d="M3.5 6.5 Q10 4.5 16.5 6.5"/>
+          <path d="M3.5 13.5 Q10 15.5 16.5 13.5"/>
         </svg>
         {lang.toUpperCase()}
       </button>
