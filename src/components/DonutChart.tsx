@@ -70,7 +70,7 @@ export default function DonutChart({ title, data, centerText, formatValue }: Don
       <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap' }}>
         {/* SVG donut */}
         <div style={{ flexShrink: 0 }}>
-          <svg viewBox="0 0 180 180" width="130" height="130">
+          <svg viewBox="0 0 180 180" width="110" height="110">
             {slices.map((s, i) => (
               <path key={i} d={slicePath(s.startDeg, s.endDeg)} fill={s.color} />
             ))}
@@ -85,7 +85,7 @@ export default function DonutChart({ title, data, centerText, formatValue }: Don
         {/* Legend */}
         <div style={{ flex: 1, minWidth: 120, display: 'flex', flexDirection: 'column', gap: 4, paddingTop: 2 }}>
           {slices.map((s, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.67rem' }}>
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.6rem' }}>
               <div style={{ width: 8, height: 8, borderRadius: 1, background: s.color, flexShrink: 0 }} />
               <span style={{ flex: 1, color: 'var(--gx-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {s.label}
