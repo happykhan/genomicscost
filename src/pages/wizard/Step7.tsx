@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { WORKFLOW_STEPS, WORKFLOW_STEP_LABELS } from '../../lib/calculations'
+import LZString from 'lz-string'
 
 function fmt(n: number) {
   return n.toLocaleString('en-US', { maximumFractionDigits: 0 })
@@ -127,9 +128,7 @@ export default function Step7() {
 
   function handleShare() {
     try {
-      // unescape(encodeURIComponent()) converts UTF-8 to Latin-1 bytes safe for btoa
-      // ~3× shorter than btoa(encodeURIComponent()) which double-encodes ASCII chars
-      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(project))))
+      const encoded = LZString.compressToEncodedURIComponent(JSON.stringify(project))
       const url = `${window.location.origin}/#share=${encoded}`
       navigator.clipboard.writeText(url)
       toast.success(t('toast_link_copied'))

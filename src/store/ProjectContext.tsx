@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useMemo, useCallback } from
 import type { Project, SequencerConfig, CostBreakdown } from '../types'
 import { calculateCosts } from '../lib/calculations'
 import { createDefaultProject, createDefaultSequencer } from '../lib/defaults'
+import LZString from 'lz-string'
 
 const STORAGE_KEY = 'genomicscost-projects'
 
@@ -87,7 +88,10 @@ function loadInitialProject(): Project {
     const hash = window.location.hash
     const match = hash.match(/^#share=(.+)$/)
     if (match) {
-      const decoded = JSON.parse(decodeURIComponent(escape(atob(match[1]))))
+      // Try lz-string first (new format), fall back to btoa (legacy links)
+      const raw = LZString.decompressFromEncodedURIComponent(match[1])
+        ?? JSON.parse(decodeURIComponent(escape(atob(match[1]))))
+      const decoded = typeof raw === 'string' ? JSON.parse(raw) : raw
       window.history.replaceState(null, '', window.location.pathname)
       shareProjectLoaded = true
       return migrateProject(decoded)
