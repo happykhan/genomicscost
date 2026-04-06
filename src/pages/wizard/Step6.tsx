@@ -57,8 +57,8 @@ export default function Step6() {
       {/* ── Facility ── */}
       <section className="mb-8">
         <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--gx-text)' }}>{t('field_facility')}</h3>
-        <div className="card overflow-hidden mb-2">
-          <table className="w-full text-sm">
+        <div className="card mb-2" style={{ overflowX: 'auto' }}>
+          <table className="w-full text-sm" style={{ minWidth: 420 }}>
             <thead>
               <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
                 <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_label')}</th>
@@ -100,8 +100,8 @@ export default function Step6() {
       {/* ── Transport ── */}
       <section className="mb-8">
         <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--gx-text)' }}>{t('field_transport')}</h3>
-        <div className="card overflow-hidden mb-2">
-          <table className="w-full text-sm">
+        <div className="card mb-2" style={{ overflowX: 'auto' }}>
+          <table className="w-full text-sm" style={{ minWidth: 300 }}>
             <thead>
               <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
                 <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_label')}</th>
@@ -205,8 +205,8 @@ export default function Step6() {
       {/* ── QMS ── */}
       <section>
         <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--gx-text)' }}>{t('field_qms')} {t('label_optional')}</h3>
-        <div className="card overflow-hidden mb-2">
-          <table className="w-full text-sm">
+        <div className="card mb-2" style={{ overflowX: 'auto' }}>
+          <table className="w-full text-sm" style={{ minWidth: 360 }}>
             <thead>
               <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
                 <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_activity')}</th>

@@ -76,7 +76,7 @@ export default function Step3() {
           <div className="text-xs uppercase tracking-wider mb-2 font-semibold" style={{ color: 'var(--gx-text-muted)' }}>
             {group.label}
           </div>
-          <div className="card overflow-hidden">
+          <div className="card" style={{ overflowX: 'auto' }}>
             <table className="w-full text-sm">
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--gx-border)', background: 'var(--gx-bg-alt)' }}>

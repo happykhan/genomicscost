@@ -243,7 +243,7 @@ export default function Step7() {
       </div>
 
       {/* Summary table — Feature 4: local currency column */}
-      <div className="card overflow-hidden mb-6">
+      <div className="card mb-6" style={{ overflowX: 'auto' }}>
         <table className="w-full text-sm">
           <thead>
             <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
@@ -283,7 +283,7 @@ export default function Step7() {
       </div>
 
       {/* Feature 5: Workflow step breakdown */}
-      <div className="card overflow-hidden mb-6">
+      <div className="card mb-6" style={{ overflowX: 'auto' }}>
         <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--gx-border)', background: 'var(--gx-bg-alt)' }}>
           <h3 className="text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>{t('label_workflow_breakdown')}</h3>
         </div>
