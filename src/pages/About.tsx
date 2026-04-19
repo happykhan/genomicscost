@@ -45,19 +45,21 @@ export default function About() {
 
             <section>
               <h2 className="text-base font-medium mb-2" style={{ color: 'var(--gx-text)' }}>{t('about_citation_title')}</h2>
-              <p style={{ color: 'var(--gx-text-muted)' }}>
-                World Health Organization (2026). Genomics costing tool, 2nd ed. World Health
-                Organization.{' '}
-                <a
-                  href="https://doi.org/10.2471/B09722"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: 'var(--gx-accent)' }}
-                >
-                  https://doi.org/10.2471/B09722
-                </a>
-                . Licence: CC BY-NC-SA 3.0 IGO.
-              </p>
+              <p className="mb-3" style={{ color: 'var(--gx-text-muted)' }}>{t('about_citation_who')}</p>
+              <p style={{ color: 'var(--gx-text-muted)' }}>{t('about_citation_tool')}</p>
+            </section>
+
+            <section>
+              <h2 className="text-base font-medium mb-2" style={{ color: 'var(--gx-text)' }}>{t('about_author_title')}</h2>
+              <p className="mb-2">{t('about_author_body')}</p>
+              <a
+                href="https://cgps.group"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'var(--gx-accent)' }}
+              >
+                {t('about_cgps_link')}
+              </a>
             </section>
 
             <section>
