@@ -26,15 +26,22 @@ export default function Step7() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [showPriceEditor, setShowPriceEditor] = useState(false)
+  const [showAnnualised, setShowAnnualised] = useState(false)
   const { exchangeRate, currency } = project
   const samplesPerYear = project.pathogens.reduce((sum, p) => sum + p.samplesPerYear, 0)
   const showLocalCurrency = exchangeRate !== 1 || currency !== 'USD'
 
-  // Equipment depreciation excluded — it's a capital cost shown separately as establishment cost
+  // Full annualised view adds equipment depreciation back into the total
+  const displayTotal = showAnnualised ? costs.total + costs.equipment : costs.total
+  const displayCostPerSample = samplesPerYear > 0 ? displayTotal / samplesPerYear : 0
+
   const rows = [
     { label: t('label_sequencing_reagents'), value: costs.sequencingReagents },
     { label: t('label_library_prep'), value: costs.libraryPrep },
     { label: t('label_consumables'), value: costs.consumables },
+    ...(showAnnualised && costs.equipment > 0
+      ? [{ label: `${t('label_equipment')} (annualised)`, value: costs.equipment }]
+      : []),
     { label: t('label_personnel'), value: costs.personnel },
     { label: t('label_training'), value: costs.training },
     { label: t('label_facility'), value: costs.facility },
@@ -66,10 +73,10 @@ export default function Step7() {
     const sep = ','
     const lines: string[] = [
       `${t('col_category')}${sep}${t('col_annual_usd')}${sep}${t('col_pct_of_total')}`,
-      ...rows.map(r => `${r.label}${sep}${r.value}${sep}${pct(r.value, costs.total)}`),
-      `${t('label_annual_total')}${sep}${costs.total}${sep}100`,
+      ...rows.map(r => `${r.label}${sep}${r.value}${sep}${pct(r.value, displayTotal)}`),
+      `${t('label_annual_total')}${sep}${displayTotal}${sep}100`,
       '',
-      `${t('label_cost_per_sample')}${sep}${costs.costPerSample}`,
+      `${t('label_cost_per_sample')}${sep}${displayCostPerSample}`,
     ]
     downloadCSV(lines.join('\n'), `${project.name || 'genomics-cost'}-results.csv`)
   }
@@ -84,10 +91,10 @@ export default function Step7() {
       [project.name || t('label_unnamed_project'), project.country || '', project.year],
       [],
       [t('col_category'), t('col_annual_usd'), t('col_pct_of_total')],
-      ...rows.map(r => [r.label, r.value, pct(r.value, costs.total)]),
+      ...rows.map(r => [r.label, r.value, pct(r.value, displayTotal)]),
       [],
-      [t('label_annual_total'), costs.total, 100],
-      [t('label_cost_per_sample'), costs.costPerSample],
+      [t('label_annual_total'), displayTotal, 100],
+      [t('label_cost_per_sample'), displayCostPerSample],
       [t('label_establishment_cost'), costs.establishmentCost],
     ]
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summaryData), 'Summary')
@@ -140,9 +147,37 @@ export default function Step7() {
     <div className="gx-print-region">
       {/* Screen header */}
       <div className="no-print">
-        <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>{t('step7_title')}</h2>
+        <div className="flex items-start justify-between mb-1 flex-wrap gap-3">
+          <h2 className="text-xl font-semibold" style={{ color: 'var(--gx-text)' }}>{t('step7_title')}</h2>
+          {/* Cost view toggle */}
+          <div className="flex items-center gap-1 rounded-lg p-1" style={{ background: 'var(--gx-bg-alt)', border: '1px solid var(--gx-border)' }}>
+            <button
+              onClick={() => setShowAnnualised(false)}
+              className="px-3 py-1 rounded text-xs font-medium transition-all"
+              style={{
+                background: !showAnnualised ? 'var(--gx-accent)' : 'transparent',
+                color: !showAnnualised ? 'var(--gx-bg)' : 'var(--gx-text-muted)',
+                border: 'none', cursor: 'pointer',
+              }}
+            >
+              Running cost
+            </button>
+            <button
+              onClick={() => setShowAnnualised(true)}
+              className="px-3 py-1 rounded text-xs font-medium transition-all"
+              style={{
+                background: showAnnualised ? 'var(--gx-accent)' : 'transparent',
+                color: showAnnualised ? 'var(--gx-bg)' : 'var(--gx-text-muted)',
+                border: 'none', cursor: 'pointer',
+              }}
+            >
+              Full annualised
+            </button>
+          </div>
+        </div>
         <p className="text-sm mb-6" style={{ color: 'var(--gx-text-muted)' }}>
           {project.name || t('label_unnamed_project')} · {project.country || t('label_no_country')} · {project.year}
+          {showAnnualised && <span className="ml-2" style={{ color: 'var(--gx-accent)' }}>· includes equipment depreciation</span>}
         </p>
       </div>
 
@@ -198,11 +233,11 @@ export default function Step7() {
           {t('label_cost_per_sample')}
         </div>
         <div className="text-6xl font-bold mb-1 gx-cost-number">
-          ${fmt(costs.costPerSample)}
+          ${fmt(displayCostPerSample)}
         </div>
         {showLocalCurrency && (
           <div className="text-2xl font-semibold mt-1" style={{ opacity: 0.85 }}>
-            {fmtCurrency(costs.costPerSample * exchangeRate)} {currency}
+            {fmtCurrency(displayCostPerSample * exchangeRate)} {currency}
           </div>
         )}
         <div className="text-sm mt-1" style={{ opacity: 0.75 }}>
@@ -233,7 +268,7 @@ export default function Step7() {
                 ${fmt(row.value)}
               </div>
               <div className="w-10 text-xs text-right flex-shrink-0" style={{ color: 'var(--gx-text-muted)' }}>
-                {pct(row.value, costs.total)}%
+                {pct(row.value, displayTotal)}%
               </div>
             </div>
           ))}
@@ -263,15 +298,15 @@ export default function Step7() {
                     {fmtCurrency(row.value * exchangeRate)}
                   </td>
                 )}
-                <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-text-muted)' }}>{pct(row.value, costs.total)}%</td>
+                <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-text-muted)' }}>{pct(row.value, displayTotal)}%</td>
               </tr>
             ))}
             <tr style={{ borderTop: '2px solid var(--gx-border)', fontWeight: 700 }}>
               <td className="px-4 py-2" style={{ color: 'var(--gx-text)' }}>{t('label_annual_total')}</td>
-              <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-accent)' }}>${fmt(costs.total)}</td>
+              <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-accent)' }}>${fmt(displayTotal)}</td>
               {showLocalCurrency && (
                 <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-accent)' }}>
-                  {fmtCurrency(costs.total * exchangeRate)} {currency}
+                  {fmtCurrency(displayTotal * exchangeRate)} {currency}
                 </td>
               )}
               <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-text-muted)' }}>100%</td>
@@ -349,7 +384,7 @@ export default function Step7() {
       </div>
 
       {/* Charts — 4 donut charts matching WHO Excel Results tab */}
-      {costs.total > 0 && (() => {
+      {displayTotal > 0 && (() => {
         const catData = [
           { label: t('label_sequencing_reagents'), value: costs.sequencingReagents, color: CAT_COLORS[0] },
           { label: t('label_library_prep'),         value: costs.libraryPrep,         color: CAT_COLORS[1] },
@@ -380,13 +415,13 @@ export default function Step7() {
             <DonutChart
               title={t('chart_cost_per_sample_by_category')}
               data={perSampleCatData}
-              centerText={`$${fmtCurrency(costs.costPerSample, 2)}`}
+              centerText={`$${fmtCurrency(displayCostPerSample, 2)}`}
               formatValue={fmtUsd2}
             />
             <DonutChart
               title={t('chart_total_annual_by_category')}
               data={catData}
-              centerText={`$${fmt(costs.total)}`}
+              centerText={`$${fmt(displayTotal)}`}
             />
             <DonutChart
               title={t('chart_cost_per_sample_by_workflow')}
@@ -404,12 +439,12 @@ export default function Step7() {
       })()}
 
       {/* Additional charts: throughput curve, breakeven, sequencer comparison */}
-      {costs.total > 0 && (
+      {displayTotal > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 gx-print-charts-grid">
-          <ThroughputCurve project={project} costPerSample={costs.costPerSample} />
+          <ThroughputCurve project={project} costPerSample={displayCostPerSample} />
           <BreakevenChart
             establishmentCost={costs.establishmentCost}
-            annualRunningCost={costs.total}
+            annualRunningCost={displayTotal}
           />
           {project.sequencers.filter(s => s.enabled).length >= 2 && (
             <div className="sm:col-span-2">
