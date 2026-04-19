@@ -185,7 +185,7 @@ export default function Step1() {
                 {/* Total row */}
                 <tr style={{ borderTop: '2px solid var(--gx-border)', background: 'var(--gx-bg-alt)' }}>
                   <td className="px-3 py-2 text-xs font-semibold" colSpan={3} style={{ color: 'var(--gx-text-muted)' }}>
-                    {t('label_annual_total')}
+                    Total samples/year
                   </td>
                   <td className="px-3 py-2 text-right font-semibold text-sm" style={{ color: 'var(--gx-text)' }}>
                     {totalSamplesPerYear.toLocaleString()}
@@ -201,7 +201,7 @@ export default function Step1() {
             className="mt-3 px-4 py-2 rounded text-sm font-medium"
             style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
           >
-            + {t('btn_add')} pathogen
+            + Add pathogen
           </button>
         </div>
 
