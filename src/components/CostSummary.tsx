@@ -6,11 +6,12 @@ export default function CostSummary() {
   const { costs } = useProject()
   const { t } = useTranslation()
 
-  // Equipment depreciation excluded — capital cost shown separately as establishment cost
   const rows = [
     { label: t('label_sequencing_reagents'), value: costs.sequencingReagents },
     { label: t('label_library_prep'), value: costs.libraryPrep },
     { label: t('label_consumables'), value: costs.consumables },
+    { label: t('label_incidentals'), value: costs.incidentals },
+    { label: t('label_equipment'), value: costs.equipment },
     { label: t('label_personnel'), value: costs.personnel },
     { label: t('label_training'), value: costs.training },
     { label: t('label_facility'), value: costs.facility },

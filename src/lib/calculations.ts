@@ -202,7 +202,7 @@ export function calculateCosts(project: Project): CostBreakdown {
 
   const zero: CostBreakdown = {
     sequencingReagents: 0, libraryPrep: 0, consumables: 0,
-    equipment: 0, establishmentCost: 0, personnel: 0,
+    equipment: 0, incidentals: 0, establishmentCost: 0, personnel: 0,
     facility: 0, transport: 0, bioinformatics: 0, qms: 0, training: 0,
     total: 0, costPerSample: 0,
     workflowBreakdown: Object.fromEntries(WORKFLOW_STEPS.map(s => [s, 0])),
@@ -229,12 +229,18 @@ export function calculateCosts(project: Project): CostBreakdown {
       return sum + qty * (c.unitCostUsd ?? 0)
     }, 0)
 
-  // Feature 2: per-item lifespan for depreciation
+  // WHO GCT: depreciation (age-adjusted) + 15% maintenance, both scaled by pctSequencing
   const annualEquipment = equipment
     .filter(e => e.status === 'buy')
     .reduce((sum, e) => {
       const lifespan = Math.max(1, e.lifespanYears ?? 5)
-      return sum + (e.unitCostUsd ?? 0) * (e.quantity ?? 1) / lifespan
+      const age = Math.max(0, Math.min(e.ageYears ?? 0, lifespan - 1))
+      const remainingLife = Math.max(1, lifespan - age)
+      const totalCost = (e.unitCostUsd ?? 0) * (e.quantity ?? 1)
+      const pct = (e.pctSequencing ?? 100) / 100
+      const depreciation = (totalCost / remainingLife) * pct
+      const maintenance = totalCost * 0.15 * pct
+      return sum + depreciation + maintenance
     }, 0)
 
   // Establishment cost: full purchase price of equipment to buy
@@ -253,7 +259,9 @@ export function calculateCosts(project: Project): CostBreakdown {
     return sum + (f.monthlyCostUsd ?? 0) * 12 * (f.pctSequencing ?? 0) / 100
   }, 0)
 
-  const annualTransport = transport.reduce((sum, t) => sum + (t.annualCostUsd ?? 0), 0)
+  const annualTransport = transport.reduce((sum, t) => {
+    return sum + (t.annualCostUsd ?? 0) * ((t.pctSequencing ?? 100) / 100)
+  }, 0)
 
   let annualBioinformatics = 0
   if (bioinformatics.type === 'cloud') {
@@ -269,17 +277,20 @@ export function calculateCosts(project: Project): CostBreakdown {
     .filter(q => q.enabled)
     .reduce((sum, q) => sum + (q.costUsd ?? 0) * (q.quantity ?? 1) * (q.pctSequencing ?? 100) / 100, 0)
 
-  // Equipment is capital expenditure (one-off), shown separately as establishmentCost.
-  // Depreciation (annualEquipment) is excluded from running cost total.
+  // WHO GCT: 7% incidentals on all reagent/consumable costs
+  const incidentals = (seqCosts.sequencingReagents + seqCosts.libraryPrep + annualConsumables) * 0.07
+
+  // WHO GCT: equipment operational cost (depreciation + maintenance) is always included
   const total =
     seqCosts.sequencingReagents + seqCosts.libraryPrep + annualConsumables +
+    annualEquipment + incidentals +
     annualPersonnel + annualFacility + annualTransport + annualBioinformatics + annualQMS + annualTraining
 
   const costPerSample = samplesPerYear > 0 ? total / samplesPerYear : 0
 
   // ── Feature 5: Workflow step breakdown ──────────────────────────────────────
-  // Personnel, Facility, Transport, QMS, Training are shared evenly across 6 steps
-  const sharedCost = annualPersonnel + annualFacility + annualTransport + annualQMS + annualTraining
+  // Personnel, Facility, Transport, QMS, Training, Equipment, Incidentals are shared evenly across 6 steps
+  const sharedCost = annualPersonnel + annualFacility + annualTransport + annualQMS + annualTraining + annualEquipment + incidentals
   const perStep = sharedCost / WORKFLOW_STEPS.length
 
   const workflowBreakdown: Record<string, number> = Object.fromEntries(WORKFLOW_STEPS.map(s => [s, perStep]))
@@ -297,7 +308,7 @@ export function calculateCosts(project: Project): CostBreakdown {
     }
   })
 
-  // Equipment is capital expenditure — excluded from workflow running cost breakdown.
+  // Equipment operational cost and incidentals are distributed evenly across workflow steps (already in sharedCost).
 
   // Sequencing reagents → sequencing step; library prep → library_prep step
   workflowBreakdown['sequencing'] = (workflowBreakdown['sequencing'] ?? 0) + seqCosts.sequencingReagents
@@ -311,6 +322,7 @@ export function calculateCosts(project: Project): CostBreakdown {
     libraryPrep: seqCosts.libraryPrep,
     consumables: annualConsumables,
     equipment: annualEquipment,
+    incidentals,
     establishmentCost,
     personnel: annualPersonnel,
     facility: annualFacility,

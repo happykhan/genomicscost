@@ -7,13 +7,13 @@
  * Reference: WHO GCT User Manual 2nd ed. 2026
  * Excel: B09722-eng (1).xlsx — the canonical reference tool.
  *
- * KNOWN GAPS (features in the Excel that our tool does not yet implement):
- *   GAP-1: Equipment maintenance cost (Excel: 15%/yr of unit cost; we: $0)
- *   GAP-2: Equipment age field (Excel adjusts depreciation for existing equipment; we: always depreciate from new)
- *   GAP-3: Equipment "% use for sequencing" per item (we apply 100% always)
- *   GAP-4: Transport "% use for sequencing" per item (our TransportItem has no pctSequencing)
- *
- * Tests marked with // GAP-n are expected to diverge once the gap is fixed.
+ * All 6 GAPs identified in the original review have been fixed:
+ *   GAP-1 FIXED: Equipment maintenance cost (15%/yr of unit cost now included)
+ *   GAP-2 FIXED: Equipment age field (depreciation uses remaining_life = lifespan - age)
+ *   GAP-3 FIXED: Equipment "% use for sequencing" per item (pctSequencing field added)
+ *   GAP-4 FIXED: Transport "% use for sequencing" per item (pctSequencing field added)
+ *   GAP-5 FIXED: Incidental consumable costs (7% of reagent/consumable costs)
+ *   GAP-6 FIXED: Equipment always included in total (toggle removed)
  */
 
 import { describe, it, expect } from 'vitest'
@@ -203,12 +203,11 @@ describe('WHO GCT — Consumables', () => {
 })
 
 // ── Section 5: Equipment ─────────────────────────────────────────────────────
-// Excel formula (annual operational cost):
-//   depreciation = (unit_cost × qty) / lifespan_years   [assumes age=0, i.e. new equipment]
-//   maintenance  = (unit_cost × qty) × 0.15             [GAP-1: we don't implement this]
-//   annual_cost  = (depreciation + maintenance) × pct_sequencing / 100  [GAP-3]
-//
-// Our formula: (unit_cost × qty) / lifespan_years  [no maintenance, no age, no % scaling]
+// WHO Excel formula (annual operational cost):
+//   depreciation = (unit_cost × qty) / remaining_life_years
+//   remaining_life = max(1, lifespan - age)
+//   maintenance  = (unit_cost × qty) × 0.15
+//   annual_cost  = (depreciation + maintenance) × pct_sequencing / 100
 // Establishment cost = unit_cost × qty (purchase price; same in Excel)
 
 describe('WHO GCT — Equipment', () => {
@@ -216,9 +215,9 @@ describe('WHO GCT — Equipment', () => {
     const project = makeProject({
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral', genomeSizeMb: 0.03, samplesPerYear: 100 }],
       equipment: [
-        { name: 'iSeq 100', status: 'buy', unitCostUsd: 19_900, quantity: 1, lifespanYears: 8 },
-        { name: '-80 Freezer', status: 'buy', unitCostUsd: 13_719, quantity: 1, lifespanYears: 10 },
-        { name: 'Thermal cycler', status: 'existing', unitCostUsd: 9_000, quantity: 1, lifespanYears: 10 },
+        { name: 'iSeq 100', category: 'sequencing_platform', status: 'buy' as const, unitCostUsd: 19_900, quantity: 1, lifespanYears: 8 },
+        { name: '-80 Freezer', category: 'lab_equipment', status: 'buy' as const, unitCostUsd: 13_719, quantity: 1, lifespanYears: 10 },
+        { name: 'Thermal cycler', category: 'lab_equipment', status: 'have' as const, unitCostUsd: 9_000, quantity: 1, lifespanYears: 10 },
       ],
     })
     const costs = calculateCosts(project)
@@ -226,30 +225,81 @@ describe('WHO GCT — Equipment', () => {
     expect(costs.establishmentCost).toBe(19_900 + 13_719)
   })
 
-  it('annual depreciation = unit_cost / lifespan (no maintenance, no age adjustment)', () => {
-    // NOTE: Excel also adds 15% maintenance/yr (GAP-1) — our tool underestimates annual equipment cost
+  it('annual equipment cost = depreciation + 15% maintenance (age=0, pct=100%)', () => {
     const project = makeProject({
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral', genomeSizeMb: 0.03, samplesPerYear: 100 }],
       equipment: [
-        { name: 'iSeq 100', status: 'buy', unitCostUsd: 19_900, quantity: 1, lifespanYears: 8 },
+        { name: 'iSeq 100', category: 'sequencing_platform', status: 'buy' as const, unitCostUsd: 19_900, quantity: 1, lifespanYears: 8 },
       ],
     })
     const costs = calculateCosts(project)
-    // Our tool: 19,900 / 8 = 2,487.50
-    expect(costs.equipment).toBeCloseTo(19_900 / 8, 2)
-    // Excel would add 15% maintenance: 19,900 × 0.15 = 2,985/yr on top → GAP-1
+    // depreciation = 19,900 / 8 = 2,487.50
+    // maintenance = 19,900 × 0.15 = 2,985
+    // total = 5,472.50
+    expect(costs.equipment).toBeCloseTo(19_900 / 8 + 19_900 * 0.15, 2)
   })
 
-  it('existing equipment does not add to establishment cost', () => {
+  it('age adjustment: remaining life = lifespan - age', () => {
     const project = makeProject({
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral', genomeSizeMb: 0.03, samplesPerYear: 100 }],
       equipment: [
-        { name: 'Thermal cycler', status: 'existing', unitCostUsd: 9_000, quantity: 1, lifespanYears: 10 },
+        // Equipment 3 years old with 8yr lifespan → remaining = 5yr
+        { name: 'iSeq 100', category: 'sequencing_platform', status: 'buy' as const, unitCostUsd: 19_900, quantity: 1, lifespanYears: 8, ageYears: 3 },
+      ],
+    })
+    const costs = calculateCosts(project)
+    // depreciation = 19,900 / (8-3) = 19,900 / 5 = 3,980
+    // maintenance = 19,900 × 0.15 = 2,985
+    // total = 6,965
+    expect(costs.equipment).toBeCloseTo(19_900 / 5 + 19_900 * 0.15, 2)
+  })
+
+  it('pctSequencing scales both depreciation and maintenance', () => {
+    const project = makeProject({
+      pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral', genomeSizeMb: 0.03, samplesPerYear: 100 }],
+      equipment: [
+        { name: 'Centrifuge', category: 'lab_equipment', status: 'buy' as const, unitCostUsd: 10_000, quantity: 1, lifespanYears: 10, ageYears: 0, pctSequencing: 85 },
+      ],
+    })
+    const costs = calculateCosts(project)
+    // depreciation = (10,000 / 10) × 0.85 = 850
+    // maintenance = 10,000 × 0.15 × 0.85 = 1,275
+    // total = 2,125
+    expect(costs.equipment).toBeCloseTo((10_000 / 10 + 10_000 * 0.15) * 0.85, 2)
+  })
+
+  it('existing equipment does not add to establishment cost or annual cost', () => {
+    const project = makeProject({
+      pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral', genomeSizeMb: 0.03, samplesPerYear: 100 }],
+      equipment: [
+        { name: 'Thermal cycler', category: 'lab_equipment', status: 'have' as const, unitCostUsd: 9_000, quantity: 1, lifespanYears: 10 },
       ],
     })
     const costs = calculateCosts(project)
     expect(costs.establishmentCost).toBe(0)
     expect(costs.equipment).toBe(0)
+  })
+
+  it('equipment is included in the running total (GAP-6 fixed)', () => {
+    const project = makeProject({
+      pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral', genomeSizeMb: 0.03, samplesPerYear: 100 }],
+      sequencers: [],
+      consumables: [],
+      equipment: [
+        { name: 'iSeq 100', category: 'sequencing_platform', status: 'buy' as const, unitCostUsd: 19_900, quantity: 1, lifespanYears: 8 },
+      ],
+      personnel: [],
+      facility: [],
+      transport: [],
+      bioinformatics: { type: 'none' as const, cloudPlatform: '', costPerSampleUsd: 0, annualServerCostUsd: 0 },
+      qms: [],
+    })
+    const costs = calculateCosts(project)
+    // Equipment (depreciation + maintenance) must appear in total
+    expect(costs.equipment).toBeGreaterThan(0)
+    // With no other costs, total = equipment + incidentals (incidentals=0 here since no reagents)
+    expect(costs.total).toBeCloseTo(costs.equipment, 5)
+    expect(costs.incidentals).toBe(0)
   })
 })
 
@@ -316,20 +366,32 @@ describe('WHO GCT — Facility', () => {
 
 // ── Section 8: Transport ─────────────────────────────────────────────────────
 // Excel formula: annual_cost × pct_for_sequencing / 100 per item
-// GAP-4: our TransportItem has no pctSequencing — we use 100% always
+// GAP-4 FIXED: TransportItem now has pctSequencing field (default 100%)
 
 describe('WHO GCT — Transport', () => {
-  it('annual transport = sum of annual costs (100% attributed — GAP-4: no pct_sequencing field)', () => {
-    // NOTE: Excel allows per-item % attribution to sequencing; our tool applies 100%
+  it('annual transport = sum of annual costs × pctSequencing (default 100%)', () => {
     const project = makeProject({
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral', genomeSizeMb: 0.03, samplesPerYear: 100 }],
       transport: [
-        { label: 'Regional courier', annualCostUsd: 3_600 },
-        { label: 'Insurance', annualCostUsd: 400 },
+        { label: 'Regional courier', annualCostUsd: 3_600, pctSequencing: 100 },
+        { label: 'Insurance', annualCostUsd: 400, pctSequencing: 100 },
       ],
     })
     const costs = calculateCosts(project)
     expect(costs.transport).toBe(4_000)
+  })
+
+  it('transport pctSequencing scales the attributed cost', () => {
+    const project = makeProject({
+      pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral', genomeSizeMb: 0.03, samplesPerYear: 100 }],
+      transport: [
+        { label: 'Regional courier', annualCostUsd: 3_600, pctSequencing: 80 },
+        { label: 'Insurance', annualCostUsd: 500, pctSequencing: 50 },
+      ],
+    })
+    const costs = calculateCosts(project)
+    // 3600 × 0.80 + 500 × 0.50 = 2880 + 250 = 3130
+    expect(costs.transport).toBeCloseTo(3_130, 2)
   })
 })
 
@@ -343,7 +405,7 @@ describe('WHO GCT — Bioinformatics', () => {
   it('cloud: samples × cost_per_sample', () => {
     const project = makeProject({
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral', genomeSizeMb: 0.03, samplesPerYear: 200 }],
-      bioinformatics: { type: 'cloud', costPerSampleUsd: 5, annualServerCostUsd: 0 },
+      bioinformatics: { type: 'cloud', cloudPlatform: '', costPerSampleUsd: 5, annualServerCostUsd: 0 },
     })
     const costs = calculateCosts(project)
     expect(costs.bioinformatics).toBe(1_000)
@@ -352,7 +414,7 @@ describe('WHO GCT — Bioinformatics', () => {
   it('inhouse: annual server cost', () => {
     const project = makeProject({
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral', genomeSizeMb: 0.03, samplesPerYear: 200 }],
-      bioinformatics: { type: 'inhouse', costPerSampleUsd: 0, annualServerCostUsd: 12_000 },
+      bioinformatics: { type: 'inhouse', cloudPlatform: '', costPerSampleUsd: 0, annualServerCostUsd: 12_000 },
     })
     const costs = calculateCosts(project)
     expect(costs.bioinformatics).toBe(12_000)
@@ -361,7 +423,7 @@ describe('WHO GCT — Bioinformatics', () => {
   it('hybrid: samples × cost_per_sample + annual server', () => {
     const project = makeProject({
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral', genomeSizeMb: 0.03, samplesPerYear: 200 }],
-      bioinformatics: { type: 'hybrid', costPerSampleUsd: 2, annualServerCostUsd: 5_000 },
+      bioinformatics: { type: 'hybrid', cloudPlatform: '', costPerSampleUsd: 2, annualServerCostUsd: 5_000 },
     })
     const costs = calculateCosts(project)
     // 200 × $2 + $5,000 = $5,400
@@ -388,12 +450,48 @@ describe('WHO GCT — QMS', () => {
   })
 })
 
+// ── Section 10b: Incidentals (GAP-5 FIXED) ───────────────────────────────────
+// Excel formula: incidentals = (sequencing_reagents + library_prep + consumables) × 0.07
+// This covers nitrile gloves, lab coats, PPE, and other miscellaneous lab costs.
+
+describe('WHO GCT — Incidentals (7% of reagent/consumable costs)', () => {
+  it('incidentals = 7% of sequencing reagents + library prep + consumables', () => {
+    const project = makeProject({
+      pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral', genomeSizeMb: 0.03, samplesPerYear: 100 }],
+      sequencers: [{
+        platformId: 'illumina', label: 'Sequencer 1',
+        reagentKitName: 'test', reagentKitPrice: 1_000,
+        samplesPerRun: 33, coverageX: 100, bufferPct: 20, retestPct: 0,
+        libPrepKitName: '', libPrepCostPerSample: 50,
+        enrichment: false, controlsPerRun: 0, enabled: true,
+        captureAll: false, minReadsPerSample: 100_000,
+      }],
+      consumables: [{ name: 'Extraction kit', unitCostUsd: 20, quantityPerSample: 0.5, enabled: true }],
+    })
+    const costs = calculateCosts(project)
+    // seqReagents = ceil(100/33) × 1000 = 4 × 1000 = 4000
+    // libPrep = 100 × 50 = 5000
+    // consumables = ceil(50) × 20 = 1000
+    // incidentals = (4000 + 5000 + 1000) × 0.07 = 700
+    expect(costs.incidentals).toBeCloseTo(700, 2)
+  })
+
+  it('incidentals = 0 when no reagent/consumable costs', () => {
+    const project = makeProject({
+      pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral', genomeSizeMb: 0.03, samplesPerYear: 100 }],
+      sequencers: [],
+      consumables: [],
+    })
+    const costs = calculateCosts(project)
+    expect(costs.incidentals).toBe(0)
+  })
+})
+
 // ── Section 11: End-to-end scenario ──────────────────────────────────────────
-// A concrete scenario with all components, verifiable against manual Excel entry.
-// Inputs chosen to produce round numbers for easy cross-checking.
+// A concrete scenario with all components, verifiable against WHO Excel methodology.
 
 describe('WHO GCT — end-to-end scenario', () => {
-  it('matches manually-computed WHO GCT running cost total', () => {
+  it('matches WHO GCT running cost total including equipment and incidentals', () => {
     /**
      * Scenario: SARS-CoV-2 surveillance lab, 100 samples/year
      *
@@ -403,20 +501,22 @@ describe('WHO GCT — end-to-end scenario', () => {
      *     → sequencing reagents = 4 × $1,000 = $4,000
      *     → lib prep = 100 × $50 = $5,000
      *   Consumables: extraction kit 0.5 units/sample @ $20 → ceil(50) × $20 = $1,000
-     *   Equipment: iSeq100 $19,900, 8yr lifespan (to buy)
+     *   Incidentals (GAP-5 FIXED): 7% × ($4,000 + $5,000 + $1,000) = $700
+     *   Equipment: iSeq100 $19,900, 8yr lifespan, age=0, pct=100% (to buy)
      *     → establishment = $19,900
-     *     → depreciation = $19,900/8 = $2,487.50 [excluded from running cost by default]
-     *     → GAP-1: Excel also adds 15% maintenance = $2,985/yr
+     *     → depreciation = $19,900/8 = $2,487.50
+     *     → maintenance = $19,900 × 0.15 = $2,985
+     *     → annual equipment = $5,472.50  [GAP-1, GAP-6 FIXED: now in total]
      *   Personnel: lab manager 50% @ $50,000 → $25,000
      *   Training: $500
      *   Facility: $1,000/mo × 12 × 10% = $1,200
-     *   Transport: $500/yr (100% attributed — GAP-4)
+     *   Transport: $500/yr × 100% pctSequencing = $500  [GAP-4 FIXED]
      *   Bioinformatics: cloud $5/sample → $500
      *   QMS: EQA-NGS $2,300 × 1 × 100% = $2,300
      *
-     * Running cost total (no equipment depreciation):
-     *   $4,000 + $5,000 + $1,000 + $25,000 + $500 + $1,200 + $500 + $500 + $2,300 = $40,000
-     * Cost per sample: $40,000 / 100 = $400.00
+     * WHO running cost total (all components including equipment):
+     *   $4,000 + $5,000 + $1,000 + $700 + $5,472.50 + $25,000 + $500 + $1,200 + $500 + $500 + $2,300 = $46,172.50
+     * Cost per sample: $46,172.50 / 100 = $461.725
      * Establishment cost: $19,900
      */
     const project = makeProject({
@@ -435,7 +535,7 @@ describe('WHO GCT — end-to-end scenario', () => {
         { name: 'DNA extraction kit', unitCostUsd: 20, quantityPerSample: 0.5, enabled: true },
       ],
       equipment: [
-        { name: 'Illumina iSeq 100', status: 'buy', unitCostUsd: 19_900, quantity: 1, lifespanYears: 8 },
+        { name: 'Illumina iSeq 100', category: 'sequencing_platform', status: 'buy' as const, unitCostUsd: 19_900, quantity: 1, lifespanYears: 8, ageYears: 0, pctSequencing: 100 },
       ],
       personnel: [
         { role: 'Lab manager', annualSalaryUsd: 50_000, pctTime: 50, trainingCostUsd: 500 },
@@ -444,9 +544,9 @@ describe('WHO GCT — end-to-end scenario', () => {
         { label: 'Rent + utilities', monthlyCostUsd: 1_000, pctSequencing: 10 },
       ],
       transport: [
-        { label: 'Sample courier', annualCostUsd: 500 },
+        { label: 'Sample courier', annualCostUsd: 500, pctSequencing: 100 },
       ],
-      bioinformatics: { type: 'cloud', costPerSampleUsd: 5, annualServerCostUsd: 0 },
+      bioinformatics: { type: 'cloud' as const, cloudPlatform: '', costPerSampleUsd: 5, annualServerCostUsd: 0 },
       qms: [
         { activity: 'EQA – NGS', costUsd: 2_300, quantity: 1, pctSequencing: 100, enabled: true },
       ],
@@ -458,6 +558,10 @@ describe('WHO GCT — end-to-end scenario', () => {
     expect(costs.sequencingReagents).toBe(4_000)
     expect(costs.libraryPrep).toBe(5_000)
     expect(costs.consumables).toBe(1_000)
+    // Incidentals: 7% × (4000 + 5000 + 1000) = 700
+    expect(costs.incidentals).toBeCloseTo(700, 2)
+    // Equipment: depreciation + maintenance = 19900/8 + 19900*0.15 = 2487.50 + 2985 = 5472.50
+    expect(costs.equipment).toBeCloseTo(19_900 / 8 + 19_900 * 0.15, 2)
     expect(costs.personnel).toBe(25_000)
     expect(costs.training).toBe(500)
     expect(costs.facility).toBe(1_200)
@@ -465,14 +569,12 @@ describe('WHO GCT — end-to-end scenario', () => {
     expect(costs.bioinformatics).toBe(500)
     expect(costs.qms).toBe(2_300)
 
-    // Running cost total (equipment depreciation excluded — it's capital expenditure)
-    expect(costs.total).toBe(40_000)
-    expect(costs.costPerSample).toBe(400)
+    // WHO total includes equipment and incidentals
+    const expectedTotal = 4_000 + 5_000 + 1_000 + 700 + (19_900 / 8 + 19_900 * 0.15) + 25_000 + 500 + 1_200 + 500 + 500 + 2_300
+    expect(costs.total).toBeCloseTo(expectedTotal, 2)
+    expect(costs.costPerSample).toBeCloseTo(expectedTotal / 100, 4)
 
-    // Establishment cost (capital one-off)
+    // Establishment cost (capital one-off, unchanged)
     expect(costs.establishmentCost).toBe(19_900)
-
-    // Depreciation is tracked but NOT in running total
-    expect(costs.equipment).toBeCloseTo(19_900 / 8, 2)
   })
 })

@@ -34,7 +34,7 @@ export default function Step4() {
     updateProject({
       equipment: [
         ...equipment,
-        { name: 'Custom equipment', category: 'lab_equipment', status: 'buy', quantity: 1, unitCostUsd: 0, lifespanYears: 5 },
+        { name: 'Custom equipment', category: 'lab_equipment', status: 'buy', quantity: 1, unitCostUsd: 0, lifespanYears: 5, ageYears: 0, pctSequencing: 100 },
       ],
     })
   }
@@ -57,15 +57,24 @@ export default function Step4() {
           quantity: cat.recommended_quantity ?? 1,
           unitCostUsd: cat.unit_cost_usd ?? 0,
           lifespanYears: cat.category === 'sequencing_platform' ? 10 : 5,
+          ageYears: 0,
+          pctSequencing: 100,
         },
       ],
     })
   }
 
-  // Feature 2: use per-item lifespan for annualisation
+  // WHO GCT: depreciation (age-adjusted) + 15% maintenance × pctSequencing
   const annualTotal = equipment
     .filter(e => e.status === 'buy')
-    .reduce((sum, e) => sum + e.unitCostUsd * e.quantity / Math.max(1, e.lifespanYears ?? 5), 0)
+    .reduce((sum, e) => {
+      const lifespan = Math.max(1, e.lifespanYears ?? 5)
+      const age = Math.max(0, Math.min(e.ageYears ?? 0, lifespan - 1))
+      const remainingLife = Math.max(1, lifespan - age)
+      const totalCost = e.unitCostUsd * e.quantity
+      const pct = (e.pctSequencing ?? 100) / 100
+      return sum + (totalCost / remainingLife) * pct + totalCost * 0.15 * pct
+    }, 0)
 
   const establishmentTotal = equipment
     .filter(e => e.status === 'buy')
@@ -97,7 +106,11 @@ export default function Step4() {
           <div className="flex flex-col gap-2">
             {group.items.map(item => {
               const lifespan = Math.max(1, item.lifespanYears ?? 5)
-              const annual = item.status === 'buy' ? item.unitCostUsd * item.quantity / lifespan : 0
+              const age = Math.max(0, Math.min(item.ageYears ?? 0, lifespan - 1))
+              const remainingLife = Math.max(1, lifespan - age)
+              const totalCost = item.unitCostUsd * item.quantity
+              const pct = (item.pctSequencing ?? 100) / 100
+              const annual = item.status === 'buy' ? ((totalCost / remainingLife) * pct + totalCost * 0.15 * pct) : 0
               return (
                 <div
                   key={item.idx}
@@ -162,6 +175,32 @@ export default function Step4() {
                           min={1}
                           max={30}
                           onChange={e => updateItem(item.idx, { lifespanYears: parseInt(e.target.value) || 5 })}
+                          className={inputClass}
+                          style={{ width: 60, textAlign: 'center' }}
+                        />
+                      </div>
+                      {/* WHO GCT: age of equipment */}
+                      <div className="flex items-center gap-1">
+                        <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_age_yr')}</label>
+                        <input
+                          type="number"
+                          value={item.ageYears ?? 0}
+                          min={0}
+                          max={item.lifespanYears ? item.lifespanYears - 1 : 29}
+                          onChange={e => updateItem(item.idx, { ageYears: parseInt(e.target.value) || 0 })}
+                          className={inputClass}
+                          style={{ width: 60, textAlign: 'center' }}
+                        />
+                      </div>
+                      {/* WHO GCT: % use for sequencing */}
+                      <div className="flex items-center gap-1">
+                        <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_pct_seq')}</label>
+                        <input
+                          type="number"
+                          value={item.pctSequencing ?? 100}
+                          min={0}
+                          max={100}
+                          onChange={e => updateItem(item.idx, { pctSequencing: parseInt(e.target.value) || 0 })}
                           className={inputClass}
                           style={{ width: 60, textAlign: 'center' }}
                         />

@@ -104,6 +104,10 @@ export interface EquipmentItem {
   unitCostUsd: number
   // Feature 2: per-item lifespan
   lifespanYears: number
+  // WHO GCT: age adjustment for depreciation (0 = new)
+  ageYears?: number
+  // WHO GCT: % of use attributed to sequencing (0–100; default 100)
+  pctSequencing?: number
 }
 
 export interface PersonnelItem {
@@ -138,6 +142,8 @@ export interface QMSItem {
 export interface TransportItem {
   label: string
   annualCostUsd: number
+  // WHO GCT: % of cost attributed to sequencing (0–100; default 100)
+  pctSequencing?: number
 }
 
 export interface Project {
@@ -163,7 +169,8 @@ export interface CostBreakdown {
   sequencingReagents: number
   libraryPrep: number
   consumables: number
-  equipment: number       // annualised
+  equipment: number       // annualised (depreciation + maintenance)
+  incidentals: number     // 7% of reagent/consumable costs
   establishmentCost: number  // one-off
   personnel: number
   facility: number

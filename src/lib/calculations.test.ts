@@ -292,16 +292,21 @@ describe('calculateCosts', () => {
     expect(costs.sequencingReagents).toBe(0)
   })
 
-  it('equipment depreciation uses per-item lifespan', () => {
+  it('equipment uses WHO formula: depreciation (age-adjusted) + 15% maintenance × pctSequencing', () => {
     const project = {
       ...createDefaultProject(),
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 100 }],
       sequencers: [],
       consumables: [],
       equipment: [
-        { name: 'iSeq 100', category: 'sequencing_platform', status: 'buy' as const, quantity: 1, unitCostUsd: 19_900, lifespanYears: 10 },
-        { name: 'Thermal cycler', category: 'lab_equipment', status: 'buy' as const, quantity: 1, unitCostUsd: 5_000, lifespanYears: 5 },
-        { name: 'Already owned', category: 'lab_equipment', status: 'have' as const, quantity: 1, unitCostUsd: 999, lifespanYears: 5 },
+        // iSeq: $19,900, lifespan 10yr, age 0 → remaining 10yr, pct 100%
+        //   depreciation = 19900/10 = 1990; maintenance = 19900*0.15 = 2985; total = 4975
+        { name: 'iSeq 100', category: 'sequencing_platform', status: 'buy' as const, quantity: 1, unitCostUsd: 19_900, lifespanYears: 10, ageYears: 0, pctSequencing: 100 },
+        // Thermal cycler: $5,000, lifespan 5yr, age 2yr → remaining 3yr, pct 100%
+        //   depreciation = 5000/3 ≈ 1666.67; maintenance = 5000*0.15 = 750; total ≈ 2416.67
+        { name: 'Thermal cycler', category: 'lab_equipment', status: 'buy' as const, quantity: 1, unitCostUsd: 5_000, lifespanYears: 5, ageYears: 2, pctSequencing: 100 },
+        // Already owned — no cost
+        { name: 'Already owned', category: 'lab_equipment', status: 'have' as const, quantity: 1, unitCostUsd: 999, lifespanYears: 5, ageYears: 0, pctSequencing: 100 },
       ],
       personnel: [],
       facility: [],
@@ -310,8 +315,12 @@ describe('calculateCosts', () => {
       qms: [],
     }
     const costs = calculateCosts(project)
-    // 19900/10 + 5000/5 = 1990 + 1000 = 2990; 'have' items not depreciated
-    expect(costs.equipment).toBeCloseTo(2990, 2)
+    // iSeq: 19900/10 + 19900*0.15 = 1990 + 2985 = 4975
+    // Thermal cycler (age=2, remaining=3): 5000/3 + 5000*0.15 ≈ 1666.67 + 750 = 2416.67
+    // 'have' items: 0
+    expect(costs.equipment).toBeCloseTo(4975 + 5000 / 3 + 750, 1)
+    // Equipment IS now included in total (WHO methodology)
+    expect(costs.total).toBeCloseTo(costs.equipment + costs.incidentals, 5)
     // Establishment = 19900 + 5000 = 24900
     expect(costs.establishmentCost).toBe(24_900)
   })

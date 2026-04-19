@@ -65,6 +65,9 @@ export function createDefaultProject(): Project {
       unitCostUsd: e.unit_cost_usd ?? 0,
       // Feature 2: sequencers get 10-year lifespan, everything else 5
       lifespanYears: e.category === 'sequencing_platform' ? 10 : 5,
+      // WHO GCT: defaults for new fields
+      ageYears: 0,
+      pctSequencing: 100,
     }))
 
   const defaultPersonnel = catalogue.personnel_roles.map((r, i) => ({
@@ -105,8 +108,8 @@ export function createDefaultProject(): Project {
       { label: 'Maintenance', monthlyCostUsd: 100, pctSequencing: 100 },
     ],
     transport: [
-      { label: 'Sample transport', annualCostUsd: 2000 },
-      { label: 'Courier/shipping', annualCostUsd: 1000 },
+      { label: 'Sample transport', annualCostUsd: 2000, pctSequencing: 100 },
+      { label: 'Courier/shipping', annualCostUsd: 1000, pctSequencing: 100 },
     ],
     bioinformatics: {
       type: 'cloud',
