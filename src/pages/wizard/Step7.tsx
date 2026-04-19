@@ -259,7 +259,14 @@ export default function Step7() {
           <tbody>
             {rows.map(row => (
               <tr key={row.label} style={{ borderBottom: '1px solid var(--gx-border)' }}>
-                <td className="px-4 py-2" style={{ color: 'var(--gx-text)' }}>{row.label}</td>
+                <td className="px-4 py-2" style={{ color: 'var(--gx-text)' }}>
+                  {row.label}
+                  {row.label === t('label_equipment') && (
+                    <div className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)', fontWeight: 400 }}>
+                      Annual depreciation + maintenance. One-off capital cost shown below as establishment cost.
+                    </div>
+                  )}
+                </td>
                 <td className="px-4 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>${fmt(row.value)}</td>
                 {showLocalCurrency && (
                   <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-text-muted)' }}>
