@@ -1,4 +1,4 @@
-import type { Project, CostBreakdown, SequencerConfig } from '../types'
+import type { Project, CostBreakdown, SequencerConfig, PathogenEntry } from '../types'
 
 // ── Workflow step constants ───────────────────────────────────────────────────
 
@@ -98,6 +98,74 @@ export function calculateSamplesPerRun(
     if (!genomeSizeMb || !coverageX) return 1
     const mbPerSample = genomeSizeMb * coverageX * buffer
     grossSamples = Math.floor(maxOutputMb / mbPerSample)
+  } else {
+    return 1
+  }
+
+  const effectiveSamples = Math.max(1, grossSamples - Math.max(0, controlsPerRun))
+  return Math.max(1, Math.min(effectiveSamples, barcodingLimit || Infinity))
+}
+
+/**
+ * For a mixed-pathogen run, calculate effective samples per run using a
+ * weighted-average reads-per-sample across all pathogens (weighted by annual count).
+ * This is more accurate than using the largest genome alone.
+ */
+export function calculateSamplesPerRunMulti(
+  pathogens: PathogenEntry[],
+  coverageX: number,
+  readLengthBp: number,
+  kitMaxReads: number,
+  bufferPct: number,
+  barcodingLimit: number,
+  captureAll = false,
+  minReadsCaptureAll = 100_000,
+  controlsPerRun = 0,
+  maxOutputMb = 0,
+): number {
+  if (pathogens.length === 0) return 1
+  if (pathogens.length === 1) {
+    return calculateSamplesPerRun(
+      pathogens[0].genomeSizeMb, coverageX, readLengthBp, kitMaxReads,
+      bufferPct, barcodingLimit, pathogens[0].pathogenType,
+      captureAll, minReadsCaptureAll, controlsPerRun, maxOutputMb,
+    )
+  }
+
+  const totalSamples = pathogens.reduce((s, p) => s + p.samplesPerYear, 0)
+  if (totalSamples === 0) return 1
+  const buffer = 1 + bufferPct / 100
+
+  let grossSamples: number
+
+  if (captureAll) {
+    const readsPerSample = Math.max(1, minReadsCaptureAll)
+    if (kitMaxReads > 0) {
+      grossSamples = Math.floor(kitMaxReads / (readsPerSample * buffer))
+    } else if (maxOutputMb > 0 && readLengthBp > 0) {
+      const mbPerSample = (readsPerSample * readLengthBp * buffer) / 1e6
+      grossSamples = Math.floor(maxOutputMb / mbPerSample)
+    } else {
+      return 1
+    }
+  } else if (kitMaxReads > 0 && readLengthBp > 0) {
+    // Weighted average reads per sample across all pathogens
+    const weightedReadsPerSample = pathogens.reduce((sum, p) => {
+      const proportion = p.samplesPerYear / totalSamples
+      const outputPerSampleBp = p.genomeSizeMb * 1e6 * coverageX
+      const readsFromCoverage = outputPerSampleBp / readLengthBp
+      const minReads = minReadsForPathogen(p.pathogenType, p.genomeSizeMb)
+      return sum + proportion * Math.max(readsFromCoverage, minReads)
+    }, 0)
+    if (weightedReadsPerSample === 0) return 1
+    grossSamples = Math.floor(kitMaxReads / (weightedReadsPerSample * buffer))
+  } else if (maxOutputMb > 0) {
+    const weightedMbPerSample = pathogens.reduce((sum, p) => {
+      const proportion = p.samplesPerYear / totalSamples
+      return sum + proportion * p.genomeSizeMb * coverageX
+    }, 0)
+    if (weightedMbPerSample === 0) return 1
+    grossSamples = Math.floor(maxOutputMb / (weightedMbPerSample * buffer))
   } else {
     return 1
   }

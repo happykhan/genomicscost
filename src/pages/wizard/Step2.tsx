@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react'
 import { useProject } from '../../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
 import { createDefaultSequencer } from '../../lib/defaults'
-import { calculateSamplesPerRun } from '../../lib/calculations'
+import { calculateSamplesPerRunMulti } from '../../lib/calculations'
 import catalogue from '../../data/catalogue.json'
-import type { SequencerConfig } from '../../types'
+import type { SequencerConfig, PathogenEntry } from '../../types'
 import Tooltip from '../../components/Tooltip'
 
 const inputClass = 'border border-[var(--gx-border)] rounded-[var(--gx-radius)] bg-[var(--gx-bg)] text-[var(--gx-text)] p-2 text-sm focus:outline-none focus:border-[var(--gx-accent)] w-full'
@@ -13,21 +13,40 @@ const labelClass = 'text-xs text-[var(--gx-text-muted)] uppercase tracking-wider
 const PLATFORM_IDS = ['illumina', 'ont', 'thermofisher', 'mgi'] as const
 type PlatformId = typeof PLATFORM_IDS[number]
 
+// Maps kit name substrings → catalogue equipment name
+const KIT_TO_INSTRUMENT: Array<{ match: string; instrument: string }> = [
+  { match: 'iSeq 100',              instrument: 'Illumina iSeq 100' },
+  { match: 'MiniSeq',               instrument: 'Illumina MiniSeq' },
+  { match: 'MiSeq',                 instrument: 'Illumina MiSeq' },
+  { match: 'NextSeq 2000 P3',       instrument: 'Illumina NextSeq 2000' },
+  { match: 'NextSeq 2000 P4',       instrument: 'Illumina NextSeq 2000' },
+  { match: 'NextSeq 1000/2000 P1',  instrument: 'Illumina NextSeq 1000' },
+  { match: 'NextSeq 1000/2000 P2',  instrument: 'Illumina NextSeq 1000' },
+  { match: 'NovaSeq',               instrument: 'Illumina NovaSeq 6000' },
+  { match: 'Flongle',               instrument: 'ONT Flongle (Starter Pack)' },
+  { match: 'MinION or GridION',     instrument: 'ONT MinION Mk1B' },
+  { match: 'PromethION Flow Cell Packs (R10.4.1; 4', instrument: 'ONT PromethION 2 Solo (Starter Pack)' },
+  { match: 'PromethION Flow Cell Packs',             instrument: 'ONT PromethION 24 (Project Pack XL)' },
+]
+
+function getInstrumentForKit(kitName: string): string | null {
+  const entry = KIT_TO_INSTRUMENT.find(e => kitName.includes(e.match))
+  return entry?.instrument ?? null
+}
+
 interface SequencerPanelProps {
   index: number
   sequencer: SequencerConfig
-  genomeSizeMb: number
-  pathogenName: string
-  pathogenType: string
+  pathogens: PathogenEntry[]
   canRemove: boolean
 }
 
-function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogenType, canRemove }: SequencerPanelProps) {
+function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPanelProps) {
   const { project, updateSequencer, updateProject } = useProject()
   const { t } = useTranslation()
   const [kitSearch, setKitSearch] = useState('')
 
-  const isCaptureAll = sequencer.captureAll || pathogenName === 'Multiple pathogens (capture-all)'
+  const isCaptureAll = sequencer.captureAll || pathogens.some(p => p.pathogenName === 'Multiple pathogens (capture-all)')
 
   const currentPlatform = catalogue.platforms.find(p => p.id === sequencer.platformId)
   const kits = currentPlatform?.reagent_kits ?? []
@@ -46,17 +65,16 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
   const selectedLibPrepKit = catalogue.library_prep_kits.find(k => k.name === sequencer.libPrepKitName)
   const barcodingLimit = selectedLibPrepKit?.barcoding_limit ?? Infinity
 
-  // Auto-calc samplesPerRun using Annex 2 reads-based formula
+  // Auto-calc samplesPerRun using weighted multi-pathogen formula (Annex 2)
   useEffect(() => {
     if (!selectedKit) return
-    const calculated = calculateSamplesPerRun(
-      genomeSizeMb,
+    const calculated = calculateSamplesPerRunMulti(
+      pathogens,
       sequencer.coverageX,
       selectedKit.read_length_bp ?? 0,
       selectedKit.max_reads_per_flowcell ?? 0,
       sequencer.bufferPct,
       barcodingLimit,
-      pathogenType,
       isCaptureAll,
       sequencer.minReadsPerSample ?? 100_000,
       sequencer.controlsPerRun ?? 0,
@@ -64,9 +82,9 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
     )
     updateSequencer(index, { samplesPerRun: calculated })
   }, [ // eslint-disable-line react-hooks/exhaustive-deps
-    sequencer.reagentKitName, genomeSizeMb, sequencer.coverageX, sequencer.bufferPct,
+    sequencer.reagentKitName, pathogens, sequencer.coverageX, sequencer.bufferPct,
     sequencer.controlsPerRun, isCaptureAll, sequencer.minReadsPerSample,
-    sequencer.libPrepKitName, pathogenType,
+    sequencer.libPrepKitName,
   ])
 
   const PLATFORM_PREFIX: Record<string, string> = {
@@ -76,7 +94,7 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
     mgi: 'MGI',
   }
 
-  function handlePlatformChange(newPlatformId: PlatformId) {
+  function handlePlatformChange(newPlatformId: PlatformId, kitName?: string) {
     const platform = catalogue.platforms.find(p => p.id === newPlatformId)
     const firstKit = platform?.reagent_kits[0]
     updateSequencer(index, {
@@ -99,9 +117,13 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
         e.category === 'sequencing_platform' && e.name.startsWith(prefix)
       )
       if (existing.length > 0) return existing
-      const catItem = catalogue.equipment.find(e =>
-        e.category === 'sequencing_platform' && e.name.startsWith(prefix)
-      )
+
+      // Use kit-specific instrument name if available, otherwise fall back to first for this platform
+      const instrumentName = (pid === newPlatformId && kitName) ? getInstrumentForKit(kitName) : null
+      const catItem = instrumentName
+        ? catalogue.equipment.find(e => e.category === 'sequencing_platform' && e.name === instrumentName)
+        : catalogue.equipment.find(e => e.category === 'sequencing_platform' && e.name.startsWith(prefix))
+
       if (!catItem) return []
       return [{
         name: catItem.name,
@@ -129,7 +151,30 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
       }
     }
     if (kitPlatformId && kitPlatformId !== sequencer.platformId) {
-      handlePlatformChange(kitPlatformId)
+      // Platform switching — handlePlatformChange will also update equipment
+      handlePlatformChange(kitPlatformId, kitName)
+    } else {
+      // Same platform — update equipment to match the specific instrument for this kit
+      const instrumentName = getInstrumentForKit(kitName)
+      if (instrumentName) {
+        const prefix = PLATFORM_PREFIX[sequencer.platformId] ?? sequencer.platformId
+        const catItem = catalogue.equipment.find(e =>
+          e.category === 'sequencing_platform' && e.name === instrumentName
+        )
+        if (catItem) {
+          const nonSeqEquipment = project.equipment.filter(e => e.category !== 'sequencing_platform')
+          const otherSeqEquipment = project.equipment.filter(e =>
+            e.category === 'sequencing_platform' && !e.name.startsWith(prefix)
+          )
+          updateProject({
+            equipment: [
+              ...otherSeqEquipment,
+              { name: catItem.name, category: 'sequencing_platform', status: 'buy' as const, quantity: 1, unitCostUsd: catItem.unit_cost_usd ?? 0, lifespanYears: 10 },
+              ...nonSeqEquipment,
+            ]
+          })
+        }
+      }
     }
     updateSequencer(index, {
       reagentKitName: kitName,
@@ -471,16 +516,7 @@ export default function Step2() {
   const { t } = useTranslation()
   const { sequencers } = project
 
-  // Use the largest genome across all pathogens (conservative: ensures adequate coverage for all)
-  const effectiveGenomeSizeMb = project.pathogens.length > 0
-    ? Math.max(...project.pathogens.map(p => p.genomeSizeMb))
-    : 0.03
-
   const totalSamplesPerYear = project.pathogens.reduce((sum, p) => sum + p.samplesPerYear, 0)
-  const effectivePathogenType = project.pathogens.some(p => p.pathogenType === 'bacterial') ? 'bacterial' : 'viral'
-
-  // Derive a display name from pathogens list
-  const effectivePathogenName = project.pathogens.map(p => p.pathogenName).filter(Boolean).join(', ') || ''
 
   function addSecondSequencer() {
     const newSeq = createDefaultSequencer('Sequencer 2')
@@ -502,9 +538,7 @@ export default function Step2() {
           key={idx}
           index={idx}
           sequencer={seq}
-          genomeSizeMb={effectiveGenomeSizeMb}
-          pathogenName={effectivePathogenName}
-          pathogenType={effectivePathogenType}
+          pathogens={project.pathogens}
           canRemove={sequencers.length > 1}
         />
       ))}
