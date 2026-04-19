@@ -128,7 +128,9 @@ function calcSequencerCosts(
 // ── Main cost calculator ──────────────────────────────────────────────────────
 
 export function calculateCosts(project: Project): CostBreakdown {
-  const { samplesPerYear, sequencers, consumables, equipment, personnel, facility, transport, bioinformatics, qms } = project
+  const { pathogens, sequencers, consumables, equipment, personnel, facility, transport, bioinformatics, qms } = project
+
+  const samplesPerYear = (pathogens ?? []).reduce((sum, p) => sum + p.samplesPerYear, 0)
 
   const zero: CostBreakdown = {
     sequencingReagents: 0, libraryPrep: 0, consumables: 0,
@@ -199,8 +201,10 @@ export function calculateCosts(project: Project): CostBreakdown {
     .filter(q => q.enabled)
     .reduce((sum, q) => sum + (q.costUsd ?? 0) * (q.quantity ?? 1) * (q.pctSequencing ?? 100) / 100, 0)
 
+  // Equipment is capital expenditure (one-off), shown separately as establishmentCost.
+  // Depreciation (annualEquipment) is excluded from running cost total.
   const total =
-    seqCosts.sequencingReagents + seqCosts.libraryPrep + annualConsumables + annualEquipment +
+    seqCosts.sequencingReagents + seqCosts.libraryPrep + annualConsumables +
     annualPersonnel + annualFacility + annualTransport + annualBioinformatics + annualQMS + annualTraining
 
   const costPerSample = samplesPerYear > 0 ? total / samplesPerYear : 0
@@ -225,15 +229,7 @@ export function calculateCosts(project: Project): CostBreakdown {
     }
   })
 
-  // Equipment: assigned by workflow_step from catalogue (only 'Sequencing' currently)
-  equipment.filter(e => e.status === 'buy').forEach(e => {
-    const lifespan = Math.max(1, e.lifespanYears ?? 5)
-    const annualCost = (e.unitCostUsd ?? 0) * (e.quantity ?? 1) / lifespan
-    // Equipment items store category; workflow step not on EquipmentItem directly
-    // Assign sequencing_platform category to sequencing step, rest to sample_receipt
-    const step = e.category === 'sequencing_platform' ? 'sequencing' : 'sample_receipt'
-    workflowBreakdown[step] = (workflowBreakdown[step] ?? 0) + annualCost
-  })
+  // Equipment is capital expenditure — excluded from workflow running cost breakdown.
 
   // Sequencing reagents → sequencing step; library prep → library_prep step
   workflowBreakdown['sequencing'] = (workflowBreakdown['sequencing'] ?? 0) + seqCosts.sequencingReagents

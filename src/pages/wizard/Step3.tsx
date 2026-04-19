@@ -16,7 +16,8 @@ const WORKFLOW_KEYS: Record<string, string> = {
 export default function Step3() {
   const { project, updateProject } = useProject()
   const { t } = useTranslation()
-  const { consumables, samplesPerYear } = project
+  const { consumables } = project
+  const samplesPerYear = project.pathogens.reduce((sum, p) => sum + p.samplesPerYear, 0)
 
   function updateConsumable(index: number, patch: Partial<typeof consumables[0]>) {
     const next = consumables.map((c, i) => i === index ? { ...c, ...patch } : c)

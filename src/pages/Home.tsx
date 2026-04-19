@@ -93,7 +93,7 @@ export default function Home() {
                     {p.name || t('label_unnamed_project')}
                   </div>
                   <div className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)' }}>
-                    {p.country || t('label_no_country')} · {p.pathogenName || t('label_no_pathogen')} · {p.samplesPerYear} {t('label_samples_per_yr')} · {p.year}
+                    {p.country || t('label_no_country')} · {p.pathogens.map(ph => ph.pathogenName).filter(Boolean).join(', ') || t('label_no_pathogen')} · {p.pathogens.reduce((sum, ph) => sum + ph.samplesPerYear, 0)} {t('label_samples_per_yr')} · {p.year}
                   </div>
                 </div>
                 <div className="flex gap-2 flex-shrink-0">

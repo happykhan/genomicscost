@@ -26,7 +26,8 @@ export default function Step7() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [showPriceEditor, setShowPriceEditor] = useState(false)
-  const { exchangeRate, currency, samplesPerYear } = project
+  const { exchangeRate, currency } = project
+  const samplesPerYear = project.pathogens.reduce((sum, p) => sum + p.samplesPerYear, 0)
   const showLocalCurrency = exchangeRate !== 1 || currency !== 'USD'
 
   const rows = [
@@ -180,8 +181,8 @@ export default function Step7() {
               <span><strong style={{ color: '#0f172a' }}>Country:</strong> <span style={{ color: '#475569' }}>{project.country}</span></span>
             )}
             <span><strong style={{ color: '#0f172a' }}>Year:</strong> <span style={{ color: '#475569' }}>{project.year}</span></span>
-            {project.pathogenName && (
-              <span><strong style={{ color: '#0f172a' }}>Pathogen:</strong> <span style={{ color: '#475569' }}>{project.pathogenName}</span></span>
+            {project.pathogens.length > 0 && (
+              <span><strong style={{ color: '#0f172a' }}>Pathogen:</strong> <span style={{ color: '#475569' }}>{project.pathogens.map(p => p.pathogenName).join(', ') || t('label_no_pathogen')}</span></span>
             )}
             <span><strong style={{ color: '#0f172a' }}>Samples/yr:</strong> <span style={{ color: '#475569' }}>{samplesPerYear.toLocaleString()}</span></span>
           </div>
@@ -205,7 +206,7 @@ export default function Step7() {
           </div>
         )}
         <div className="text-sm mt-1" style={{ opacity: 0.75 }}>
-          {samplesPerYear} {t('label_samples_per_yr')} · {project.pathogenName || t('label_no_pathogen')}
+          {samplesPerYear} {t('label_samples_per_yr')} · {project.pathogens.map(p => p.pathogenName).join(', ') || t('label_no_pathogen')}
         </div>
       </div>
 

@@ -254,5 +254,7 @@
   "label_disclaimer_note": "Notes et avertissement",
   "label_disclaimer_text": "Ce rapport a été généré par l'Outil de calcul des coûts génomiques, une implémentation open source indépendante de la méthodologie de l'Outil de calcul des coûts génomiques de l'OMS (2e édition, 2026). Tous les coûts sont des estimations basées sur les données saisies et des prix de référence. Les coûts réels varieront selon le pays, le fournisseur et le contexte institutionnel. Cet outil n'est pas affilié à l'Organisation mondiale de la Santé.",
   "label_salary_attributed": "Salaire attribué",
-  "label_capture_all_mode_short": "Capture-all"
+  "label_capture_all_mode_short": "Capture-all",
+  "placeholder_search_kits": "Rechercher tous les kits…",
+  "label_no_results": "Aucun kit trouvé"
 }

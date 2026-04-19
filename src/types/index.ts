@@ -66,6 +66,13 @@ export interface CloudPlatform {
 
 // ── Project state ─────────────────────────────────────────────────────────────
 
+export interface PathogenEntry {
+  pathogenName: string
+  pathogenType: 'bacterial' | 'viral'
+  genomeSizeMb: number
+  samplesPerYear: number
+}
+
 export interface SequencerConfig {
   platformId: string        // 'illumina' | 'ont' | 'thermofisher' | 'mgi'
   reagentKitName: string
@@ -138,10 +145,7 @@ export interface Project {
   name: string
   country: string
   year: number
-  pathogenType: 'viral' | 'bacterial' | ''
-  pathogenName: string
-  genomeSizeMb: number
-  samplesPerYear: number
+  pathogens: PathogenEntry[]
   // Feature 6: dual sequencer (replaces singular sequencer)
   sequencers: SequencerConfig[]
   consumables: Array<{ name: string; unitCostUsd: number; quantityPerSample: number; enabled: boolean; workflow?: string }>

@@ -105,7 +105,10 @@ describe('defaultBufferPct', () => {
 
 describe('calculateCosts', () => {
   it('returns zero costs when samplesPerYear is 0', () => {
-    const project = { ...createDefaultProject(), samplesPerYear: 0 }
+    const project = {
+      ...createDefaultProject(),
+      pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 0 }],
+    }
     const costs = calculateCosts(project)
     expect(costs.total).toBe(0)
     expect(costs.costPerSample).toBe(0)
@@ -116,7 +119,7 @@ describe('calculateCosts', () => {
     // kit price $526.15 → $3,683.05
     const project = {
       ...createDefaultProject(),
-      samplesPerYear: 200,
+      pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 200 }],
       sequencers: [{
         platformId: 'illumina',
         reagentKitName: 'iSeq 100 i1 Reagent v2 (300-cycle)',
@@ -150,7 +153,7 @@ describe('calculateCosts', () => {
   it('library prep cost: samples × cost per sample', () => {
     const project = {
       ...createDefaultProject(),
-      samplesPerYear: 100,
+      pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 100 }],
       sequencers: [{
         platformId: 'illumina',
         reagentKitName: 'test',
@@ -185,7 +188,7 @@ describe('calculateCosts', () => {
     // 31 per run → ceil(220/31) = 8 runs
     const project = {
       ...createDefaultProject(),
-      samplesPerYear: 200,
+      pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 200 }],
       sequencers: [{
         platformId: 'illumina',
         reagentKitName: 'test',
@@ -226,7 +229,7 @@ describe('calculateCosts', () => {
     // wrong (double subtract): ceil(200/10)=20 runs × $100 = $2000
     const project = {
       ...createDefaultProject(),
-      samplesPerYear: 200,
+      pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 200 }],
       sequencers: [{
         platformId: 'illumina',
         reagentKitName: 'test',
@@ -259,7 +262,7 @@ describe('calculateCosts', () => {
   it('disabled sequencer contributes zero cost', () => {
     const project = {
       ...createDefaultProject(),
-      samplesPerYear: 200,
+      pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 200 }],
       sequencers: [{
         platformId: 'illumina',
         reagentKitName: 'test',
@@ -292,7 +295,7 @@ describe('calculateCosts', () => {
   it('equipment depreciation uses per-item lifespan', () => {
     const project = {
       ...createDefaultProject(),
-      samplesPerYear: 100,
+      pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 100 }],
       sequencers: [],
       consumables: [],
       equipment: [
@@ -316,7 +319,7 @@ describe('calculateCosts', () => {
   it('facility cost: monthly × 12 × pctSequencing', () => {
     const project = {
       ...createDefaultProject(),
-      samplesPerYear: 100,
+      pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 100 }],
       sequencers: [],
       consumables: [],
       equipment: [],
@@ -337,7 +340,7 @@ describe('calculateCosts', () => {
   it('QMS cost: costUsd × quantity × pctSequencing', () => {
     const project = {
       ...createDefaultProject(),
-      samplesPerYear: 100,
+      pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 100 }],
       sequencers: [],
       consumables: [],
       equipment: [],
@@ -359,7 +362,7 @@ describe('calculateCosts', () => {
   it('cloud bioinformatics: costPerSample × samplesPerYear', () => {
     const project = {
       ...createDefaultProject(),
-      samplesPerYear: 200,
+      pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 200 }],
       sequencers: [],
       consumables: [],
       equipment: [],
@@ -376,7 +379,7 @@ describe('calculateCosts', () => {
   it('hybrid bioinformatics: cloud cost + server cost', () => {
     const project = {
       ...createDefaultProject(),
-      samplesPerYear: 200,
+      pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 200 }],
       sequencers: [],
       consumables: [],
       equipment: [],
@@ -394,7 +397,7 @@ describe('calculateCosts', () => {
   it('inhouse bioinformatics: annualServerCostUsd', () => {
     const project = {
       ...createDefaultProject(),
-      samplesPerYear: 200,
+      pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 200 }],
       sequencers: [],
       consumables: [],
       equipment: [],
@@ -411,7 +414,7 @@ describe('calculateCosts', () => {
   it('training costs: sum of trainingCostUsd per personnel role', () => {
     const project = {
       ...createDefaultProject(),
-      samplesPerYear: 100,
+      pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 100 }],
       sequencers: [],
       consumables: [],
       equipment: [],
@@ -433,8 +436,9 @@ describe('calculateCosts', () => {
   it('costPerSample = total / samplesPerYear', () => {
     const project = createDefaultProject()
     const costs = calculateCosts(project)
-    if (project.samplesPerYear > 0) {
-      expect(costs.costPerSample).toBeCloseTo(costs.total / project.samplesPerYear, 10)
+    const totalSamples = project.pathogens.reduce((sum, p) => sum + p.samplesPerYear, 0)
+    if (totalSamples > 0) {
+      expect(costs.costPerSample).toBeCloseTo(costs.total / totalSamples, 10)
     }
   })
 
@@ -466,7 +470,7 @@ describe('calculateCosts', () => {
     }
     const project = {
       ...createDefaultProject(),
-      samplesPerYear: 100,
+      pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 100 }],
       sequencers: [
         { ...seq, label: 'Sequencer 1' },
         { ...seq, label: 'Sequencer 2' },
@@ -482,5 +486,27 @@ describe('calculateCosts', () => {
     const costs = calculateCosts(project)
     // Each: ceil(100/50) = 2 runs × $1000 = $2000; total = $4000
     expect(costs.sequencingReagents).toBe(4_000)
+  })
+
+  it('multi-pathogen: total samplesPerYear is sum across pathogens', () => {
+    const project = {
+      ...createDefaultProject(),
+      pathogens: [
+        { pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 100 },
+        { pathogenName: 'M. tuberculosis', pathogenType: 'bacterial' as const, genomeSizeMb: 4.4, samplesPerYear: 50 },
+      ],
+      sequencers: [],
+      consumables: [],
+      equipment: [],
+      personnel: [],
+      facility: [],
+      transport: [],
+      bioinformatics: { type: 'cloud' as const, cloudPlatform: 'BaseSpace', costPerSampleUsd: 3, annualServerCostUsd: 0 },
+      qms: [],
+    }
+    const costs = calculateCosts(project)
+    // total samples = 150; cloud bio = 150 × $3 = $450
+    expect(costs.bioinformatics).toBe(450)
+    expect(costs.costPerSample).toBeCloseTo(450 / 150, 10)
   })
 })

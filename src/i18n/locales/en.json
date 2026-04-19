@@ -254,5 +254,7 @@
   "label_disclaimer_note": "Notes & Disclaimer",
   "label_disclaimer_text": "This report was generated using the Genomics Costing Tool, an independent open-source implementation of the WHO Genomics Costing Tool methodology (2nd edition, 2026). All costs are estimates based on user-entered data and reference prices. Actual costs will vary by country, supplier, and institutional context. This tool is not affiliated with or endorsed by the World Health Organization.",
   "label_salary_attributed": "Salary attributed",
-  "label_capture_all_mode_short": "Capture-all"
+  "label_capture_all_mode_short": "Capture-all",
+  "placeholder_search_kits": "Search all kits…",
+  "label_no_results": "No kits found"
 }

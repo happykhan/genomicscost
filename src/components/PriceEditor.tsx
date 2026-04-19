@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 import { downloadCSV } from '../lib/download'
 
-type Tab = 'equipment' | 'consumables' | 'personnel'
+type Tab = 'equipment' | 'consumables' | 'personnel' | 'sequencing'
 
 const inputClass = 'border border-[var(--gx-border)] rounded-[var(--gx-radius)] bg-[var(--gx-bg)] text-[var(--gx-text)] px-2 py-1 text-sm focus:outline-none focus:border-[var(--gx-accent)]'
 
@@ -22,9 +22,10 @@ export default function PriceEditor({ onClose }: PriceEditorProps) {
   const [equipment, setEquipment] = useState(project.equipment.map(e => ({ ...e })))
   const [consumables, setConsumables] = useState(project.consumables.map(c => ({ ...c })))
   const [personnel, setPersonnel] = useState(project.personnel.map(p => ({ ...p })))
+  const [sequencers, setSequencers] = useState(project.sequencers.map(s => ({ ...s })))
 
   function handleSave() {
-    updateProject({ equipment, consumables, personnel })
+    updateProject({ equipment, consumables, personnel, sequencers })
     toast.success(t('toast_prices_saved'))
     onClose()
   }
@@ -103,6 +104,7 @@ export default function PriceEditor({ onClose }: PriceEditorProps) {
     { id: 'equipment', label: t('step4_label'), count: equipment.length },
     { id: 'consumables', label: t('step3_label'), count: consumables.length },
     { id: 'personnel', label: t('step5_label'), count: personnel.length },
+    { id: 'sequencing', label: t('step2_label'), count: sequencers.filter(s => s.enabled).length },
   ]
 
   return (
@@ -259,6 +261,50 @@ export default function PriceEditor({ onClose }: PriceEditorProps) {
                     </td>
                   </tr>
                 ))}
+              </tbody>
+            </table>
+          )}
+
+          {tab === 'sequencing' && (
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+              <thead>
+                <tr style={{ background: 'var(--gx-bg-alt)', position: 'sticky', top: 0 }}>
+                  <th style={{ textAlign: 'left', padding: '8px 16px', color: 'var(--gx-text-muted)', fontWeight: 500 }}>{t('col_item')}</th>
+                  <th style={{ textAlign: 'right', padding: '8px 16px', color: 'var(--gx-text-muted)', fontWeight: 500, width: 150 }}>{t('label_reagent_kit_cost_per_run')}</th>
+                  <th style={{ textAlign: 'right', padding: '8px 16px', color: 'var(--gx-text-muted)', fontWeight: 500, width: 160 }}>{t('label_lib_prep_cost_per_sample')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sequencers.map((seq, globalIdx) => {
+                  if (!seq.enabled) return null
+                  const seqLabel = seq.label || `${seq.platformId} / ${seq.reagentKitName}`
+                  return (
+                    <tr key={globalIdx} style={{ borderBottom: '1px solid var(--gx-border)' }}>
+                      <td style={{ padding: '6px 16px', color: 'var(--gx-text)' }}>{seqLabel}</td>
+                      <td style={{ padding: '6px 16px', textAlign: 'right' }}>
+                        <input
+                          type="number"
+                          value={seq.reagentKitPrice}
+                          min={0}
+                          onChange={e => setSequencers(prev => prev.map((x, j) => j === globalIdx ? { ...x, reagentKitPrice: parseFloat(e.target.value) || 0 } : x))}
+                          className={inputClass}
+                          style={{ width: 120, textAlign: 'right' }}
+                        />
+                      </td>
+                      <td style={{ padding: '6px 16px', textAlign: 'right' }}>
+                        <input
+                          type="number"
+                          value={seq.libPrepCostPerSample}
+                          min={0}
+                          step={0.5}
+                          onChange={e => setSequencers(prev => prev.map((x, j) => j === globalIdx ? { ...x, libPrepCostPerSample: parseFloat(e.target.value) || 0 } : x))}
+                          className={inputClass}
+                          style={{ width: 120, textAlign: 'right' }}
+                        />
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           )}

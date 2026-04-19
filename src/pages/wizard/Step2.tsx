@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useProject } from '../../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
 import { createDefaultSequencer } from '../../lib/defaults'
@@ -25,6 +25,7 @@ interface SequencerPanelProps {
 function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogenType, canRemove }: SequencerPanelProps) {
   const { project, updateSequencer, updateProject } = useProject()
   const { t } = useTranslation()
+  const [kitSearch, setKitSearch] = useState('')
 
   const isCaptureAll = sequencer.captureAll || pathogenName === 'Multiple pathogens (capture-all)'
 
@@ -116,10 +117,23 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
   }
 
   function handleKitChange(kitName: string) {
-    const kit = kits.find(k => k.name === kitName)
+    // Look up which platform this kit belongs to across all platforms
+    let kitPlatformId: PlatformId | undefined
+    let kitPrice = 0
+    for (const platform of catalogue.platforms) {
+      const found = platform.reagent_kits.find(k => k.name === kitName)
+      if (found) {
+        kitPlatformId = platform.id as PlatformId
+        kitPrice = found.unit_price_usd ?? 0
+        break
+      }
+    }
+    if (kitPlatformId && kitPlatformId !== sequencer.platformId) {
+      handlePlatformChange(kitPlatformId)
+    }
     updateSequencer(index, {
       reagentKitName: kitName,
-      reagentKitPrice: kit?.unit_price_usd ?? 0,
+      reagentKitPrice: kitPrice || (kits.find(k => k.name === kitName)?.unit_price_usd ?? 0),
     })
   }
 
@@ -151,6 +165,84 @@ function SequencerPanel({ index, sequencer, genomeSizeMb, pathogenName, pathogen
             </button>
           )}
         </div>
+      </div>
+
+      {/* Search all kits */}
+      <div className="mb-4" style={{ position: 'relative' }}>
+        <input
+          type="text"
+          placeholder={t('placeholder_search_kits')}
+          value={kitSearch}
+          onChange={e => setKitSearch(e.target.value)}
+          className={inputClass}
+          style={{ maxWidth: 400 }}
+        />
+        {kitSearch.trim().length > 0 && (() => {
+          const query = kitSearch.trim().toLowerCase()
+          const results = catalogue.platforms.flatMap(p =>
+            p.reagent_kits
+              .filter(k => k.name.toLowerCase().includes(query))
+              .map(k => ({ kitName: k.name, platformId: p.id as PlatformId, platformName: p.name }))
+          ).slice(0, 8)
+          return results.length > 0 ? (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              zIndex: 50,
+              background: 'var(--gx-bg)',
+              border: '1px solid var(--gx-border)',
+              borderRadius: 'var(--gx-radius)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              minWidth: 400,
+              maxWidth: 600,
+              maxHeight: 260,
+              overflowY: 'auto',
+            }}>
+              {results.map((r, i) => (
+                <button
+                  key={i}
+                  onClick={() => {
+                    setKitSearch('')
+                    handleKitChange(r.kitName)
+                  }}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    textAlign: 'left',
+                    padding: '7px 12px',
+                    background: 'none',
+                    border: 'none',
+                    borderBottom: i < results.length - 1 ? '1px solid var(--gx-border)' : 'none',
+                    cursor: 'pointer',
+                    fontSize: '0.82rem',
+                    color: 'var(--gx-text)',
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--gx-bg-alt)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+                >
+                  <span style={{ fontWeight: 500 }}>{r.kitName}</span>
+                  <span style={{ color: 'var(--gx-text-muted)', marginLeft: 8, fontSize: '0.75rem' }}>{r.platformName}</span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              zIndex: 50,
+              background: 'var(--gx-bg)',
+              border: '1px solid var(--gx-border)',
+              borderRadius: 'var(--gx-radius)',
+              padding: '8px 12px',
+              fontSize: '0.82rem',
+              color: 'var(--gx-text-muted)',
+            }}>
+              {t('label_no_results')}
+            </div>
+          )
+        })()}
       </div>
 
       {/* Platform tabs */}
@@ -379,10 +471,24 @@ export default function Step2() {
   const { t } = useTranslation()
   const { sequencers } = project
 
+  // Use the largest genome across all pathogens (conservative: ensures adequate coverage for all)
+  const effectiveGenomeSizeMb = project.pathogens.length > 0
+    ? Math.max(...project.pathogens.map(p => p.genomeSizeMb))
+    : 0.03
+
+  const totalSamplesPerYear = project.pathogens.reduce((sum, p) => sum + p.samplesPerYear, 0)
+  const effectivePathogenType = project.pathogens.some(p => p.pathogenType === 'bacterial') ? 'bacterial' : 'viral'
+
+  // Derive a display name from pathogens list
+  const effectivePathogenName = project.pathogens.map(p => p.pathogenName).filter(Boolean).join(', ') || ''
+
   function addSecondSequencer() {
     const newSeq = createDefaultSequencer('Sequencer 2')
     updateProject({ sequencers: [...sequencers, newSeq] })
   }
+
+  // Suppress unused variable warning — totalSamplesPerYear is available for child components if needed
+  void totalSamplesPerYear
 
   return (
     <div>
@@ -396,9 +502,9 @@ export default function Step2() {
           key={idx}
           index={idx}
           sequencer={seq}
-          genomeSizeMb={project.genomeSizeMb}
-          pathogenName={project.pathogenName}
-          pathogenType={project.pathogenType}
+          genomeSizeMb={effectiveGenomeSizeMb}
+          pathogenName={effectivePathogenName}
+          pathogenType={effectivePathogenType}
           canRemove={sequencers.length > 1}
         />
       ))}
