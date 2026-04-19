@@ -30,7 +30,7 @@ export default function Step6() {
     updateProject({ transport: transport.map((t, i) => i === idx ? { ...t, ...patch } : t) })
   }
   function addTransportRow() {
-    updateProject({ transport: [...transport, { label: 'New transport cost', annualCostUsd: 0 }] })
+    updateProject({ transport: [...transport, { label: 'New transport cost', annualCostUsd: 0, pctSequencing: 100 }] })
   }
   function removeTransportRow(idx: number) {
     updateProject({ transport: transport.filter((_, i) => i !== idx) })
@@ -42,7 +42,7 @@ export default function Step6() {
   }
 
   const facilityTotal = facility.reduce((s, f) => s + f.monthlyCostUsd * 12 * f.pctSequencing / 100, 0)
-  const transportTotal = transport.reduce((s, t) => s + t.annualCostUsd, 0)
+  const transportTotal = transport.reduce((s, t) => s + t.annualCostUsd * (t.pctSequencing ?? 100) / 100, 0)
   const qmsTotal = qms.filter(q => q.enabled).reduce((s, q) => s + q.costUsd * q.quantity, 0)
 
   return (
@@ -99,11 +99,13 @@ export default function Step6() {
       <section className="mb-8">
         <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--gx-text)' }}>{t('field_transport')}</h3>
         <div className="card mb-2" style={{ overflowX: 'auto' }}>
-          <table className="w-full text-sm" style={{ minWidth: 300 }}>
+          <table className="w-full text-sm" style={{ minWidth: 380 }}>
             <thead>
               <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
                 <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_label')}</th>
                 <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}><span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>{t('col_annual_cost_transport')}<Tooltip content={t('tooltip_transport_cost')} /></span></th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_pct_seq')}</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual_attr')}</th>
                 <th className="px-3 py-2"></th>
               </tr>
             </thead>
@@ -115,6 +117,12 @@ export default function Step6() {
                   </td>
                   <td className="px-3 py-2">
                     <input type="number" value={t.annualCostUsd} min={0} onChange={e => updateTransportRow(idx, { annualCostUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 120, textAlign: 'right' }} />
+                  </td>
+                  <td className="px-3 py-2">
+                    <input type="number" value={t.pctSequencing ?? 100} min={0} max={100} onChange={e => updateTransportRow(idx, { pctSequencing: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 70, textAlign: 'right' }} />
+                  </td>
+                  <td className="px-3 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>
+                    {fmt(t.annualCostUsd * (t.pctSequencing ?? 100) / 100)}
                   </td>
                   <td className="px-3 py-2">
                     <button onClick={() => removeTransportRow(idx)} className="text-xs px-2 py-0.5 rounded" style={{ color: 'var(--gx-text-muted)', background: 'none', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>×</button>

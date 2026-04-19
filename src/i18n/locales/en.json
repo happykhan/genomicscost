@@ -69,6 +69,7 @@
   "col_qty": "Qty",
   "col_price_each": "$ each",
   "col_life_yr": "Life (yr)",
+  "col_age_yr": "Age (yr)",
   "label_annual_amortised": "Annual (amortised by lifespan)",
   "label_establishment": "Establishment (one-off)",
   "label_add_catalogue": "Add from catalogue…",
@@ -107,7 +108,8 @@
   "label_sequencing_reagents": "Sequencing reagents",
   "label_library_prep": "Library preparation",
   "label_consumables": "Consumables",
-  "label_equipment": "Equipment (annual)",
+  "label_equipment": "Equipment (depreciation + maintenance)",
+  "label_incidentals": "Incidentals (PPE, consumables)",
   "label_personnel": "Personnel",
   "label_facility": "Facility",
   "label_transport": "Transport",
@@ -254,5 +256,7 @@
   "label_disclaimer_note": "Notes & Disclaimer",
   "label_disclaimer_text": "This report was generated using the Genomics Costing Tool, an independent open-source implementation of the WHO Genomics Costing Tool methodology (2nd edition, 2026). All costs are estimates based on user-entered data and reference prices. Actual costs will vary by country, supplier, and institutional context. This tool is not affiliated with or endorsed by the World Health Organization.",
   "label_salary_attributed": "Salary attributed",
-  "label_capture_all_mode_short": "Capture-all"
+  "label_capture_all_mode_short": "Capture-all",
+  "placeholder_search_kits": "Search all kits…",
+  "label_no_results": "No kits found"
 }

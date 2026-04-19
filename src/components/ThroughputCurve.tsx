@@ -20,18 +20,23 @@ const MULTIPLIERS = [0.1, 0.2, 0.3, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0, 4.
 
 export default function ThroughputCurve({ project, costPerSample }: Props) {
   const { t } = useTranslation()
-  const { samplesPerYear } = project
+  const samplesPerYear = project.pathogens.reduce((sum, p) => sum + p.samplesPerYear, 0)
 
   const points = useMemo(() => {
     if (samplesPerYear <= 0) return []
     return MULTIPLIERS.map(m => {
       const v = Math.max(1, Math.round(samplesPerYear * m))
-      return { x: v, y: calculateCosts({ ...project, samplesPerYear: v }).costPerSample }
+      // Scale each pathogen's samples proportionally
+      const scaledPathogens = project.pathogens.map(p => ({
+        ...p,
+        samplesPerYear: Math.max(1, Math.round(p.samplesPerYear * m)),
+      }))
+      return { x: v, y: calculateCosts({ ...project, pathogens: scaledPathogens }).costPerSample }
     })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [samplesPerYear, project.sequencers, project.equipment, project.personnel,
       project.facility, project.transport, project.bioinformatics, project.qms,
-      project.consumables])
+      project.consumables, project.pathogens])
 
   if (!points.length || samplesPerYear <= 0 || costPerSample <= 0) return null
 

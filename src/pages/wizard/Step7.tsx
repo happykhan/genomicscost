@@ -26,13 +26,15 @@ export default function Step7() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [showPriceEditor, setShowPriceEditor] = useState(false)
-  const { exchangeRate, currency, samplesPerYear } = project
+  const { exchangeRate, currency } = project
+  const samplesPerYear = project.pathogens.reduce((sum, p) => sum + p.samplesPerYear, 0)
   const showLocalCurrency = exchangeRate !== 1 || currency !== 'USD'
 
   const rows = [
     { label: t('label_sequencing_reagents'), value: costs.sequencingReagents },
     { label: t('label_library_prep'), value: costs.libraryPrep },
     { label: t('label_consumables'), value: costs.consumables },
+    { label: t('label_incidentals'), value: costs.incidentals },
     { label: t('label_equipment'), value: costs.equipment },
     { label: t('label_personnel'), value: costs.personnel },
     { label: t('label_training'), value: costs.training },
@@ -139,7 +141,9 @@ export default function Step7() {
     <div className="gx-print-region">
       {/* Screen header */}
       <div className="no-print">
-        <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>{t('step7_title')}</h2>
+        <div className="flex items-start justify-between mb-1 flex-wrap gap-3">
+          <h2 className="text-xl font-semibold" style={{ color: 'var(--gx-text)' }}>{t('step7_title')}</h2>
+        </div>
         <p className="text-sm mb-6" style={{ color: 'var(--gx-text-muted)' }}>
           {project.name || t('label_unnamed_project')} · {project.country || t('label_no_country')} · {project.year}
         </p>
@@ -180,8 +184,8 @@ export default function Step7() {
               <span><strong style={{ color: '#0f172a' }}>Country:</strong> <span style={{ color: '#475569' }}>{project.country}</span></span>
             )}
             <span><strong style={{ color: '#0f172a' }}>Year:</strong> <span style={{ color: '#475569' }}>{project.year}</span></span>
-            {project.pathogenName && (
-              <span><strong style={{ color: '#0f172a' }}>Pathogen:</strong> <span style={{ color: '#475569' }}>{project.pathogenName}</span></span>
+            {project.pathogens.length > 0 && (
+              <span><strong style={{ color: '#0f172a' }}>Pathogen:</strong> <span style={{ color: '#475569' }}>{project.pathogens.map(p => p.pathogenName).join(', ') || t('label_no_pathogen')}</span></span>
             )}
             <span><strong style={{ color: '#0f172a' }}>Samples/yr:</strong> <span style={{ color: '#475569' }}>{samplesPerYear.toLocaleString()}</span></span>
           </div>
@@ -205,7 +209,7 @@ export default function Step7() {
           </div>
         )}
         <div className="text-sm mt-1" style={{ opacity: 0.75 }}>
-          {samplesPerYear} {t('label_samples_per_yr')} · {project.pathogenName || t('label_no_pathogen')}
+          {samplesPerYear} {t('label_samples_per_yr')} · {project.pathogens.map(p => p.pathogenName).join(', ') || t('label_no_pathogen')}
         </div>
       </div>
 
@@ -255,7 +259,14 @@ export default function Step7() {
           <tbody>
             {rows.map(row => (
               <tr key={row.label} style={{ borderBottom: '1px solid var(--gx-border)' }}>
-                <td className="px-4 py-2" style={{ color: 'var(--gx-text)' }}>{row.label}</td>
+                <td className="px-4 py-2" style={{ color: 'var(--gx-text)' }}>
+                  {row.label}
+                  {row.label === t('label_equipment') && (
+                    <div className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)', fontWeight: 400 }}>
+                      Annual depreciation + maintenance. One-off capital cost shown below as establishment cost.
+                    </div>
+                  )}
+                </td>
                 <td className="px-4 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>${fmt(row.value)}</td>
                 {showLocalCurrency && (
                   <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-text-muted)' }}>
@@ -353,6 +364,7 @@ export default function Step7() {
           { label: t('label_sequencing_reagents'), value: costs.sequencingReagents, color: CAT_COLORS[0] },
           { label: t('label_library_prep'),         value: costs.libraryPrep,         color: CAT_COLORS[1] },
           { label: t('label_consumables'),           value: costs.consumables,          color: CAT_COLORS[2] },
+          { label: t('label_incidentals'),           value: costs.incidentals,          color: CAT_COLORS[9] },
           { label: t('label_equipment'),             value: costs.equipment,            color: CAT_COLORS[3] },
           { label: t('label_personnel'),             value: costs.personnel,            color: CAT_COLORS[4] },
           { label: t('label_training'),              value: costs.training,             color: CAT_COLORS[5] },

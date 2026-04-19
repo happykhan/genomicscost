@@ -69,6 +69,7 @@
   "col_qty": "Cant.",
   "col_price_each": "$ c/u",
   "col_life_yr": "Vida útil (años)",
+  "col_age_yr": "Edad (años)",
   "label_annual_amortised": "Anual (amortizado por vida útil)",
   "label_establishment": "Establecimiento (pago único)",
   "label_add_catalogue": "Agregar del catálogo…",
@@ -107,7 +108,8 @@
   "label_sequencing_reagents": "Reactivos de secuenciación",
   "label_library_prep": "Preparación de biblioteca",
   "label_consumables": "Consumibles",
-  "label_equipment": "Equipamiento (anual)",
+  "label_equipment": "Equipamiento (depreciación + mantenimiento)",
+  "label_incidentals": "Gastos incidentales (EPI, consumibles)",
   "label_personnel": "Personal",
   "label_facility": "Instalaciones",
   "label_transport": "Transporte",
@@ -254,5 +256,7 @@
   "label_disclaimer_note": "Notas y aviso legal",
   "label_disclaimer_text": "Este informe fue generado con la Herramienta de costeo genómico, una implementación de código abierto independiente de la metodología de la Herramienta de costeo genómico de la OMS (2.ª edición, 2026). Todos los costos son estimaciones basadas en datos ingresados por el usuario y precios de referencia. Los costos reales variarán según el país, proveedor y contexto institucional. Esta herramienta no está afiliada ni es respaldada por la Organización Mundial de la Salud.",
   "label_salary_attributed": "Salario atribuido",
-  "label_capture_all_mode_short": "Capture-all"
+  "label_capture_all_mode_short": "Capture-all",
+  "placeholder_search_kits": "Buscar todos los kits…",
+  "label_no_results": "No se encontraron kits"
 }

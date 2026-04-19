@@ -23,6 +23,26 @@ const ProjectContext = createContext<ProjectContextValue | null>(null)
 // ── Migration: handle old saved projects that had singular `sequencer` ────────
 function migrateProject(raw: unknown): Project {
   const p = raw as Record<string, unknown>
+
+  // Migrate old single-pathogen fields to pathogens array
+  if (!p.pathogens && p.pathogenName !== undefined) {
+    p.pathogens = [{
+      pathogenName: (p.pathogenName as string) || 'Unknown',
+      pathogenType: (p.pathogenType as string) || 'bacterial',
+      genomeSizeMb: (p.genomeSizeMb as number) || 5,
+      samplesPerYear: (p.samplesPerYear as number) || 100,
+    }]
+  }
+  // Ensure pathogens is always an array
+  if (!Array.isArray(p.pathogens) || p.pathogens.length === 0) {
+    p.pathogens = [{
+      pathogenName: 'SARS-CoV-2',
+      pathogenType: 'viral',
+      genomeSizeMb: 0.03,
+      samplesPerYear: 200,
+    }]
+  }
+
   if (!p.sequencers && p.sequencer) {
     const oldSeq = p.sequencer as SequencerConfig
     p.sequencers = [{

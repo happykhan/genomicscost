@@ -10,6 +10,7 @@ export default function CostSummary() {
     { label: t('label_sequencing_reagents'), value: costs.sequencingReagents },
     { label: t('label_library_prep'), value: costs.libraryPrep },
     { label: t('label_consumables'), value: costs.consumables },
+    { label: t('label_incidentals'), value: costs.incidentals },
     { label: t('label_equipment'), value: costs.equipment },
     { label: t('label_personnel'), value: costs.personnel },
     { label: t('label_training'), value: costs.training },

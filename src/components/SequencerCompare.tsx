@@ -8,7 +8,8 @@ interface Props {
 
 export default function SequencerCompare({ project }: Props) {
   const { t } = useTranslation()
-  const { sequencers, samplesPerYear } = project
+  const { sequencers } = project
+  const samplesPerYear = project.pathogens.reduce((sum, p) => sum + p.samplesPerYear, 0)
 
   const enabled = sequencers.filter(s => s.enabled)
   if (enabled.length < 2) return null

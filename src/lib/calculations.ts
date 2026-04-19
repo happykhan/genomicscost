@@ -1,4 +1,4 @@
-import type { Project, CostBreakdown, SequencerConfig } from '../types'
+import type { Project, CostBreakdown, SequencerConfig, PathogenEntry } from '../types'
 
 // ── Workflow step constants ───────────────────────────────────────────────────
 
@@ -106,6 +106,74 @@ export function calculateSamplesPerRun(
   return Math.max(1, Math.min(effectiveSamples, barcodingLimit || Infinity))
 }
 
+/**
+ * For a mixed-pathogen run, calculate effective samples per run using a
+ * weighted-average reads-per-sample across all pathogens (weighted by annual count).
+ * This is more accurate than using the largest genome alone.
+ */
+export function calculateSamplesPerRunMulti(
+  pathogens: PathogenEntry[],
+  coverageX: number,
+  readLengthBp: number,
+  kitMaxReads: number,
+  bufferPct: number,
+  barcodingLimit: number,
+  captureAll = false,
+  minReadsCaptureAll = 100_000,
+  controlsPerRun = 0,
+  maxOutputMb = 0,
+): number {
+  if (pathogens.length === 0) return 1
+  if (pathogens.length === 1) {
+    return calculateSamplesPerRun(
+      pathogens[0].genomeSizeMb, coverageX, readLengthBp, kitMaxReads,
+      bufferPct, barcodingLimit, pathogens[0].pathogenType,
+      captureAll, minReadsCaptureAll, controlsPerRun, maxOutputMb,
+    )
+  }
+
+  const totalSamples = pathogens.reduce((s, p) => s + p.samplesPerYear, 0)
+  if (totalSamples === 0) return 1
+  const buffer = 1 + bufferPct / 100
+
+  let grossSamples: number
+
+  if (captureAll) {
+    const readsPerSample = Math.max(1, minReadsCaptureAll)
+    if (kitMaxReads > 0) {
+      grossSamples = Math.floor(kitMaxReads / (readsPerSample * buffer))
+    } else if (maxOutputMb > 0 && readLengthBp > 0) {
+      const mbPerSample = (readsPerSample * readLengthBp * buffer) / 1e6
+      grossSamples = Math.floor(maxOutputMb / mbPerSample)
+    } else {
+      return 1
+    }
+  } else if (kitMaxReads > 0 && readLengthBp > 0) {
+    // Weighted average reads per sample across all pathogens
+    const weightedReadsPerSample = pathogens.reduce((sum, p) => {
+      const proportion = p.samplesPerYear / totalSamples
+      const outputPerSampleBp = p.genomeSizeMb * 1e6 * coverageX
+      const readsFromCoverage = outputPerSampleBp / readLengthBp
+      const minReads = minReadsForPathogen(p.pathogenType, p.genomeSizeMb)
+      return sum + proportion * Math.max(readsFromCoverage, minReads)
+    }, 0)
+    if (weightedReadsPerSample === 0) return 1
+    grossSamples = Math.floor(kitMaxReads / (weightedReadsPerSample * buffer))
+  } else if (maxOutputMb > 0) {
+    const weightedMbPerSample = pathogens.reduce((sum, p) => {
+      const proportion = p.samplesPerYear / totalSamples
+      return sum + proportion * p.genomeSizeMb * coverageX
+    }, 0)
+    if (weightedMbPerSample === 0) return 1
+    grossSamples = Math.floor(maxOutputMb / (weightedMbPerSample * buffer))
+  } else {
+    return 1
+  }
+
+  const effectiveSamples = Math.max(1, grossSamples - Math.max(0, controlsPerRun))
+  return Math.max(1, Math.min(effectiveSamples, barcodingLimit || Infinity))
+}
+
 // ── Per-sequencer cost calculator ─────────────────────────────────────────────
 
 function calcSequencerCosts(
@@ -128,11 +196,13 @@ function calcSequencerCosts(
 // ── Main cost calculator ──────────────────────────────────────────────────────
 
 export function calculateCosts(project: Project): CostBreakdown {
-  const { samplesPerYear, sequencers, consumables, equipment, personnel, facility, transport, bioinformatics, qms } = project
+  const { pathogens, sequencers, consumables, equipment, personnel, facility, transport, bioinformatics, qms } = project
+
+  const samplesPerYear = (pathogens ?? []).reduce((sum, p) => sum + p.samplesPerYear, 0)
 
   const zero: CostBreakdown = {
     sequencingReagents: 0, libraryPrep: 0, consumables: 0,
-    equipment: 0, establishmentCost: 0, personnel: 0,
+    equipment: 0, incidentals: 0, establishmentCost: 0, personnel: 0,
     facility: 0, transport: 0, bioinformatics: 0, qms: 0, training: 0,
     total: 0, costPerSample: 0,
     workflowBreakdown: Object.fromEntries(WORKFLOW_STEPS.map(s => [s, 0])),
@@ -159,12 +229,18 @@ export function calculateCosts(project: Project): CostBreakdown {
       return sum + qty * (c.unitCostUsd ?? 0)
     }, 0)
 
-  // Feature 2: per-item lifespan for depreciation
+  // WHO GCT: depreciation (age-adjusted) + 15% maintenance, both scaled by pctSequencing
   const annualEquipment = equipment
     .filter(e => e.status === 'buy')
     .reduce((sum, e) => {
       const lifespan = Math.max(1, e.lifespanYears ?? 5)
-      return sum + (e.unitCostUsd ?? 0) * (e.quantity ?? 1) / lifespan
+      const age = Math.max(0, Math.min(e.ageYears ?? 0, lifespan - 1))
+      const remainingLife = Math.max(1, lifespan - age)
+      const totalCost = (e.unitCostUsd ?? 0) * (e.quantity ?? 1)
+      const pct = (e.pctSequencing ?? 100) / 100
+      const depreciation = (totalCost / remainingLife) * pct
+      const maintenance = totalCost * 0.15 * pct
+      return sum + depreciation + maintenance
     }, 0)
 
   // Establishment cost: full purchase price of equipment to buy
@@ -183,7 +259,9 @@ export function calculateCosts(project: Project): CostBreakdown {
     return sum + (f.monthlyCostUsd ?? 0) * 12 * (f.pctSequencing ?? 0) / 100
   }, 0)
 
-  const annualTransport = transport.reduce((sum, t) => sum + (t.annualCostUsd ?? 0), 0)
+  const annualTransport = transport.reduce((sum, t) => {
+    return sum + (t.annualCostUsd ?? 0) * ((t.pctSequencing ?? 100) / 100)
+  }, 0)
 
   let annualBioinformatics = 0
   if (bioinformatics.type === 'cloud') {
@@ -199,15 +277,20 @@ export function calculateCosts(project: Project): CostBreakdown {
     .filter(q => q.enabled)
     .reduce((sum, q) => sum + (q.costUsd ?? 0) * (q.quantity ?? 1) * (q.pctSequencing ?? 100) / 100, 0)
 
+  // WHO GCT: 7% incidentals on all reagent/consumable costs
+  const incidentals = (seqCosts.sequencingReagents + seqCosts.libraryPrep + annualConsumables) * 0.07
+
+  // WHO GCT: equipment operational cost (depreciation + maintenance) is always included
   const total =
-    seqCosts.sequencingReagents + seqCosts.libraryPrep + annualConsumables + annualEquipment +
+    seqCosts.sequencingReagents + seqCosts.libraryPrep + annualConsumables +
+    annualEquipment + incidentals +
     annualPersonnel + annualFacility + annualTransport + annualBioinformatics + annualQMS + annualTraining
 
   const costPerSample = samplesPerYear > 0 ? total / samplesPerYear : 0
 
   // ── Feature 5: Workflow step breakdown ──────────────────────────────────────
-  // Personnel, Facility, Transport, QMS, Training are shared evenly across 6 steps
-  const sharedCost = annualPersonnel + annualFacility + annualTransport + annualQMS + annualTraining
+  // Personnel, Facility, Transport, QMS, Training, Equipment, Incidentals are shared evenly across 6 steps
+  const sharedCost = annualPersonnel + annualFacility + annualTransport + annualQMS + annualTraining + annualEquipment + incidentals
   const perStep = sharedCost / WORKFLOW_STEPS.length
 
   const workflowBreakdown: Record<string, number> = Object.fromEntries(WORKFLOW_STEPS.map(s => [s, perStep]))
@@ -225,15 +308,7 @@ export function calculateCosts(project: Project): CostBreakdown {
     }
   })
 
-  // Equipment: assigned by workflow_step from catalogue (only 'Sequencing' currently)
-  equipment.filter(e => e.status === 'buy').forEach(e => {
-    const lifespan = Math.max(1, e.lifespanYears ?? 5)
-    const annualCost = (e.unitCostUsd ?? 0) * (e.quantity ?? 1) / lifespan
-    // Equipment items store category; workflow step not on EquipmentItem directly
-    // Assign sequencing_platform category to sequencing step, rest to sample_receipt
-    const step = e.category === 'sequencing_platform' ? 'sequencing' : 'sample_receipt'
-    workflowBreakdown[step] = (workflowBreakdown[step] ?? 0) + annualCost
-  })
+  // Equipment operational cost and incidentals are distributed evenly across workflow steps (already in sharedCost).
 
   // Sequencing reagents → sequencing step; library prep → library_prep step
   workflowBreakdown['sequencing'] = (workflowBreakdown['sequencing'] ?? 0) + seqCosts.sequencingReagents
@@ -247,6 +322,7 @@ export function calculateCosts(project: Project): CostBreakdown {
     libraryPrep: seqCosts.libraryPrep,
     consumables: annualConsumables,
     equipment: annualEquipment,
+    incidentals,
     establishmentCost,
     personnel: annualPersonnel,
     facility: annualFacility,

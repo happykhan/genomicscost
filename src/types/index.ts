@@ -66,6 +66,13 @@ export interface CloudPlatform {
 
 // ── Project state ─────────────────────────────────────────────────────────────
 
+export interface PathogenEntry {
+  pathogenName: string
+  pathogenType: 'bacterial' | 'viral'
+  genomeSizeMb: number
+  samplesPerYear: number
+}
+
 export interface SequencerConfig {
   platformId: string        // 'illumina' | 'ont' | 'thermofisher' | 'mgi'
   reagentKitName: string
@@ -97,6 +104,10 @@ export interface EquipmentItem {
   unitCostUsd: number
   // Feature 2: per-item lifespan
   lifespanYears: number
+  // WHO GCT: age adjustment for depreciation (0 = new)
+  ageYears?: number
+  // WHO GCT: % of use attributed to sequencing (0–100; default 100)
+  pctSequencing?: number
 }
 
 export interface PersonnelItem {
@@ -131,6 +142,8 @@ export interface QMSItem {
 export interface TransportItem {
   label: string
   annualCostUsd: number
+  // WHO GCT: % of cost attributed to sequencing (0–100; default 100)
+  pctSequencing?: number
 }
 
 export interface Project {
@@ -138,10 +151,7 @@ export interface Project {
   name: string
   country: string
   year: number
-  pathogenType: 'viral' | 'bacterial' | ''
-  pathogenName: string
-  genomeSizeMb: number
-  samplesPerYear: number
+  pathogens: PathogenEntry[]
   // Feature 6: dual sequencer (replaces singular sequencer)
   sequencers: SequencerConfig[]
   consumables: Array<{ name: string; unitCostUsd: number; quantityPerSample: number; enabled: boolean; workflow?: string }>
@@ -159,7 +169,8 @@ export interface CostBreakdown {
   sequencingReagents: number
   libraryPrep: number
   consumables: number
-  equipment: number       // annualised
+  equipment: number       // annualised (depreciation + maintenance)
+  incidentals: number     // 7% of reagent/consumable costs
   establishmentCost: number  // one-off
   personnel: number
   facility: number
