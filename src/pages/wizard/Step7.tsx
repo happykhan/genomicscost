@@ -30,11 +30,11 @@ export default function Step7() {
   const samplesPerYear = project.pathogens.reduce((sum, p) => sum + p.samplesPerYear, 0)
   const showLocalCurrency = exchangeRate !== 1 || currency !== 'USD'
 
+  // Equipment depreciation excluded — it's a capital cost shown separately as establishment cost
   const rows = [
     { label: t('label_sequencing_reagents'), value: costs.sequencingReagents },
     { label: t('label_library_prep'), value: costs.libraryPrep },
     { label: t('label_consumables'), value: costs.consumables },
-    { label: t('label_equipment'), value: costs.equipment },
     { label: t('label_personnel'), value: costs.personnel },
     { label: t('label_training'), value: costs.training },
     { label: t('label_facility'), value: costs.facility },
@@ -354,13 +354,12 @@ export default function Step7() {
           { label: t('label_sequencing_reagents'), value: costs.sequencingReagents, color: CAT_COLORS[0] },
           { label: t('label_library_prep'),         value: costs.libraryPrep,         color: CAT_COLORS[1] },
           { label: t('label_consumables'),           value: costs.consumables,          color: CAT_COLORS[2] },
-          { label: t('label_equipment'),             value: costs.equipment,            color: CAT_COLORS[3] },
-          { label: t('label_personnel'),             value: costs.personnel,            color: CAT_COLORS[4] },
-          { label: t('label_training'),              value: costs.training,             color: CAT_COLORS[5] },
-          { label: t('label_facility'),              value: costs.facility,             color: CAT_COLORS[6] },
-          { label: t('label_transport'),             value: costs.transport,            color: CAT_COLORS[7] },
-          { label: t('label_bioinformatics'),        value: costs.bioinformatics,       color: CAT_COLORS[8] },
-          { label: t('label_qms'),                   value: costs.qms,                  color: CAT_COLORS[9] },
+          { label: t('label_personnel'),             value: costs.personnel,            color: CAT_COLORS[3] },
+          { label: t('label_training'),              value: costs.training,             color: CAT_COLORS[4] },
+          { label: t('label_facility'),              value: costs.facility,             color: CAT_COLORS[5] },
+          { label: t('label_transport'),             value: costs.transport,            color: CAT_COLORS[6] },
+          { label: t('label_bioinformatics'),        value: costs.bioinformatics,       color: CAT_COLORS[7] },
+          { label: t('label_qms'),                   value: costs.qms,                  color: CAT_COLORS[8] },
         ]
         const perSampleCatData = catData.map(d => ({
           ...d,
