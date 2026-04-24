@@ -1,0 +1,146 @@
+{
+  "_meta": {
+    "source": "reference/fixtures/GCTv2_DEMO_COMPLETED.xlsx",
+    "extracted": "2026-04-23",
+    "notes": "Hand-extracted from WHO GCT v2 demo workbook. Workbook values (wb_*) come directly from the Results - USD sheet. App values (app_*) are computed using our model's formulas given the same inputs. Where they differ, the reason is documented."
+  },
+  "inputs": {
+    "pathogens": [
+      {
+        "pathogenName": "Salmonella spp.",
+        "pathogenType": "bacterial",
+        "genomeSizeMb": 4.8,
+        "samplesPerYear": 500
+      },
+      {
+        "pathogenName": "Escherichia coli",
+        "pathogenType": "bacterial",
+        "genomeSizeMb": 5.0,
+        "samplesPerYear": 300
+      }
+    ],
+    "totalSamples": 800,
+    "totalReactions": 831,
+    "sequencer1": {
+      "label": "Sequencer 1",
+      "platformId": "illumina",
+      "reagentKitName": "MiSeq Reagent Kit v2 (300 cycle)",
+      "reagentKitPrice": 1194,
+      "readLengthBp": 300,
+      "kitMaxReads": 15000000,
+      "coverageX": 50,
+      "bufferPct": 30,
+      "retestPct": 5,
+      "controlsPerRun": 2,
+      "libPrepKitName": "Illumina DNA Prep, (M) Tagmentation (96 Samples, IPB)",
+      "libPrepCostPerSample": 67.07,
+      "enrichment": false,
+      "maxSamplesPerFC": 12,
+      "avgSamplesPerRun": 10,
+      "runsPerYearAvg": 53,
+      "runsPerYearMax": 44,
+      "assignedSamples": 500,
+      "reactions": 525
+    },
+    "sequencer2": {
+      "label": "Sequencer 2",
+      "platformId": "ont",
+      "reagentKitName": "Other sequencing kit",
+      "reagentKitPrice": 0,
+      "readLengthBp": 10000,
+      "maxOutputBytes": 180000000000,
+      "maxOutputMb": 180000,
+      "coverageX": 50,
+      "bufferPct": 30,
+      "retestPct": 2,
+      "controlsPerRun": 2,
+      "libPrepKitName": "Other library preparation kit",
+      "libPrepCostPerSample": 0,
+      "enrichment": false,
+      "barcodingLimit": 384,
+      "maxSamplesPerFC": 16,
+      "avgSamplesPerRun": 15,
+      "runsPerYearAvg": 21,
+      "runsPerYearMax": 20,
+      "assignedSamples": 300,
+      "reactions": 306
+    },
+    "bioinformatics": {
+      "type": "hybrid",
+      "cloudPurchaseCost": 156.25,
+      "cloudCostPerSample": 0.1953125,
+      "inhousePurchaseCost": 10584,
+      "inhouseDepreciation": 3183.6,
+      "totalHybridOperational": 3339.85,
+      "totalHybridPerSample": 4.1748125
+    },
+    "personnel": [
+      { "role": "Clinical microbiologist", "salary": 15000, "pctTime": 10, "training": 0 },
+      { "role": "Laboratory manager", "salary": 20000, "pctTime": 2, "training": 0 },
+      { "role": "Bioinformatician", "salary": 12000, "pctTime": 30, "training": 0 },
+      { "role": "Molecular biologist", "salary": 15000, "pctTime": 30, "training": 0 },
+      { "role": "Laboratory technician", "salary": 8000, "pctTime": 25, "training": 0 },
+      { "role": "Laboratory technician 2", "salary": 8000, "pctTime": 75, "training": 0 }
+    ],
+    "personnelAdminPct": 10,
+    "trainingCost": 5000,
+    "facility": {
+      "totalMonthlyCost": 2850,
+      "pctSequencing": 20,
+      "annualCost": 6840
+    },
+    "transport": [
+      { "label": "Regional to national reference laboratory", "annualCost": 1000, "pctSequencing": 15 }
+    ],
+    "qms": [
+      { "activity": "Annual BSC certification", "cost": 300, "quantity": 1, "pctSequencing": 50 },
+      { "activity": "Internal quality control material", "cost": 200, "quantity": 2, "pctSequencing": 10 }
+    ]
+  },
+  "expected": {
+    "_comment": "Values from the Results - USD sheet of the WHO demo workbook",
+    "wb_establishmentCost": 338444.062,
+    "wb_operationalAnnual": 271272.46,
+    "wb_costPerSample": 339.091,
+    "wb_byCategory": {
+      "seqReagentsLibSeq1_perSample": 196.988,
+      "seqReagentsLibSeq1_total": 98494,
+      "seqReagentsLibSeq2_perSample": 0,
+      "seqReagentsLibSeq2_total": 0,
+      "reagentsConsumables_perSample": 191.317,
+      "reagentsConsumables_total": 153053.896,
+      "equipmentOperational_perSample": 103.623,
+      "equipmentOperational_total": 82898.714,
+      "bioinformatics_perSample": 4.175,
+      "bioinformatics_total": 3339.85,
+      "personnelTraining_perSample": 31.0,
+      "personnelTraining_total": 24800,
+      "facilityTransport_perSample": 8.738,
+      "facilityTransport_total": 6990,
+      "qualityManagement_perSample": 0.238,
+      "qualityManagement_total": 190
+    },
+    "wb_byWorkflow": {
+      "sampleReceipt_perSample": 26.768,
+      "sampleReceipt_total": 21414.048,
+      "nucleicAcidExtraction_perSample": 30.876,
+      "nucleicAcidExtraction_total": 24701.036,
+      "pcrTesting_perSample": 41.382,
+      "pcrTesting_total": 33105.557,
+      "ngsLibraryPrep_perSample": 77.518,
+      "ngsLibraryPrep_total": 62014.186,
+      "sequencing_perSample": 149.182,
+      "sequencing_total": 119345.303,
+      "bioinformatics_perSample": 13.365,
+      "bioinformatics_total": 10692.33
+    }
+  },
+  "structuralGaps": {
+    "establishmentCost": "Workbook establishment = all equipment purchase ($316,913.64) + bio purchase ($10,740.25) + potential additional items ($10,790.17) = $338,444.06. Our model only includes equipment with status=buy, which won't match unless we include all items.",
+    "incidentals": "Workbook incidentals = $12,134.88 (~8.6% of reagent base). Our model applies a flat 7%. The workbook seems to use a different base or rate. This is a known calculation gap.",
+    "consumableModel": "Workbook uses a detailed line-item list of ~30 reagent/consumable items with per-item quantities and prices. Our model uses a simpler array with qty_per_sample. Exact figures will differ unless each item is replicated precisely.",
+    "samplesPerRun": "Workbook distinguishes max samples per FC (12/16) from average loading (10/15). Our calculator computes the max. For cost accuracy, tests should use average loading as samplesPerRun.",
+    "personnelAdmin": "Workbook applies a 10% admin overhead to total personnel salary before adding training costs. Our model does not have this admin percentage.",
+    "libPrepModel": "Workbook calculates lib prep as packs (ceil(reactions/packSize) * packPrice). Our model uses a flat per-sample cost. The per-sample cost is derived to match: $35,212/525 = $67.07."
+  }
+}

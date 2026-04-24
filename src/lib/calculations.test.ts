@@ -90,6 +90,63 @@ describe('calculateSamplesPerRun', () => {
   })
 })
 
+// ── WHO demo workbook: "Other" custom kit on ONT GridION ─────────────────────
+// The workbook specifies a custom ONT kit with user-supplied specs:
+//   read_length = 10,000 bp, max_output = 180 GB, barcoding = 384
+// The WHO workbook derives kitMaxReads = max_output_bytes / read_length_bp
+//   = 180,000,000,000 / 10,000 = 18,000,000 reads
+// Our calculateSamplesPerRun uses the reads-based path when kitMaxReads > 0 && readLengthBp > 0.
+
+describe('calculateSamplesPerRun — ONT custom kit (WHO demo workbook Seq 2)', () => {
+  // E. coli: 5 Mb bacterial, 50× coverage, 30% buffer, 2 controls
+  // Custom kit: 18M reads derived from 180GB/10kbp, barcoding limit 384
+  const CUSTOM_KIT_READS = 18_000_000
+  const CUSTOM_READ_LEN = 10_000
+
+  it('max samples per flowcell = 16 (matches workbook row C24)', () => {
+    // readsFromCoverage = 5e6 × 50 / 10,000 = 25,000
+    // minReads(bacterial, 5.0) = 750,000  (5 <= 5)
+    // readsPerSample = max(25,000, 750,000) = 750,000
+    // readsWithBuffer = 750,000 × 1.30 = 975,000
+    // grossSamples = floor(18,000,000 / 975,000) = 18
+    // effectiveSamples = 18 − 2 = 16
+    // min(16, 384) = 16
+    const result = calculateSamplesPerRun(
+      5.0, 50, CUSTOM_READ_LEN, CUSTOM_KIT_READS, 30, 384,
+      'bacterial', false, 100_000, 2,
+    )
+    expect(result).toBe(16)
+  })
+
+  it('maxOutputMb fallback gives a different (higher) result — demonstrates why kitMaxReads is needed', () => {
+    // Using only maxOutputMb = 180,000: Mb-based path
+    //   mbPerSample = 5 × 50 × 1.30 = 325
+    //   grossSamples = floor(180,000 / 325) = 553
+    //   effective = 553 − 2 = 551, capped at 384
+    const result = calculateSamplesPerRun(
+      5.0, 50, 0, 0, 30, 384,
+      'bacterial', false, 100_000, 2, 180_000,
+    )
+    expect(result).toBe(384)
+  })
+
+  it('Salmonella on MiSeq v2 300-cycle gives 12 max samples per FC (workbook row C24)', () => {
+    // 4.8 Mb bacterial, 50×, 30% buffer, 2 controls
+    // MiSeq v2 300-cycle: 15M reads, 300 bp
+    // readsFromCoverage = 4.8e6 × 50 / 300 = 800,000
+    // minReads(bacterial, 4.8) = 750,000
+    // readsPerSample = max(800,000, 750,000) = 800,000
+    // readsWithBuffer = 800,000 × 1.30 = 1,040,000
+    // grossSamples = floor(15,000,000 / 1,040,000) = 14
+    // effectiveSamples = 14 − 2 = 12
+    const result = calculateSamplesPerRun(
+      4.8, 50, 300, 15_000_000, 30, 384,
+      'bacterial', false, 100_000, 2,
+    )
+    expect(result).toBe(12)
+  })
+})
+
 // ── defaultBufferPct ──────────────────────────────────────────────────────────
 
 describe('defaultBufferPct', () => {

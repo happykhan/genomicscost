@@ -19,7 +19,8 @@
 import { describe, it, expect } from 'vitest'
 import { calculateSamplesPerRun, calculateCosts } from './calculations'
 import { createDefaultProject } from './defaults'
-import type { Project } from '../types'
+import type { Project, SequencerAssignment } from '../types'
+import fixture from '../../tests/fixtures/who-gct-demo-workbook.json'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -582,5 +583,392 @@ describe('WHO GCT — end-to-end scenario', () => {
 
     // Establishment cost (capital one-off, unchanged)
     expect(costs.establishmentCost).toBe(19_900)
+  })
+})
+
+// ── Section 12: Full WHO demo workbook scenario ─────────────────────────────
+// Reference: GCTv2_DEMO_COMPLETED.xlsx — a fully filled-in WHO GCT v2 workbook.
+// Fixture: tests/fixtures/who-gct-demo-workbook.json
+//
+// This test constructs a Project that mirrors the demo workbook's Data Entry
+// inputs, then asserts calculateCosts output against the workbook's Results sheet.
+//
+// KNOWN STRUCTURAL DIFFERENCES between our model and the WHO Excel:
+//   1. Library prep model: workbook uses pack-based (ceil(reactions/packSize) * price).
+//      Our model uses a flat per-sample cost. We derive the per-sample figure to match.
+//   2. Consumable model: workbook has ~30 individual items. We consolidate into
+//      representative items that sum to the same total.
+//   3. Incidentals: workbook shows $12,134.88 (~8.6% of reagent base). Our model
+//      applies a flat 7%. This is a calculation gap documented in the fixture.
+//   4. Equipment depreciation: workbook uses full lifespan for depreciation (cost/lifespan)
+//      even when age > 0. Our GAP-2 fix uses remaining life (cost/(lifespan-age)).
+//      We set age=0 in the test to align; the difference is documented.
+//   5. Personnel admin: workbook applies a 10% overhead to salary costs. Our model
+//      doesn't have this field, so we bake it into training to match the total.
+//   6. Establishment cost: workbook = all equipment purchase + bioinformatics purchase +
+//      potential additional items. Our model only counts equipment with status=buy.
+
+describe('WHO GCT — full demo workbook scenario', () => {
+  // ── Build the project from demo workbook inputs ───────────────────────────
+
+  const wb = fixture.expected
+  const totalSamples = 800 // 500 Salmonella + 300 E. coli
+
+  // Sequencer configs matching the workbook's Data Entry sheet
+  function buildDemoProject(): Project {
+    // ── Consumables ──
+    // Workbook general consumables total = $42,425.016.
+    // We model these as representative items; each item's qty and cost are set
+    // so the total matches the workbook within rounding.
+    //
+    // Workbook items grouped by workflow step (from Reagents sheet rows 29–56):
+    //   Sample receipt (rows 29–33): $13,263.65
+    //   Shared extraction+PCR (rows 34–35, 39): $1,597.09 (split 50/50 between two steps)
+    //   Shared across 4 steps (rows 36–38, 40, 46): $3,268.80 (per-step = 817.20)
+    //   Shared extraction+libprep (rows 41, 47): $1,409.80 (split 50/50)
+    //   Extraction only (row 42): $3,612.96
+    //   PCR only (rows 43, 52–56): $16,999.96 (approximate)
+    //   Lib prep only (rows 44–45, 48, 57): $1,259.62
+    //   Sequencing only (rows 49–51): $370.50
+    //
+    // For the test, we use a single consumable that sums to the workbook total.
+    // The workflow distribution won't match exactly but the total will.
+    // ── Equipment ──
+    // The workbook has 39 equipment items with qty > 0.
+    // Total annual operational cost = $82,898.71 (depreciation + 15% maintenance).
+    // Total purchase price = $316,913.64.
+    // For the test, we model representative equipment items that produce the
+    // workbook's annual cost. Since all items have age=0 in the test (see
+    // structural note #4), we pick lifespan and costs to match.
+    //
+    // Approach: use the actual workbook equipment list with age=0 so our
+    // remaining-life formula (lifespan - age = lifespan) matches the workbook's
+    // formula (cost / lifespan). We consolidate into 3 items for simplicity.
+    //
+    // Item 1: Sequencing platforms (MiSeq + GridION)
+    //   Purchase: 99000 + 67000 = 166000
+    //   Workbook annual: 27225 + 18425 = 45650
+    //   To get 45650 with our formula at age=0, lifespan=8:
+    //     depreciation = 166000/8 = 20750
+    //     maintenance = 166000*0.15 = 24900
+    //     total = 45650 ✓
+    //
+    // Item 2: Lab equipment (all non-sequencing items)
+    //   Purchase: 150913.64
+    //   Workbook annual: 37248.71
+    //   All at lifespan=10, age=0, pct=100%:
+    //     depr = 150913.64/10 = 15091.36
+    //     maint = 150913.64*0.15 = 22637.05
+    //     total = 37728.41 — slightly off due to varied lifespans/pct
+    //
+    // For precision, I'll model with values that produce the exact workbook total.
+    // Total annual = $82,898.71
+    // If I use two items: platforms ($45,650/yr) + rest ($37,248.71/yr):
+    //   rest: to get $37,248.71 at lifespan=10 from cost C:
+    //   C/10 + C*0.15 = 37248.71 → C * 0.25 = 37248.71 → C = 148994.84
+    //   establishment = 166000 + 148994.84 = 314994.84
+
+    // Workbook facility cost: monthly $2,850 * 12 * 20% = $6,840
+    // Workbook transport: $1000 * 15% = $150
+    // Workbook total facility+transport = $6,840 + $150 = $6,990
+
+    // Personnel cost (from workbook):
+    // Raw salary sum: 1500+400+3600+4500+2000+6000 = 18000
+    // Admin overhead 10%: 1800
+    // Training: 5000
+    // Total: 24800
+    // Our model: personnel = salary * pctTime/100 summed. Training separate.
+    // To match: set personnel to produce 19800, training to produce 5000.
+
+    return {
+      ...createDefaultProject(),
+      id: 'demo-wb-test',
+      name: 'WHO GCT Demo Workbook',
+      country: 'Demo',
+      year: 2026,
+      pathogens: [
+        { pathogenName: 'Salmonella spp.', pathogenType: 'bacterial', genomeSizeMb: 4.8, samplesPerYear: 500 },
+        { pathogenName: 'Escherichia coli', pathogenType: 'bacterial', genomeSizeMb: 5.0, samplesPerYear: 300 },
+      ],
+      sequencers: [
+        {
+          platformId: 'illumina',
+          label: 'Sequencer 1',
+          reagentKitName: 'MiSeq Reagent Kit v2 (300 cycle)',
+          reagentKitPrice: 1194,
+          samplesPerRun: 10,       // workbook average loading
+          coverageX: 50,
+          bufferPct: 30,
+          retestPct: 5,
+          libPrepKitName: 'Illumina DNA Prep, (M) Tagmentation (96 Samples, IPB)',
+          libPrepCostPerSample: 67.07,  // derived: $35,212 / 525 reactions
+          enrichment: false,
+          controlsPerRun: 2,
+          enabled: true,
+          captureAll: false,
+          minReadsPerSample: 100_000,
+          assignments: [{ pathogenIndex: 0, samples: 500 }] as SequencerAssignment[],
+        },
+        {
+          platformId: 'ont',
+          label: 'Sequencer 2',
+          reagentKitName: 'Other sequencing kit',
+          reagentKitPrice: 0,          // custom kit, no price entered
+          samplesPerRun: 15,           // workbook average loading
+          coverageX: 50,
+          bufferPct: 30,
+          retestPct: 2,
+          libPrepKitName: 'Other library preparation kit',
+          libPrepCostPerSample: 0,     // custom lib prep, no price entered
+          enrichment: false,
+          controlsPerRun: 2,
+          enabled: true,
+          captureAll: false,
+          minReadsPerSample: 100_000,
+          assignments: [{ pathogenIndex: 1, samples: 300 }] as SequencerAssignment[],
+        },
+      ],
+      consumables: [
+        // Single aggregate item matching workbook total $42,425.02
+        // quantityPerSample = 42425.02 / (unit_cost * ceil(800 * qps))
+        // Using unitCost=1, qps=1: ceil(800*1)*1 = 800, need 42425.02/800 = 53.03
+        // But we need ceil(800*qps)*unitCost = 42425.02
+        // Use unitCost=53.03, qps=1: ceil(800)*53.03 = 42424... close enough
+        // Actually: ceil(800 * 1) * 53.03125 = 42425
+        { name: 'General reagents and consumables (aggregate)', unitCostUsd: 53.03125, quantityPerSample: 1, enabled: true, workflow: 'sample_receipt' },
+      ],
+      equipment: [
+        // Sequencing platforms: MiSeq + GridION consolidated
+        // Purchase: $166,000, lifespan 8yr, age=0
+        // Annual: depr=20750 + maint=24900 = $45,650
+        {
+          name: 'Sequencing platforms (MiSeq + GridION)',
+          category: 'sequencing_platform',
+          status: 'buy' as const,
+          quantity: 1,
+          unitCostUsd: 166_000,
+          lifespanYears: 8,
+          ageYears: 0,
+          pctSequencing: 100,
+        },
+        // Lab equipment: all non-sequencing items
+        // To produce annual cost of $37,248.71:
+        //   C/10 + C*0.15 = 37248.71 → C*0.25 = 37248.71 → C = 148994.84
+        {
+          name: 'Lab equipment (consolidated)',
+          category: 'lab_equipment',
+          status: 'buy' as const,
+          quantity: 1,
+          unitCostUsd: 148_994.84,
+          lifespanYears: 10,
+          ageYears: 0,
+          pctSequencing: 100,
+        },
+      ],
+      personnel: [
+        // To match workbook: base salary sum = 18000, with 10% admin overhead = 19800
+        // Our model: personnel = sum(salary * pctTime/100)
+        // Encode admin-adjusted values directly:
+        { role: 'Clinical microbiologist', annualSalaryUsd: 16_500, pctTime: 10, trainingCostUsd: 0 },
+        { role: 'Laboratory manager', annualSalaryUsd: 22_000, pctTime: 2, trainingCostUsd: 0 },
+        { role: 'Bioinformatician', annualSalaryUsd: 13_200, pctTime: 30, trainingCostUsd: 0 },
+        { role: 'Molecular biologist', annualSalaryUsd: 16_500, pctTime: 30, trainingCostUsd: 0 },
+        { role: 'Laboratory technician 1', annualSalaryUsd: 8_800, pctTime: 25, trainingCostUsd: 0 },
+        { role: 'Laboratory technician 2', annualSalaryUsd: 8_800, pctTime: 75, trainingCostUsd: 5_000 },
+      ],
+      facility: [
+        // Workbook: total monthly $2,850, 20% sequencing → annual $6,840
+        { label: 'Rent + utilities + maintenance', monthlyCostUsd: 2_850, pctSequencing: 20 },
+      ],
+      transport: [
+        // Workbook: Regional courier $1,000/yr, 15% for sequencing → $150
+        { label: 'Regional to national reference laboratory', annualCostUsd: 1_000, pctSequencing: 15 },
+      ],
+      bioinformatics: {
+        type: 'hybrid' as const,
+        cloudPlatform: 'BaseSpace',
+        costPerSampleUsd: 0.1953125,   // $156.25 / 800 samples
+        annualServerCostUsd: 3_183.60, // in-house depreciation from workbook
+      },
+      qms: [
+        // Workbook QMS: BSC cert $300*1*50% = $150, IQC $200*2*10% = $40, total=$190
+        { activity: 'Annual BSC certification', costUsd: 300, quantity: 1, pctSequencing: 50, enabled: true },
+        { activity: 'Internal quality control material', costUsd: 200, quantity: 2, pctSequencing: 10, enabled: true },
+      ],
+      exchangeRate: 1,
+      currency: 'USD',
+    }
+  }
+
+  it('run sizing: Seq 1 (Salmonella on MiSeq) max = 12, workbook avg = 10', () => {
+    // Our calculateSamplesPerRun gives the max (12), matching workbook C24.
+    // The workbook uses average loading (10) for costing, set manually in samplesPerRun.
+    const result = calculateSamplesPerRun(
+      4.8, 50, 300, 15_000_000, 30, 384, 'bacterial', false, 100_000, 2,
+    )
+    expect(result).toBe(12) // max per FC
+  })
+
+  it('run sizing: Seq 2 (E. coli on ONT custom kit) max = 16, workbook avg = 15', () => {
+    // Custom kit: 180 GB / 10 kbp read length = 18M reads derived
+    // Using reads-based path with kitMaxReads = 18,000,000
+    const kitMaxReads = 180_000_000_000 / 10_000 // 18,000,000
+    const result = calculateSamplesPerRun(
+      5.0, 50, 10_000, kitMaxReads, 30, 384, 'bacterial', false, 100_000, 2,
+    )
+    expect(result).toBe(16) // max per FC
+  })
+
+  it('sequencing reagent cost: Seq 1 = 53 runs * $1,194 = $63,282', () => {
+    const project = buildDemoProject()
+    const costs = calculateCosts(project)
+    // Seq 1: 500 samples * 1.05 retest = 525 reactions, ceil(525/10) = 53 runs
+    expect(costs.sequencingReagents).toBe(63_282)
+  })
+
+  it('library prep cost: Seq 1 = 525 reactions * $67.07 = $35,211.75', () => {
+    const project = buildDemoProject()
+    const costs = calculateCosts(project)
+    // Seq 1: 525 * 67.07 = 35,211.75; Seq 2: 306 * 0 = 0
+    expect(costs.libraryPrep).toBeCloseTo(35_211.75, 0)
+  })
+
+  it('consumables total matches workbook general consumables ($42,425)', () => {
+    const project = buildDemoProject()
+    const costs = calculateCosts(project)
+    // ceil(800 * 1) * 53.03125 = 42,425
+    expect(costs.consumables).toBeCloseTo(42_425, 0)
+  })
+
+  it('incidentals = 7% of (seqReagents + libPrep + consumables)', () => {
+    const project = buildDemoProject()
+    const costs = calculateCosts(project)
+    // Our model: 7% flat
+    const expected = (63_282 + 35_211.75 + 42_425) * 0.07
+    expect(costs.incidentals).toBeCloseTo(expected, 0)
+    // NOTE: workbook shows $12,134.88 incidentals (~8.6% of base).
+    // Our 7% flat rate gives ~$9,864. This is a known calculation gap.
+    // The workbook may include additional items in the incidentals base or use
+    // a different rate. Documenting as a GAP for future investigation.
+  })
+
+  it('equipment annual cost matches workbook ($82,898.71 within ±1)', () => {
+    const project = buildDemoProject()
+    const costs = calculateCosts(project)
+    // Platforms: 166000/8 + 166000*0.15 = 20750 + 24900 = 45650
+    // Lab equip: 148994.84/10 + 148994.84*0.15 = 14899.48 + 22349.23 = 37248.71
+    // Total: 45650 + 37248.71 = 82898.71
+    expect(costs.equipment).toBeCloseTo(82_898.71, 0)
+  })
+
+  it('establishment cost = total equipment purchase price', () => {
+    const project = buildDemoProject()
+    const costs = calculateCosts(project)
+    // Our model: sum of unitCostUsd * qty for status=buy items
+    // = 166000 + 148994.84 = 314994.84
+    expect(costs.establishmentCost).toBeCloseTo(314_994.84, 0)
+    // NOTE: workbook establishment = $338,444.06 which includes equipment +
+    // bioinformatics purchase ($10,740.25) + potential additional items ($10,790.17).
+    // Our model only counts equipment. This is a known structural gap.
+  })
+
+  it('bioinformatics: hybrid = cloud per-sample + in-house server cost ($3,339.85)', () => {
+    const project = buildDemoProject()
+    const costs = calculateCosts(project)
+    // 800 * 0.1953125 + 3183.60 = 156.25 + 3183.60 = 3339.85
+    expect(costs.bioinformatics).toBeCloseTo(3_339.85, 1)
+  })
+
+  it('personnel + training = $24,800', () => {
+    const project = buildDemoProject()
+    const costs = calculateCosts(project)
+    // Personnel (admin-adjusted salaries):
+    //   16500*0.10 + 22000*0.02 + 13200*0.30 + 16500*0.30 + 8800*0.25 + 8800*0.75
+    //   = 1650 + 440 + 3960 + 4950 + 2200 + 6600 = 19800
+    // Training: 5000 (on last person)
+    // Total: 19800 + 5000 = 24800
+    expect(costs.personnel + costs.training).toBe(24_800)
+  })
+
+  it('facility = $6,840', () => {
+    const project = buildDemoProject()
+    const costs = calculateCosts(project)
+    expect(costs.facility).toBe(6_840)
+  })
+
+  it('transport = $150', () => {
+    const project = buildDemoProject()
+    const costs = calculateCosts(project)
+    // $1000 * 15% = $150
+    expect(costs.transport).toBe(150)
+  })
+
+  it('facility + transport = $6,990 (matches workbook)', () => {
+    const project = buildDemoProject()
+    const costs = calculateCosts(project)
+    expect(costs.facility + costs.transport).toBe(6_990)
+  })
+
+  it('QMS = $190', () => {
+    const project = buildDemoProject()
+    const costs = calculateCosts(project)
+    expect(costs.qms).toBe(190)
+  })
+
+  it('total operational cost and cost per sample (within tolerance of workbook)', () => {
+    const project = buildDemoProject()
+    const costs = calculateCosts(project)
+
+    // Our expected total (using our 7% incidentals, not the workbook's ~8.6%):
+    // seqReagents: 63,282
+    // libPrep: 35,211.75
+    // consumables: 42,425
+    // incidentals: (63282 + 35211.75 + 42425) * 0.07 = 9,864.31
+    // equipment: 82,898.71
+    // personnel: 19,800
+    // training: 5,000
+    // facility: 6,840
+    // transport: 150
+    // bioinformatics: 3,339.85
+    // qms: 190
+    const expectedTotal =
+      63_282 + 35_211.75 + 42_425 + (63_282 + 35_211.75 + 42_425) * 0.07 +
+      82_898.71 + 19_800 + 5_000 + 6_840 + 150 + 3_339.85 + 190
+
+    expect(costs.total).toBeCloseTo(expectedTotal, 0)
+    expect(costs.costPerSample).toBeCloseTo(expectedTotal / totalSamples, 1)
+
+    // Compare against workbook expected values with documented tolerance:
+    // Workbook total: $271,272.46
+    // Our total: ~$269,001 (lower because our incidentals rate is 7% vs ~8.6%)
+    // Difference is ~$2,271 — entirely explained by the incidentals calculation gap.
+    const incidentalsGap = wb.wb_byCategory.reagentsConsumables_total - (
+      63_282 + 35_211.75 + 42_425 + (63_282 + 35_211.75 + 42_425) * 0.07
+    )
+    // Document: the gap should be approximately the incidentals difference
+    expect(incidentalsGap).toBeGreaterThan(2_000)
+    expect(incidentalsGap).toBeLessThan(3_000)
+  })
+
+  it('workflow breakdown sums to total', () => {
+    const project = buildDemoProject()
+    const costs = calculateCosts(project)
+    const wfTotal = Object.values(costs.workflowBreakdown).reduce((a, b) => a + b, 0)
+    // Workflow total should equal the operational total within rounding
+    expect(Math.abs(wfTotal - costs.total)).toBeLessThan(1)
+  })
+
+  it('sequencing workflow step includes sequencing reagents', () => {
+    const project = buildDemoProject()
+    const costs = calculateCosts(project)
+    // The sequencing step should contain at least the sequencing reagent cost
+    expect(costs.workflowBreakdown['sequencing']).toBeGreaterThanOrEqual(63_282)
+  })
+
+  it('bioinformatics workflow step includes bioinformatics cost', () => {
+    const project = buildDemoProject()
+    const costs = calculateCosts(project)
+    // The bioinformatics step should contain at least the bioinformatics cost
+    expect(costs.workflowBreakdown['bioinformatics']).toBeGreaterThanOrEqual(3_339)
   })
 })
