@@ -250,7 +250,10 @@ export default function Step7() {
         </div>
         <div className="flex justify-between items-center">
           <button onClick={addQMS} className="px-3 py-1.5 rounded text-xs font-medium" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>{t('btn_add')}</button>
-          <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_total')} QMS: <strong style={{ color: 'var(--gx-accent)' }}>${fmt(qmsTotal)}</strong></div>
+          <div className="flex gap-6 text-xs" style={{ color: 'var(--gx-text-muted)' }}>
+            <span>{t('label_total')} QMS: <strong style={{ color: 'var(--gx-accent)' }}>${fmt(qmsTotal)}</strong></span>
+            <span>QMS cost per sample: <strong style={{ color: 'var(--gx-accent)' }}>{samplesPerYear > 0 ? `$${fmt(qmsTotal / samplesPerYear)}` : '—'}</strong></span>
+          </div>
         </div>
       </section>
 
