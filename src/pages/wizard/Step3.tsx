@@ -210,7 +210,7 @@ export default function Step3() {
                 ))}
                 <th className="px-3 py-2 text-left text-xs font-medium" style={{ color: 'var(--gx-text-muted)', width: 60 }}>Type</th>
                 <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_item')}</th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_qty_sample')}</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Qty/sample · samples/unit</th>
                 <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_unit_cost')}</th>
                 <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual')}</th>
                 <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)', whiteSpace: 'nowrap' }}>Dist/wf</th>
@@ -287,17 +287,39 @@ export default function Step3() {
                       </div>
                     </td>
 
-                    {/* Qty/sample */}
+                    {/* Qty/sample ↕ Samples/unit (synced inverses) */}
                     <td className="px-3 py-2">
-                      <input
-                        type="number"
-                        value={item.quantityPerSample}
-                        min={0}
-                        step={0.001}
-                        onChange={e => updateConsumable(idx, { quantityPerSample: parseFloat(e.target.value) || 0 })}
-                        className={inputClass}
-                        style={{ width: 80, textAlign: 'right' }}
-                      />
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="number"
+                            value={item.quantityPerSample}
+                            min={0}
+                            step={0.001}
+                            title="Units consumed per sample"
+                            onChange={e => updateConsumable(idx, { quantityPerSample: parseFloat(e.target.value) || 0 })}
+                            className={inputClass}
+                            style={{ width: 72, textAlign: 'right' }}
+                          />
+                          <span className="text-xs" style={{ color: 'var(--gx-text-muted)', whiteSpace: 'nowrap' }}>/sample</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="number"
+                            value={item.quantityPerSample > 0 ? Math.round(1 / item.quantityPerSample) : ''}
+                            min={1}
+                            step={1}
+                            title="Samples covered per unit"
+                            onChange={e => {
+                              const n = parseInt(e.target.value)
+                              if (n > 0) updateConsumable(idx, { quantityPerSample: parseFloat((1 / n).toFixed(4)) })
+                            }}
+                            className={inputClass}
+                            style={{ width: 72, textAlign: 'right' }}
+                          />
+                          <span className="text-xs" style={{ color: 'var(--gx-text-muted)', whiteSpace: 'nowrap' }}>/unit</span>
+                        </div>
+                      </div>
                     </td>
 
                     {/* Unit cost */}
