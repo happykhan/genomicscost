@@ -44,14 +44,31 @@ export default function Step6() {
     updateProject({ bioinformatics: { ...bioinformatics, inhouseItems: bioinformatics.inhouseItems.filter((_, i) => i !== idx) } })
   }
 
-  const cloudTotal = (bioinformatics.type === 'cloud' || bioinformatics.type === 'hybrid')
+  const showCloud = bioinformatics.type === 'cloud' || bioinformatics.type === 'hybrid'
+  const showInhouse = bioinformatics.type === 'inhouse' || bioinformatics.type === 'hybrid'
+
+  // Cloud: full purchase cost (pricePerUnit × qty, before sample-proportion adjustment)
+  const cloudPurchaseCost = showCloud
+    ? bioinformatics.cloudItems.filter(i => i.enabled)
+        .reduce((sum, item) => sum + (item.pricePerUnit ?? 0) * (item.quantity ?? 1), 0)
+    : 0
+
+  // Cloud: annual operational cost (proportioned by samples this scenario / all pathogens)
+  const cloudTotal = showCloud
     ? bioinformatics.cloudItems.filter(i => i.enabled).reduce((sum, item) => {
         const totalSamplesAll = Math.max(1, item.totalSamplesAllPathogens || samplesPerYear)
         return sum + (item.pricePerUnit ?? 0) * (item.quantity ?? 1) * (item.samplesThisScenario ?? samplesPerYear) / totalSamplesAll
       }, 0)
     : 0
 
-  const inhouseTotal = (bioinformatics.type === 'inhouse' || bioinformatics.type === 'hybrid')
+  // In-house: total capital cost (pricePerUnit × qty, before depreciation)
+  const inhousePurchaseCost = showInhouse
+    ? bioinformatics.inhouseItems.filter(i => i.enabled)
+        .reduce((sum, item) => sum + (item.pricePerUnit ?? 0) * (item.quantity ?? 1), 0)
+    : 0
+
+  // In-house: annual depreciation cost
+  const inhouseTotal = showInhouse
     ? bioinformatics.inhouseItems.filter(i => i.enabled).reduce((sum, item) => {
         const remainingLife = Math.max(1, (item.lifespanYears ?? 1) - (item.ageYears ?? 0))
         return sum + (item.pricePerUnit ?? 0) * (item.quantity ?? 1) * ((item.pctUse ?? 100) / 100) / remainingLife
@@ -226,18 +243,92 @@ export default function Step6() {
           </div>
         )}
 
-        {/* Total */}
+        {/* Calculated costs summary */}
         {bioinformatics.type !== 'none' && (
-          <div className="p-3 rounded" style={{ background: 'var(--gx-bg-alt)', border: '1px solid var(--gx-border)' }}>
-            <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_bio_total')}</div>
-            <div className="text-sm font-semibold" style={{ color: 'var(--gx-accent)' }}>
-              ${fmt(bioTotal)}
-              {samplesPerYear > 0 && (
-                <span className="font-normal text-xs ml-2" style={{ color: 'var(--gx-text-muted)' }}>
-                  (${fmt(bioTotal / samplesPerYear)}/{t('label_per_sample_unit')})
-                </span>
-              )}
+          <div className="p-4 rounded flex flex-col gap-3" style={{ background: 'var(--gx-bg-alt)', border: '1px solid var(--gx-border)' }}>
+            <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--gx-text-muted)' }}>
+              Calculated costs — Bioinformatics
             </div>
+
+            {/* Cloud block */}
+            {showCloud && (
+              <div>
+                <div className="text-xs font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>Cloud-based</div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total purchase cost</div>
+                    <div className="text-sm font-medium" style={{ color: 'var(--gx-text)' }}>${fmt(cloudPurchaseCost)}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total cost per sample</div>
+                    <div className="text-sm font-medium" style={{ color: 'var(--gx-text)' }}>
+                      {samplesPerYear > 0 ? `$${fmt(cloudTotal / samplesPerYear)}` : '—'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* In-house block */}
+            {showInhouse && (
+              <div>
+                <div className="text-xs font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>In-house</div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total purchase cost</div>
+                    <div className="text-sm font-medium" style={{ color: 'var(--gx-text)' }}>${fmt(inhousePurchaseCost)}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total depreciation cost</div>
+                    <div className="text-sm font-medium" style={{ color: 'var(--gx-text)' }}>${fmt(inhouseTotal)}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total cost per sample</div>
+                    <div className="text-sm font-medium" style={{ color: 'var(--gx-text)' }}>
+                      {samplesPerYear > 0 ? `$${fmt(inhouseTotal / samplesPerYear)}` : '—'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Hybrid combined totals */}
+            {bioinformatics.type === 'hybrid' && (
+              <div style={{ borderTop: '1px solid var(--gx-border)', paddingTop: 8 }}>
+                <div className="text-xs font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>Hybrid — for users with a combination of the above</div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total hybrid purchase cost</div>
+                    <div className="text-sm font-medium" style={{ color: 'var(--gx-text)' }}>${fmt(cloudPurchaseCost + inhousePurchaseCost)}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total hybrid operational cost</div>
+                    <div className="text-sm font-semibold" style={{ color: 'var(--gx-accent)' }}>${fmt(bioTotal)}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total hybrid cost per sample</div>
+                    <div className="text-sm font-semibold" style={{ color: 'var(--gx-accent)' }}>
+                      {samplesPerYear > 0 ? `$${fmt(bioTotal / samplesPerYear)}` : '—'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Single-mode total (cloud-only or inhouse-only) */}
+            {bioinformatics.type !== 'hybrid' && (
+              <div style={{ borderTop: '1px solid var(--gx-border)', paddingTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                <div className="text-xs font-semibold" style={{ color: 'var(--gx-text-muted)' }}>{t('label_bio_total')}</div>
+                <div className="text-sm font-semibold" style={{ color: 'var(--gx-accent)' }}>
+                  ${fmt(bioTotal)}
+                  {samplesPerYear > 0 && (
+                    <span className="font-normal text-xs ml-2" style={{ color: 'var(--gx-text-muted)' }}>
+                      (${fmt(bioTotal / samplesPerYear)}/{t('label_per_sample_unit')})
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
