@@ -89,12 +89,18 @@ export default function Step7() {
         </div>
 
         <div className="card mb-2" style={{ overflowX: 'auto' }}>
-          <table className="w-full text-sm" style={{ minWidth: 360 }}>
+          <table className="w-full text-sm" style={{ minWidth: 480, tableLayout: 'fixed' }}>
+            <colgroup>
+              <col style={{ width: 'auto' }} />
+              <col style={{ width: 150 }} />
+              <col style={{ width: 150 }} />
+              <col style={{ width: 40 }} />
+            </colgroup>
             <thead>
               <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
                 <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_label')}</th>
                 <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', gap: 2 }}>
                     {t('col_monthly_cost')}<Tooltip content={t('tooltip_facility_monthly')} />
                   </span>
                 </th>
@@ -108,13 +114,13 @@ export default function Step7() {
                   <td className="px-3 py-2">
                     <input type="text" value={f.label} onChange={e => updateFacilityRow(idx, { label: e.target.value })} className={inputClass} style={{ width: '100%' }} />
                   </td>
-                  <td className="px-3 py-2">
-                    <input type="number" value={f.monthlyCostUsd} min={0} onChange={e => updateFacilityRow(idx, { monthlyCostUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 100, textAlign: 'right' }} />
+                  <td className="px-3 py-2 text-right">
+                    <input type="number" value={f.monthlyCostUsd} min={0} onChange={e => updateFacilityRow(idx, { monthlyCostUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: '100%', textAlign: 'right' }} />
                   </td>
                   <td className="px-3 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>
-                    {fmt(f.monthlyCostUsd * 12 * facilityPct)}
+                    ${fmt(f.monthlyCostUsd * 12 * facilityPct)}
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="px-3 py-2 text-center">
                     <button onClick={() => removeFacilityRow(idx)} className="text-xs px-2 py-0.5 rounded" style={{ color: 'var(--gx-text-muted)', background: 'none', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>×</button>
                   </td>
                 </tr>
