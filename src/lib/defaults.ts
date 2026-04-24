@@ -204,7 +204,7 @@ export function createDefaultEquipment(catalogue: BundledCatalogue): EquipmentIt
     .map(e => ({
       name: e.name,
       category: e.category,
-      status: (e.recommended_quantity != null && e.recommended_quantity > 0 ? 'buy' : 'skip') as EquipmentItem['status'],
+      status: (e.recommended_quantity != null && e.recommended_quantity > 0 ? 'have' : 'skip') as EquipmentItem['status'],
       quantity: (e.recommended_quantity != null && e.recommended_quantity > 0) ? e.recommended_quantity : 0,
       unitCostUsd: e.unit_cost_usd ?? 0,
       lifespanYears: 10,
