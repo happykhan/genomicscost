@@ -2005,20 +2005,6 @@
       "comment": "quantities are based on based on annual throughput ranges from GCT v1"
     },
     {
-      "name": "Single channel pipette 1\u201310\u03bcL",
-      "category": "lab_equipment",
-      "workflow_step": null,
-      "workflow_steps": [
-        "nucleic_acid_extraction",
-        "pcr_testing",
-        "ngs_library_preparation"
-      ],
-      "unit_cost_usd": 269.472,
-      "catalog_ref": null,
-      "recommended_quantity": 3,
-      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
-    },
-    {
       "name": "Single channel pipette 0.2\u20132\u03bcL",
       "category": "lab_equipment",
       "workflow_step": null,
@@ -2179,30 +2165,6 @@
       "unit_cost_usd": 5554.8,
       "catalog_ref": null,
       "recommended_quantity": 2,
-      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
-    },
-    {
-      "name": "Liquid handler \u2013 extraction",
-      "category": "lab_equipment",
-      "workflow_step": null,
-      "workflow_steps": [
-        "nucleic_acid_extraction"
-      ],
-      "unit_cost_usd": 120000,
-      "catalog_ref": null,
-      "recommended_quantity": 0,
-      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
-    },
-    {
-      "name": "Liquid handler \u2013 PCR",
-      "category": "lab_equipment",
-      "workflow_step": null,
-      "workflow_steps": [
-        "pcr_testing"
-      ],
-      "unit_cost_usd": 48000,
-      "catalog_ref": null,
-      "recommended_quantity": 0,
       "comment": "quantities are based on based on annual throughput ranges from GCT v1"
     },
     {
