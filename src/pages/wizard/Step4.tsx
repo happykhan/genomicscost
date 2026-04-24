@@ -53,20 +53,21 @@ export default function Step4() {
     updateProject({ equipment: equipment.filter((_, i) => i !== index) })
   }
 
-  // Add items from catalogue not already in list
+  // Add item from catalogue; ignore if already present
   function addFromCatalogue(name: string) {
     const cat = catalogue.equipment.find(e => e.name === name)
-    if (!cat) return
+    if (!cat || cat.category === 'sequencing_platform') return
+    if (equipment.some(e => e.name === name)) return
     updateProject({
       equipment: [
         ...equipment,
         {
           name: cat.name,
           category: cat.category,
-          status: 'buy',
+          status: 'have',
           quantity: cat.recommended_quantity ?? 1,
           unitCostUsd: cat.unit_cost_usd ?? 0,
-          lifespanYears: cat.category === 'sequencing_platform' ? 10 : 5,
+          lifespanYears: 5,
           ageYears: 0,
           pctSequencing: 100,
         },
@@ -109,9 +110,9 @@ export default function Step4() {
     items: equipment.map((e, idx) => ({ ...e, idx })).filter(e => e.category === cat),
   }))
 
-  const catalogueNames = catalogue.equipment.map(e => e.name)
-  const existingNames = equipment.map(e => e.name)
-  const availableToAdd = catalogueNames.filter(n => !existingNames.includes(n))
+  const catalogueEquipmentNames = catalogue.equipment
+    .filter(e => e.category !== 'sequencing_platform')
+    .map(e => e.name)
 
   return (
     <div>
@@ -300,17 +301,25 @@ export default function Step4() {
 
       {/* Add from catalogue */}
       <div className="flex flex-wrap gap-2 mt-4 mb-4">
-        <select
+        <input
+          type="text"
+          list="catalogue-equipment"
+          placeholder={t('label_add_catalogue')}
           className={inputClass}
-          defaultValue=""
-          onChange={e => { if (e.target.value) { addFromCatalogue(e.target.value); e.target.value = '' } }}
           style={{ flex: 1, minWidth: 200 }}
-        >
-          <option value="">{t('label_add_catalogue')}</option>
-          {availableToAdd.map(name => (
-            <option key={name} value={name}>{name}</option>
+          onChange={e => {
+            const name = e.target.value
+            if (catalogueEquipmentNames.includes(name)) {
+              addFromCatalogue(name)
+              e.target.value = ''
+            }
+          }}
+        />
+        <datalist id="catalogue-equipment">
+          {catalogueEquipmentNames.map(name => (
+            <option key={name} value={name} />
           ))}
-        </select>
+        </datalist>
         <button
           onClick={addEquipmentItem}
           className="px-4 py-2 rounded text-sm font-medium"
