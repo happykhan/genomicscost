@@ -133,6 +133,7 @@ function migrateProject(raw: unknown): Project {
   // Migrate old BioinformaticsConfig (flat fields) to new structure with cloudItems/inhouseItems
   if (p.bioinformatics) {
     const bio = p.bioinformatics as Record<string, unknown>
+    if (!bio.type) bio.type = 'hybrid'
     if (!Array.isArray(bio.cloudItems)) {
       bio.cloudItems = createDefaultCloudItems()
       // If old config had a cloud platform and cost, enable that item
