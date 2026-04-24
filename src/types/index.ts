@@ -217,6 +217,8 @@ export interface Project {
   trainingGroupCostUsd: number
   // WHO GCT: admin overhead % applied to personnel + training subtotal
   adminCostPct: number
+  // WHO GCT: single global % of facility attributed to sequencing (0–100)
+  facilityPctSequencing: number
 }
 
 export interface CostBreakdown {

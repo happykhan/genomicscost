@@ -111,6 +111,8 @@ function GlobePicker() {
   )
 }
 
+declare const __APP_VERSION__: string
+
 function LangFooter() {
   const { i18n } = useTranslation()
   const lang = i18n.language
@@ -119,27 +121,33 @@ function LangFooter() {
       borderTop: '1px solid var(--gx-border)',
       padding: '12px 24px',
       display: 'flex',
-      justifyContent: 'center',
+      justifyContent: 'space-between',
+      alignItems: 'center',
       gap: 8,
       flexWrap: 'wrap',
     }}>
-      {Object.entries(LANGUAGES).map(([code, name]) => (
-        <button
-          key={code}
-          onClick={() => i18n.changeLanguage(code)}
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            fontSize: '0.78rem',
-            color: code === lang ? 'var(--gx-accent)' : 'var(--gx-text-muted)',
-            fontWeight: code === lang ? 600 : 400,
-            padding: '2px 6px',
-          }}
-        >
-          {name}
-        </button>
-      ))}
+      <span style={{ fontSize: '0.72rem', color: 'var(--gx-text-muted)' }}>
+        GCT v{__APP_VERSION__}
+      </span>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {Object.entries(LANGUAGES).map(([code, name]) => (
+          <button
+            key={code}
+            onClick={() => i18n.changeLanguage(code)}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '0.78rem',
+              color: code === lang ? 'var(--gx-accent)' : 'var(--gx-text-muted)',
+              fontWeight: code === lang ? 600 : 400,
+              padding: '2px 6px',
+            }}
+          >
+            {name}
+          </button>
+        ))}
+      </div>
     </div>
   )
 }

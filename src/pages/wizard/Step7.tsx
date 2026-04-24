@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useProject } from '../../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
 import Tooltip from '../../components/Tooltip'
@@ -10,6 +11,8 @@ export default function Step7() {
   const { t } = useTranslation()
   const { facility, transport, qms } = project
   const samplesPerYear = project.pathogens.reduce((sum, p) => sum + p.samplesPerYear, 0)
+  const facilityPct = (project.facilityPctSequencing ?? 50) / 100
+  const [qmsOpen, setQmsOpen] = useState(true)
 
   // ── Facility ─────────────────────────────────────────────────────────────────
   function updateFacilityRow(idx: number, patch: Partial<typeof facility[0]>) {
@@ -47,7 +50,7 @@ export default function Step7() {
   // ── Computed totals ──────────────────────────────────────────────────────────
   const facilityMonthlyTotal = facility.reduce((s, f) => s + f.monthlyCostUsd, 0)
   const facilityAnnualAll = facilityMonthlyTotal * 12
-  const facilityTotal = facility.reduce((s, f) => s + f.monthlyCostUsd * 12 * f.pctSequencing / 100, 0)
+  const facilityTotal = facilityAnnualAll * facilityPct
   const facilityPerSample = samplesPerYear > 0 ? facilityTotal / samplesPerYear : 0
 
   const transportTotal = transport.reduce((s, tr) => s + tr.annualCostUsd * (tr.pctSequencing ?? 100) / 100, 0)
@@ -64,8 +67,29 @@ export default function Step7() {
       {/* ── Facility ── */}
       <section className="mb-8">
         <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--gx-text)' }}>{t('field_facility')}</h3>
+
+        {/* Global sequencing % control */}
+        <div className="flex items-center gap-3 mb-3 p-3 rounded" style={{ background: 'var(--gx-bg-alt)', border: '1px solid var(--gx-border)' }}>
+          <label className="text-xs font-medium" style={{ color: 'var(--gx-text)', whiteSpace: 'nowrap' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              % of facility used for sequencing
+              <Tooltip content="Percentage of the facility costs attributed to the sequencing programme. Applied to all facility line items." />
+            </span>
+          </label>
+          <input
+            type="number"
+            value={project.facilityPctSequencing ?? 50}
+            min={0}
+            max={100}
+            onChange={e => updateProject({ facilityPctSequencing: parseInt(e.target.value) || 0 })}
+            className={inputClass}
+            style={{ width: 70, textAlign: 'right' }}
+          />
+          <span className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>%</span>
+        </div>
+
         <div className="card mb-2" style={{ overflowX: 'auto' }}>
-          <table className="w-full text-sm" style={{ minWidth: 420 }}>
+          <table className="w-full text-sm" style={{ minWidth: 360 }}>
             <thead>
               <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
                 <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_label')}</th>
@@ -74,12 +98,7 @@ export default function Step7() {
                     {t('col_monthly_cost')}<Tooltip content={t('tooltip_facility_monthly')} />
                   </span>
                 </th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>
-                    {t('col_pct_sequencing')}<Tooltip content={t('tooltip_facility_pct')} />
-                  </span>
-                </th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual_attr')}</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Annual (attributed)</th>
                 <th className="px-3 py-2"></th>
               </tr>
             </thead>
@@ -92,11 +111,8 @@ export default function Step7() {
                   <td className="px-3 py-2">
                     <input type="number" value={f.monthlyCostUsd} min={0} onChange={e => updateFacilityRow(idx, { monthlyCostUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 100, textAlign: 'right' }} />
                   </td>
-                  <td className="px-3 py-2">
-                    <input type="number" value={f.pctSequencing} min={0} max={100} onChange={e => updateFacilityRow(idx, { pctSequencing: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 70, textAlign: 'right' }} />
-                  </td>
                   <td className="px-3 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>
-                    {fmt(f.monthlyCostUsd * 12 * f.pctSequencing / 100)}
+                    {fmt(f.monthlyCostUsd * 12 * facilityPct)}
                   </td>
                   <td className="px-3 py-2">
                     <button onClick={() => removeFacilityRow(idx)} className="text-xs px-2 py-0.5 rounded" style={{ color: 'var(--gx-text-muted)', background: 'none', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>×</button>
@@ -121,7 +137,7 @@ export default function Step7() {
             <div className="text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>${fmt(facilityAnnualAll)}</div>
           </div>
           <div className="p-3 rounded" style={{ background: 'var(--gx-bg-alt)', border: '1px solid var(--gx-border)' }}>
-            <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_annual_sequencing')}</div>
+            <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_annual_sequencing')} ({project.facilityPctSequencing ?? 50}%)</div>
             <div className="text-sm font-semibold" style={{ color: 'var(--gx-accent)' }}>${fmt(facilityTotal)}</div>
           </div>
           <div className="p-3 rounded" style={{ background: 'var(--gx-bg-alt)', border: '1px solid var(--gx-border)' }}>
@@ -209,52 +225,67 @@ export default function Step7() {
 
       {/* ── QMS ── */}
       <section>
-        <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--gx-text)' }}>{t('field_qms')} <span className="font-normal text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_optional')}</span></h3>
-        <div className="card mb-2" style={{ overflowX: 'auto' }}>
-          <table className="w-full text-sm" style={{ minWidth: 360 }}>
-            <thead>
-              <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
-                <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_activity')}</th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_cost')}</th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_quantity')}</th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual')}</th>
-                <th className="px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_on')}</th>
-                <th className="px-3 py-2"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {qms.map((q, idx) => (
-                <tr key={idx} style={{ borderBottom: '1px solid var(--gx-border)', opacity: q.enabled ? 1 : 0.4 }}>
-                  <td className="px-3 py-2">
-                    <input type="text" value={q.activity} onChange={e => updateQMS(idx, { activity: e.target.value })} className={inputClass} style={{ width: '100%', minWidth: 180 }} />
-                  </td>
-                  <td className="px-3 py-2">
-                    <input type="number" value={q.costUsd} min={0} onChange={e => updateQMS(idx, { costUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 90, textAlign: 'right' }} />
-                  </td>
-                  <td className="px-3 py-2">
-                    <input type="number" value={q.quantity} min={0} onChange={e => updateQMS(idx, { quantity: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 60, textAlign: 'center' }} />
-                  </td>
-                  <td className="px-3 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>
-                    {q.enabled ? fmt(q.costUsd * q.quantity) : '—'}
-                  </td>
-                  <td className="px-3 py-2 text-center">
-                    <input type="checkbox" checked={q.enabled} onChange={e => updateQMS(idx, { enabled: e.target.checked })} style={{ accentColor: 'var(--gx-accent)', width: 15, height: 15 }} />
-                  </td>
-                  <td className="px-3 py-2">
-                    <button onClick={() => removeQMS(idx)} className="text-xs px-2 py-0.5 rounded" style={{ color: 'var(--gx-text-muted)', background: 'none', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>×</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="flex justify-between items-center">
-          <button onClick={addQMS} className="px-3 py-1.5 rounded text-xs font-medium" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>{t('btn_add')}</button>
-          <div className="flex gap-6 text-xs" style={{ color: 'var(--gx-text-muted)' }}>
-            <span>{t('label_total')} QMS: <strong style={{ color: 'var(--gx-accent)' }}>${fmt(qmsTotal)}</strong></span>
-            <span>QMS cost per sample: <strong style={{ color: 'var(--gx-accent)' }}>{samplesPerYear > 0 ? `$${fmt(qmsTotal / samplesPerYear)}` : '—'}</strong></span>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>
+            {t('field_qms')} <span className="font-normal text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_optional')}</span>
+          </h3>
+          <div className="flex items-center gap-4">
+            <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>
+              {t('label_total')} QMS: <strong style={{ color: 'var(--gx-accent)' }}>${fmt(qmsTotal)}</strong>
+              &nbsp;&nbsp;/sample: <strong style={{ color: 'var(--gx-accent)' }}>{samplesPerYear > 0 ? `$${fmt(qmsTotal / samplesPerYear)}` : '—'}</strong>
+            </div>
+            <button
+              onClick={() => setQmsOpen(o => !o)}
+              className="text-xs px-2 py-0.5 rounded"
+              style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text-muted)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
+            >
+              {qmsOpen ? '▲ Hide' : '▼ Show'}
+            </button>
           </div>
         </div>
+        {qmsOpen && (
+          <>
+            <div className="card mb-2" style={{ overflowX: 'auto' }}>
+              <table className="w-full text-sm" style={{ minWidth: 360 }}>
+                <thead>
+                  <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
+                    <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_activity')}</th>
+                    <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_cost')}</th>
+                    <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_quantity')}</th>
+                    <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual')}</th>
+                    <th className="px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_on')}</th>
+                    <th className="px-3 py-2"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {qms.map((q, idx) => (
+                    <tr key={idx} style={{ borderBottom: '1px solid var(--gx-border)', opacity: q.enabled ? 1 : 0.4 }}>
+                      <td className="px-3 py-2">
+                        <input type="text" value={q.activity} onChange={e => updateQMS(idx, { activity: e.target.value })} className={inputClass} style={{ width: '100%', minWidth: 180 }} />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input type="number" value={q.costUsd} min={0} onChange={e => updateQMS(idx, { costUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 90, textAlign: 'right' }} />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input type="number" value={q.quantity} min={0} onChange={e => updateQMS(idx, { quantity: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 60, textAlign: 'center' }} />
+                      </td>
+                      <td className="px-3 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>
+                        {q.enabled ? fmt(q.costUsd * q.quantity * (q.pctSequencing ?? 100) / 100) : '—'}
+                      </td>
+                      <td className="px-3 py-2 text-center">
+                        <input type="checkbox" checked={q.enabled} onChange={e => updateQMS(idx, { enabled: e.target.checked })} style={{ accentColor: 'var(--gx-accent)', width: 15, height: 15 }} />
+                      </td>
+                      <td className="px-3 py-2">
+                        <button onClick={() => removeQMS(idx)} className="text-xs px-2 py-0.5 rounded" style={{ color: 'var(--gx-text-muted)', background: 'none', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>×</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <button onClick={addQMS} className="px-3 py-1.5 rounded text-xs font-medium" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>{t('btn_add')}</button>
+          </>
+        )}
       </section>
 
     </div>

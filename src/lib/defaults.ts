@@ -290,5 +290,6 @@ export function createDefaultProject(): Project {
     currency: 'USD',
     trainingGroupCostUsd: 5000,
     adminCostPct: 0,
+    facilityPctSequencing: 50,
   }
 }

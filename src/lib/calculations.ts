@@ -297,8 +297,9 @@ export function calculateCosts(project: Project): CostBreakdown {
   // WHO GCT: admin overhead % applied to personnel + training subtotal
   const adminCost = (annualPersonnel + annualTraining) * (project.adminCostPct ?? 0) / 100
 
+  const facilityPct = (project.facilityPctSequencing ?? 50) / 100
   const annualFacility = facility.reduce((sum, f) => {
-    return sum + (f.monthlyCostUsd ?? 0) * 12 * (f.pctSequencing ?? 0) / 100
+    return sum + (f.monthlyCostUsd ?? 0) * 12 * facilityPct
   }, 0)
 
   const annualTransport = transport.reduce((sum, t) => {

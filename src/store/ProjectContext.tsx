@@ -111,6 +111,13 @@ function migrateProject(raw: unknown): Project {
     p.adminCostPct = 0
   }
 
+  // Ensure facilityPctSequencing exists (migrate from per-item pctSequencing: use first item's value or 50)
+  if ((p as Record<string, unknown>).facilityPctSequencing === undefined) {
+    const facilityArr = p.facility as Array<{ pctSequencing?: number }> | undefined
+    const firstPct = facilityArr?.[0]?.pctSequencing
+    ;(p as Record<string, unknown>).facilityPctSequencing = firstPct ?? 50
+  }
+
   // Ensure equipment has lifespanYears
   if (Array.isArray(p.equipment)) {
     p.equipment = (p.equipment as Array<Record<string, unknown>>).map(eq => ({

@@ -399,7 +399,7 @@ describe('calculateCosts', () => {
     expect(costs.establishmentCost).toBe(24_900)
   })
 
-  it('facility cost: monthly × 12 × pctSequencing', () => {
+  it('facility cost: monthly × 12 × global facilityPctSequencing', () => {
     const project = {
       ...createDefaultProject(),
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 100 }],
@@ -409,8 +409,9 @@ describe('calculateCosts', () => {
       personnel: [],
       facility: [
         { label: 'Rent', monthlyCostUsd: 1000, pctSequencing: 30 },
-        { label: 'Utilities', monthlyCostUsd: 500, pctSequencing: 50 },
+        { label: 'Utilities', monthlyCostUsd: 500, pctSequencing: 30 },
       ],
+      facilityPctSequencing: 30,
       transport: [],
       bioinformatics: { type: 'none' as const, cloudItems: [], inhouseItems: [] },
       trainingGroupCostUsd: 0,
@@ -418,8 +419,8 @@ describe('calculateCosts', () => {
       qms: [],
     }
     const costs = calculateCosts(project)
-    // 1000*12*0.30 + 500*12*0.50 = 3600 + 3000 = 6600
-    expect(costs.facility).toBe(6600)
+    // (1000 + 500) * 12 * 0.30 = 5400
+    expect(costs.facility).toBe(5400)
   })
 
   it('QMS cost: costUsd × quantity × pctSequencing', () => {

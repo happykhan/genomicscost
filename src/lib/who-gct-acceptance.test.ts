@@ -353,23 +353,25 @@ describe('WHO GCT — Facility', () => {
       facility: [
         { label: 'Rent + utilities', monthlyCostUsd: 2_000, pctSequencing: 30 },
       ],
+      facilityPctSequencing: 30,
     })
     const costs = calculateCosts(project)
     // 2,000 × 12 × 30% = 7,200
     expect(costs.facility).toBe(7_200)
   })
 
-  it('multiple facility items sum correctly', () => {
+  it('multiple facility items sum correctly with global sequencing pct', () => {
     const project = makeProject({
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral', genomeSizeMb: 0.03, samplesPerYear: 100 }],
       facility: [
         { label: 'Rent', monthlyCostUsd: 1_000, pctSequencing: 50 },
-        { label: 'Electricity', monthlyCostUsd: 200, pctSequencing: 100 },
+        { label: 'Electricity', monthlyCostUsd: 200, pctSequencing: 50 },
       ],
+      facilityPctSequencing: 50,
     })
     const costs = calculateCosts(project)
-    // (1,000 × 12 × 50%) + (200 × 12 × 100%) = 6,000 + 2,400 = 8,400
-    expect(costs.facility).toBe(8_400)
+    // (1,000 + 200) × 12 × 50% = 7,200
+    expect(costs.facility).toBe(7_200)
   })
 })
 
@@ -579,6 +581,7 @@ describe('WHO GCT — end-to-end scenario', () => {
       facility: [
         { label: 'Rent + utilities', monthlyCostUsd: 1_000, pctSequencing: 10 },
       ],
+      facilityPctSequencing: 10,
       transport: [
         { label: 'Sample courier', annualCostUsd: 500, pctSequencing: 100 },
       ],
@@ -837,6 +840,7 @@ describe('WHO GCT — full demo workbook scenario', () => {
         { activity: 'Annual BSC certification', costUsd: 300, quantity: 1, pctSequencing: 50, enabled: true },
         { activity: 'Internal quality control material', costUsd: 200, quantity: 2, pctSequencing: 10, enabled: true },
       ],
+      facilityPctSequencing: 20,
       exchangeRate: 1,
       currency: 'USD',
     }
