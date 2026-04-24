@@ -48,7 +48,7 @@
   "field_min_reads": "Минимальное число ридов на образец (захват всех)",
   "label_enabled": "Включено",
   "label_effective": "эффективно (за вычетом контролей)",
-  "btn_add_sequencer": "+ Добавить второй секвенатор",
+  "btn_add_sequencer": "+ Добавить секвенатор",
   "label_max_reads": "Макс. ридов",
   "label_read_length": "Длина ридов",
   "label_list_price": "Прейскурантная цена",
@@ -263,5 +263,15 @@
   "label_salary_attributed": "Приписанная зарплата",
   "label_capture_all_mode_short": "Захват всех",
   "placeholder_search_kits": "Поиск по всем наборам…",
-  "label_no_results": "Наборы не найдены"
+  "label_no_results": "Наборы не найдены",
+  "matrix_title": "Матрица распределения образцов",
+  "matrix_defined": "Определено",
+  "matrix_assigned": "Назначено",
+  "matrix_delta": "Дельта",
+  "matrix_delta_tooltip": "Назначено минус Определено. Отрицательное = не секвенированные образцы. Положительное = повторное секвенирование или сравнение между платформами. Оба варианта допустимы.",
+  "matrix_distribute": "Распределить поровну",
+  "matrix_all_to_first": "Все на секвенатор 1",
+  "matrix_clear": "Очистить",
+  "matrix_summary": "{{defined}} образцов определено, {{assigned}} назначено всего ({{delta}} повторов / не секвенировано). Расчёт затрат отражает цифру {{assigned}}.",
+  "matrix_not_assigned_hint": "Ещё не назначено"
 }

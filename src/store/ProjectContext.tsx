@@ -64,11 +64,27 @@ function migrateProject(raw: unknown): Project {
     const merged = { ...s }
     if (merged.controlsPerRun === undefined) merged.controlsPerRun = 2
     if (merged.enabled === undefined) merged.enabled = true
-    if (!merged.label) merged.label = i === 0 ? 'Sequencer 1' : 'Sequencer 2'
+    if (!merged.label) merged.label = i === 0 ? 'Sequencer 1' : `Sequencer ${i + 1}`
     if (merged.captureAll === undefined) merged.captureAll = false
     if (merged.minReadsPerSample === undefined) merged.minReadsPerSample = 100_000
+    if (!Array.isArray(merged.assignments)) merged.assignments = []
     return merged
   })
+
+  // Feature 8: backfill assignments if none exist on any sequencer
+  const seqs = p.sequencers as SequencerConfig[]
+  const pathogensList = p.pathogens as Array<{ samplesPerYear: number }>
+  const anyHasAssignments = seqs.some(s => Array.isArray(s.assignments) && s.assignments.length > 0)
+  if (!anyHasAssignments && pathogensList.length > 0) {
+    // Put all pathogens' full samplesPerYear on the first enabled sequencer
+    const firstEnabled = seqs.findIndex(s => s.enabled)
+    if (firstEnabled >= 0) {
+      seqs[firstEnabled].assignments = pathogensList.map((pat, idx) => ({
+        pathogenIndex: idx,
+        samples: pat.samplesPerYear ?? 0,
+      }))
+    }
+  }
   // Ensure personnel have trainingCostUsd
   if (Array.isArray(p.personnel)) {
     p.personnel = (p.personnel as Array<Record<string, unknown>>).map(person => ({

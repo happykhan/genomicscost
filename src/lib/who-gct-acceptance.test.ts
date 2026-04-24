@@ -113,6 +113,7 @@ describe('WHO GCT — Sequencing reagent cost', () => {
         libPrepKitName: '', libPrepCostPerSample: 0,
         enrichment: false, controlsPerRun: 0, enabled: true,
         captureAll: false, minReadsPerSample: 100_000,
+        assignments: [],
       }],
     })
     const costs = calculateCosts(project)
@@ -132,6 +133,7 @@ describe('WHO GCT — Sequencing reagent cost', () => {
         libPrepKitName: '', libPrepCostPerSample: 0,
         enrichment: false, controlsPerRun: 0, enabled: true,
         captureAll: false, minReadsPerSample: 100_000,
+        assignments: [],
       }],
     })
     const costs = calculateCosts(project)
@@ -155,6 +157,7 @@ describe('WHO GCT — Library prep cost', () => {
         libPrepKitName: 'NEBNext Ultra II', libPrepCostPerSample: 50,
         enrichment: false, controlsPerRun: 0, enabled: true,
         captureAll: false, minReadsPerSample: 100_000,
+        assignments: [],
       }],
     })
     const costs = calculateCosts(project)
@@ -171,6 +174,7 @@ describe('WHO GCT — Library prep cost', () => {
         libPrepKitName: 'NEBNext Ultra II', libPrepCostPerSample: 50,
         enrichment: false, controlsPerRun: 0, enabled: true,
         captureAll: false, minReadsPerSample: 100_000,
+        assignments: [],
       }],
     })
     const costs = calculateCosts(project)
@@ -465,6 +469,7 @@ describe('WHO GCT — Incidentals (7% of reagent/consumable costs)', () => {
         libPrepKitName: '', libPrepCostPerSample: 50,
         enrichment: false, controlsPerRun: 0, enabled: true,
         captureAll: false, minReadsPerSample: 100_000,
+        assignments: [],
       }],
       consumables: [{ name: 'Extraction kit', unitCostUsd: 20, quantityPerSample: 0.5, enabled: true }],
     })
@@ -530,6 +535,7 @@ describe('WHO GCT — end-to-end scenario', () => {
         libPrepKitName: 'NEBNext Ultra II', libPrepCostPerSample: 50,
         enrichment: false, controlsPerRun: 0, enabled: true,
         captureAll: false, minReadsPerSample: 100_000,
+        assignments: [],
       }],
       consumables: [
         { name: 'DNA extraction kit', unitCostUsd: 20, quantityPerSample: 0.5, enabled: true },

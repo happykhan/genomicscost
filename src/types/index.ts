@@ -73,6 +73,11 @@ export interface PathogenEntry {
   samplesPerYear: number
 }
 
+export interface SequencerAssignment {
+  pathogenIndex: number   // index into project.pathogens
+  samples: number         // annual sample count sent to this sequencer for this pathogen
+}
+
 export interface SequencerConfig {
   platformId: string        // 'illumina' | 'ont' | 'thermofisher' | 'mgi'
   reagentKitName: string
@@ -92,6 +97,8 @@ export interface SequencerConfig {
   // Feature 7: capture-all mode
   captureAll: boolean
   minReadsPerSample: number
+  // Feature 8: pathogen→sequencer assignment matrix
+  assignments: SequencerAssignment[]
 }
 
 export type EquipmentStatus = 'buy' | 'have' | 'skip'

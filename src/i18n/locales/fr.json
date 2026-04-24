@@ -48,7 +48,7 @@
   "field_min_reads": "Lectures minimales par échantillon (capture totale)",
   "label_enabled": "Activé",
   "label_effective": "effectif (après contrôles)",
-  "btn_add_sequencer": "+ Ajouter un second séquenceur",
+  "btn_add_sequencer": "+ Ajouter un séquenceur",
   "label_max_reads": "Lectures max.",
   "label_read_length": "Longueur de lecture",
   "label_list_price": "Prix catalogue",
@@ -263,5 +263,15 @@
   "label_salary_attributed": "Salaire attribué",
   "label_capture_all_mode_short": "Capture-all",
   "placeholder_search_kits": "Rechercher tous les kits…",
-  "label_no_results": "Aucun kit trouvé"
+  "label_no_results": "Aucun kit trouvé",
+  "matrix_title": "Matrice d'attribution des échantillons",
+  "matrix_defined": "Définis",
+  "matrix_assigned": "Attribués",
+  "matrix_delta": "Delta",
+  "matrix_delta_tooltip": "Attribués moins Définis. Négatif = échantillons non séquencés. Positif = re-séquençage ou comparaison multi-plateforme. Les deux sont autorisés.",
+  "matrix_distribute": "Répartir également",
+  "matrix_all_to_first": "Tout au séquenceur 1",
+  "matrix_clear": "Effacer",
+  "matrix_summary": "{{defined}} échantillons définis, {{assigned}} attribués au total ({{delta}} re-runs / non séquencés). Les coûts reflètent le chiffre {{assigned}}.",
+  "matrix_not_assigned_hint": "Pas encore attribué"
 }
