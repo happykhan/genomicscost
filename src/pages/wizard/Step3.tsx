@@ -1,6 +1,6 @@
 import { useProject } from '../../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
-import catalogue from '../../data/catalogue.json'
+import { getEffectiveCatalogue } from '../../lib/catalogue'
 import { fmt } from '../../lib/format'
 
 const inputClass = 'border border-[var(--gx-border)] rounded-[var(--gx-radius)] bg-[var(--gx-bg)] text-[var(--gx-text)] p-2 text-sm focus:outline-none focus:border-[var(--gx-accent)]'
@@ -16,6 +16,7 @@ const WORKFLOW_KEYS: Record<string, string> = {
 export default function Step3() {
   const { project, updateProject } = useProject()
   const { t } = useTranslation()
+  const catalogue = getEffectiveCatalogue()
   const { consumables } = project
   const samplesPerYear = project.pathogens.reduce((sum, p) => sum + p.samplesPerYear, 0)
 

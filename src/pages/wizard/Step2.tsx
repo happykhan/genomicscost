@@ -3,7 +3,7 @@ import { useProject } from '../../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
 import { createDefaultSequencer } from '../../lib/defaults'
 import { calculateSamplesPerRunMulti } from '../../lib/calculations'
-import catalogue from '../../data/catalogue.json'
+import { getEffectiveCatalogue } from '../../lib/catalogue'
 import type { SequencerConfig, PathogenEntry } from '../../types'
 import Tooltip from '../../components/Tooltip'
 
@@ -44,6 +44,7 @@ interface SequencerPanelProps {
 function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPanelProps) {
   const { project, updateSequencer, updateProject } = useProject()
   const { t } = useTranslation()
+  const catalogue = getEffectiveCatalogue()
   const [kitSearch, setKitSearch] = useState('')
 
   const isCaptureAll = sequencer.captureAll || pathogens.some(p => p.pathogenName === 'Multiple pathogens (capture-all)')

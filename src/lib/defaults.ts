@@ -1,11 +1,12 @@
 import type { Project, SequencerConfig } from '../types'
-import catalogue from '../data/catalogue.json'
+import { getEffectiveCatalogue } from './catalogue'
 
 function randomId(): string {
   return Math.random().toString(36).slice(2, 10)
 }
 
 export function createDefaultSequencer(label: string): SequencerConfig {
+  const catalogue = getEffectiveCatalogue()
   const illuminaPlatform = catalogue.platforms.find(p => p.id === 'illumina')!
   const firstKit = illuminaPlatform.reagent_kits[0]
   return {
@@ -28,6 +29,7 @@ export function createDefaultSequencer(label: string): SequencerConfig {
 }
 
 export function createDefaultProject(): Project {
+  const catalogue = getEffectiveCatalogue()
   // First 8 consumable-like reagents from catalogue that have quantity_per_sample > 0
   // quantityPerSample is units-per-sample; if pack_size > 1, normalise to packs-per-sample
   const defaultConsumables = catalogue.reagents

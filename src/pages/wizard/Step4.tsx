@@ -1,6 +1,6 @@
 import { useProject } from '../../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
-import catalogue from '../../data/catalogue.json'
+import { getEffectiveCatalogue } from '../../lib/catalogue'
 import type { EquipmentStatus } from '../../types'
 import Tooltip from '../../components/Tooltip'
 import { fmt } from '../../lib/format'
@@ -17,6 +17,7 @@ const CAT_LABEL_KEYS: Record<string, string> = {
 export default function Step4() {
   const { project, updateProject } = useProject()
   const { t } = useTranslation()
+  const catalogue = getEffectiveCatalogue()
   const { equipment } = project
 
   const STATUS_OPTIONS: { value: EquipmentStatus; labelKey: string }[] = [

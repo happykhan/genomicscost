@@ -57,12 +57,12 @@ export default function DonutChart({ title, data, centerText, formatValue }: Don
     )
   }
 
-  let cumDeg = 0
-  const slices = nonZero.map(d => {
-    const startDeg = cumDeg
-    cumDeg += (d.value / total) * 360
-    return { ...d, startDeg, endDeg: cumDeg }
-  })
+  const slices = nonZero.reduce<Array<typeof nonZero[number] & { startDeg: number; endDeg: number }>>((acc, d) => {
+    const startDeg = acc.length > 0 ? acc[acc.length - 1].endDeg : 0
+    const endDeg = startDeg + (d.value / total) * 360
+    acc.push({ ...d, startDeg, endDeg })
+    return acc
+  }, [])
 
   return (
     <div className="card p-4">

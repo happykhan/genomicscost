@@ -7,6 +7,7 @@ import './i18n/config'
 import { NavBar } from '@genomicx/ui'
 import Home from './pages/Home'
 import About from './pages/About'
+import Catalogue from './pages/Catalogue'
 import WizardShell from './components/WizardShell'
 import Step1 from './pages/wizard/Step1'
 import Step2 from './pages/wizard/Step2'
@@ -256,6 +257,50 @@ function MobileLangPicker() {
   )
 }
 
+function NavLinks() {
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const linkStyle = (path: string): React.CSSProperties => ({
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    padding: '2px 8px',
+    color: location.pathname === path ? 'var(--gx-accent)' : 'var(--gx-text-muted)',
+    fontSize: '0.82rem',
+    fontWeight: location.pathname === path ? 600 : 400,
+  })
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+      <button onClick={() => navigate('/catalogue')} style={linkStyle('/catalogue')}>{t('nav_catalogue')}</button>
+      <button onClick={() => navigate('/about')} style={linkStyle('/about')}>{t('nav_about')}</button>
+      <GlobePicker />
+    </div>
+  )
+}
+
+function MobileNavLinks() {
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <button
+        onClick={() => navigate('/catalogue')}
+        style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: '4px 0', color: 'var(--gx-text)', fontSize: '0.85rem' }}
+      >
+        {t('nav_catalogue')}
+      </button>
+      <button
+        onClick={() => navigate('/about')}
+        style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: '4px 0', color: 'var(--gx-text)', fontSize: '0.85rem' }}
+      >
+        {t('nav_about')}
+      </button>
+      <MobileLangPicker />
+    </div>
+  )
+}
+
 function AppInner() {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -274,8 +319,8 @@ function AppInner() {
         appSubtitle={t('app_subtitle')}
         icon={<AppIcon />}
         githubUrl="https://github.com/happykhan/genomicscost"
-        actions={<GlobePicker />}
-        mobileActions={<MobileLangPicker />}
+        actions={<NavLinks />}
+        mobileActions={<MobileNavLinks />}
       />
       <WizardTabBar />
       <main className="flex-1">
@@ -288,6 +333,7 @@ function AppInner() {
           <Route path="/wizard/5" element={<WizardShell step={5}><Step5 /></WizardShell>} />
           <Route path="/wizard/6" element={<WizardShell step={6}><Step6 /></WizardShell>} />
           <Route path="/wizard/7" element={<WizardShell step={7}><Step7 /></WizardShell>} />
+          <Route path="/catalogue" element={<Catalogue />} />
           <Route path="/about" element={<About />} />
           {Object.keys(LANGUAGES).map(code => (
             <Route key={code} path={`/${code}`} element={<LangRedirect lang={code} />} />

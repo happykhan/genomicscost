@@ -1,17 +1,17 @@
 import { useProject } from '../../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
-import catalogue from '../../data/catalogue.json'
+import { getEffectiveCatalogue } from '../../lib/catalogue'
 import Tooltip from '../../components/Tooltip'
 import { fmt } from '../../lib/format'
 
 const inputClass = 'border border-[var(--gx-border)] rounded-[var(--gx-radius)] bg-[var(--gx-bg)] text-[var(--gx-text)] p-2 text-sm focus:outline-none focus:border-[var(--gx-accent)]'
 const labelClass = 'text-xs text-[var(--gx-text-muted)] uppercase tracking-wider mb-1 block'
 
-const CLOUD_PLATFORMS = catalogue.bioinformatics_cloud.cloud_platforms.map(p => p.name)
-
 export default function Step6() {
   const { project, updateProject } = useProject()
   const { t } = useTranslation()
+  const catalogue = getEffectiveCatalogue()
+  const CLOUD_PLATFORMS = catalogue.bioinformatics_cloud.cloud_platforms.map(p => p.name)
   const { facility, transport, bioinformatics, qms } = project
 
   // ── Facility ─────────────────────────────────────────────────────────────────

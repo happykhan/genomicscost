@@ -1,6 +1,6 @@
 import { useProject } from '../../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
-import catalogue from '../../data/catalogue.json'
+import { getEffectiveCatalogue } from '../../lib/catalogue'
 import Tooltip from '../../components/Tooltip'
 import type { PathogenEntry } from '../../types'
 
@@ -17,6 +17,7 @@ const DEFAULT_PATHOGEN_ENTRY: PathogenEntry = {
 export default function Step1() {
   const { project, updateProject } = useProject()
   const { t } = useTranslation()
+  const catalogue = getEffectiveCatalogue()
 
   const pathogens = project.pathogens ?? []
   const totalSamplesPerYear = pathogens.reduce((sum, p) => sum + p.samplesPerYear, 0)
