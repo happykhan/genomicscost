@@ -178,11 +178,11 @@ export function calculateSamplesPerRunMulti(
 
 function calcSequencerCosts(
   seq: SequencerConfig,
-  samplesPerYear: number,
+  assignedSamples: number,
 ): { sequencingReagents: number; libraryPrep: number } {
-  if (!seq.enabled) return { sequencingReagents: 0, libraryPrep: 0 }
+  if (!seq.enabled || assignedSamples <= 0) return { sequencingReagents: 0, libraryPrep: 0 }
 
-  const samplesIncludingRetests = samplesPerYear * (1 + (seq.retestPct ?? 0) / 100)
+  const samplesIncludingRetests = assignedSamples * (1 + (seq.retestPct ?? 0) / 100)
   // samplesPerRun is already the effective count after controls (set by calculateSamplesPerRun)
   const effectiveSamplesPerRun = Math.max(1, seq.samplesPerRun ?? 1)
   const runsNeeded = Math.ceil(samplesIncludingRetests / effectiveSamplesPerRun)
@@ -210,10 +210,25 @@ export function calculateCosts(project: Project): CostBreakdown {
 
   if (!samplesPerYear || samplesPerYear <= 0) return zero
 
-  // Sum costs across all enabled sequencers
+  // Compute total assigned samples across all sequencers
+  const hasAnyAssignments = (sequencers ?? []).some(
+    s => Array.isArray(s.assignments) && s.assignments.length > 0,
+  )
+
+  // Sum costs across all enabled sequencers using assignment-based sample counts
   const seqCosts = (sequencers ?? []).reduce(
     (acc, seq) => {
-      const c = calcSequencerCosts(seq, samplesPerYear)
+      let assignedSamples: number
+      if (hasAnyAssignments && Array.isArray(seq.assignments) && seq.assignments.length > 0) {
+        assignedSamples = seq.assignments.reduce((sum, a) => sum + (a.samples ?? 0), 0)
+      } else if (!hasAnyAssignments) {
+        // Back-compat: no assignments anywhere — use global samplesPerYear (old behaviour)
+        assignedSamples = samplesPerYear
+      } else {
+        // This sequencer has no assignments but others do — it gets 0
+        assignedSamples = 0
+      }
+      const c = calcSequencerCosts(seq, assignedSamples)
       return {
         sequencingReagents: acc.sequencingReagents + c.sequencingReagents,
         libraryPrep: acc.libraryPrep + c.libraryPrep,
@@ -222,10 +237,20 @@ export function calculateCosts(project: Project): CostBreakdown {
     { sequencingReagents: 0, libraryPrep: 0 },
   )
 
+  // Compute total assigned samples for per-sample scaling (consumables, bioinformatics)
+  const totalAssignedRuns = hasAnyAssignments
+    ? (sequencers ?? []).reduce((sum, seq) => {
+        if (!seq.enabled || !Array.isArray(seq.assignments)) return sum
+        return sum + seq.assignments.reduce((s, a) => s + (a.samples ?? 0), 0)
+      }, 0)
+    : 0
+  // Use assigned total if available, otherwise fall back to defined samplesPerYear
+  const effectiveSamplesForScaling = (totalAssignedRuns > 0) ? totalAssignedRuns : samplesPerYear
+
   const annualConsumables = consumables
     .filter(c => c.enabled)
     .reduce((sum, c) => {
-      const qty = Math.ceil(samplesPerYear * (c.quantityPerSample ?? 0))
+      const qty = Math.ceil(effectiveSamplesForScaling * (c.quantityPerSample ?? 0))
       return sum + qty * (c.unitCostUsd ?? 0)
     }, 0)
 
@@ -265,11 +290,11 @@ export function calculateCosts(project: Project): CostBreakdown {
 
   let annualBioinformatics = 0
   if (bioinformatics.type === 'cloud') {
-    annualBioinformatics = samplesPerYear * (bioinformatics.costPerSampleUsd ?? 0)
+    annualBioinformatics = effectiveSamplesForScaling * (bioinformatics.costPerSampleUsd ?? 0)
   } else if (bioinformatics.type === 'inhouse') {
     annualBioinformatics = bioinformatics.annualServerCostUsd ?? 0
   } else if (bioinformatics.type === 'hybrid') {
-    annualBioinformatics = samplesPerYear * (bioinformatics.costPerSampleUsd ?? 0) + (bioinformatics.annualServerCostUsd ?? 0)
+    annualBioinformatics = effectiveSamplesForScaling * (bioinformatics.costPerSampleUsd ?? 0) + (bioinformatics.annualServerCostUsd ?? 0)
   }
 
   // QMS: cost × quantity × pctSequencing (% attributed to this sequencing programme)
@@ -286,7 +311,7 @@ export function calculateCosts(project: Project): CostBreakdown {
     annualEquipment + incidentals +
     annualPersonnel + annualFacility + annualTransport + annualBioinformatics + annualQMS + annualTraining
 
-  const costPerSample = samplesPerYear > 0 ? total / samplesPerYear : 0
+  const costPerSample = effectiveSamplesForScaling > 0 ? total / effectiveSamplesForScaling : 0
 
   // ── Feature 5: Workflow step breakdown ──────────────────────────────────────
   // Personnel, Facility, Transport, QMS, Training, Equipment, Incidentals are shared evenly across 6 steps
@@ -297,7 +322,7 @@ export function calculateCosts(project: Project): CostBreakdown {
 
   // Consumables: assigned by their workflow tag
   consumables.filter(c => c.enabled).forEach(c => {
-    const qty = Math.ceil(samplesPerYear * (c.quantityPerSample ?? 0))
+    const qty = Math.ceil(effectiveSamplesForScaling * (c.quantityPerSample ?? 0))
     const cost = qty * (c.unitCostUsd ?? 0)
     const tag = (c as { workflow?: string }).workflow ?? 'sample_receipt'
     const step = CATALOGUE_WORKFLOW_MAP[tag] ?? 'sample_receipt'

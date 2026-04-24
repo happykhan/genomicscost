@@ -136,6 +136,7 @@ describe('calculateCosts', () => {
         label: 'Sequencer 1',
         captureAll: false,
         minReadsPerSample: 100_000,
+        assignments: [],
       }],
       consumables: [],
       equipment: [],
@@ -170,6 +171,7 @@ describe('calculateCosts', () => {
         label: 'Sequencer 1',
         captureAll: false,
         minReadsPerSample: 100_000,
+        assignments: [],
       }],
       consumables: [],
       equipment: [],
@@ -205,6 +207,7 @@ describe('calculateCosts', () => {
         label: 'Sequencer 1',
         captureAll: false,
         minReadsPerSample: 100_000,
+        assignments: [],
       }],
       consumables: [],
       equipment: [],
@@ -246,6 +249,7 @@ describe('calculateCosts', () => {
         label: 'Sequencer 1',
         captureAll: false,
         minReadsPerSample: 100_000,
+        assignments: [],
       }],
       consumables: [],
       equipment: [],
@@ -279,6 +283,7 @@ describe('calculateCosts', () => {
         label: 'Sequencer 1',
         captureAll: false,
         minReadsPerSample: 100_000,
+        assignments: [],
       }],
       consumables: [],
       equipment: [],
@@ -476,6 +481,7 @@ describe('calculateCosts', () => {
       enabled: true,
       captureAll: false,
       minReadsPerSample: 100_000,
+      assignments: [],
     }
     const project = {
       ...createDefaultProject(),
@@ -495,6 +501,184 @@ describe('calculateCosts', () => {
     const costs = calculateCosts(project)
     // Each: ceil(100/50) = 2 runs × $1000 = $2000; total = $4000
     expect(costs.sequencingReagents).toBe(4_000)
+  })
+
+  it('assignment matrix: single sequencer, one pathogen — same cost as before migration', () => {
+    // With explicit assignments matching old behaviour, cost should be identical
+    const project = {
+      ...createDefaultProject(),
+      pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 200 }],
+      sequencers: [{
+        platformId: 'illumina',
+        reagentKitName: 'test',
+        reagentKitPrice: 526.15,
+        samplesPerRun: 31,
+        coverageX: 100,
+        bufferPct: 20,
+        retestPct: 0,
+        libPrepKitName: '',
+        libPrepCostPerSample: 10,
+        enrichment: false,
+        controlsPerRun: 0,
+        enabled: true,
+        label: 'Sequencer 1',
+        captureAll: false,
+        minReadsPerSample: 100_000,
+        assignments: [{ pathogenIndex: 0, samples: 200 }],
+      }],
+      consumables: [],
+      equipment: [],
+      personnel: [],
+      facility: [],
+      transport: [],
+      bioinformatics: { type: 'none' as const, cloudPlatform: '', costPerSampleUsd: 0, annualServerCostUsd: 0 },
+      qms: [],
+    }
+    const costs = calculateCosts(project)
+    const runsNeeded = Math.ceil(200 / 31) // 7
+    expect(costs.sequencingReagents).toBeCloseTo(runsNeeded * 526.15, 2)
+    expect(costs.libraryPrep).toBe(200 * 10)
+  })
+
+  it('assignment matrix: two sequencers splitting 50/50 — total reagent cost equals single-sequencer baseline', () => {
+    // 500 samples split 250/250 across two identical sequencers
+    // Each: ceil(250/50)=5 runs × $1000 = $5000; total = $10000
+    // Single-sequencer baseline: ceil(500/50)=10 runs × $1000 = $10000
+    const seq = {
+      platformId: 'illumina',
+      reagentKitName: 'test',
+      reagentKitPrice: 1000,
+      samplesPerRun: 50,
+      coverageX: 100,
+      bufferPct: 20,
+      retestPct: 0,
+      libPrepKitName: '',
+      libPrepCostPerSample: 0,
+      enrichment: false,
+      controlsPerRun: 0,
+      enabled: true,
+      captureAll: false,
+      minReadsPerSample: 100_000,
+      assignments: [],
+    }
+    const splitProject = {
+      ...createDefaultProject(),
+      pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 500 }],
+      sequencers: [
+        { ...seq, label: 'Sequencer 1', assignments: [{ pathogenIndex: 0, samples: 250 }] },
+        { ...seq, label: 'Sequencer 2', assignments: [{ pathogenIndex: 0, samples: 250 }] },
+      ],
+      consumables: [],
+      equipment: [],
+      personnel: [],
+      facility: [],
+      transport: [],
+      bioinformatics: { type: 'none' as const, cloudPlatform: '', costPerSampleUsd: 0, annualServerCostUsd: 0 },
+      qms: [],
+    }
+    const singleProject = {
+      ...splitProject,
+      sequencers: [
+        { ...seq, label: 'Sequencer 1', assignments: [{ pathogenIndex: 0, samples: 500 }] },
+      ],
+    }
+    const splitCosts = calculateCosts(splitProject)
+    const singleCosts = calculateCosts(singleProject)
+
+    // Reagent costs should be equal (within rounding for integer division)
+    expect(Math.abs(splitCosts.sequencingReagents - singleCosts.sequencingReagents)).toBeLessThanOrEqual(1000)
+    // In this case they should be exactly equal since 250 and 500 both divide evenly into runs of 50
+    expect(splitCosts.sequencingReagents).toBe(singleCosts.sequencingReagents)
+  })
+
+  it('assignment matrix: re-sequencing on two platforms (delta = +N) — reagent/lib-prep scale up', () => {
+    // 100 samples sequenced on BOTH platforms = 200 total assigned
+    // Equipment, personnel, etc. stay the same (shared infrastructure)
+    const seq = {
+      platformId: 'illumina',
+      reagentKitName: 'test',
+      reagentKitPrice: 1000,
+      samplesPerRun: 50,
+      coverageX: 100,
+      bufferPct: 20,
+      retestPct: 0,
+      libPrepKitName: '',
+      libPrepCostPerSample: 20,
+      enrichment: false,
+      controlsPerRun: 0,
+      enabled: true,
+      captureAll: false,
+      minReadsPerSample: 100_000,
+      assignments: [],
+    }
+    const singleProject = {
+      ...createDefaultProject(),
+      pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 100 }],
+      sequencers: [
+        { ...seq, label: 'Sequencer 1', assignments: [{ pathogenIndex: 0, samples: 100 }] },
+      ],
+      consumables: [],
+      equipment: [{ name: 'iSeq', category: 'sequencing_platform', status: 'buy' as const, unitCostUsd: 19_900, quantity: 1, lifespanYears: 10 }],
+      personnel: [{ role: 'Tech', annualSalaryUsd: 30_000, pctTime: 50, trainingCostUsd: 0 }],
+      facility: [],
+      transport: [],
+      bioinformatics: { type: 'none' as const, cloudPlatform: '', costPerSampleUsd: 0, annualServerCostUsd: 0 },
+      qms: [],
+    }
+    const dualProject = {
+      ...singleProject,
+      sequencers: [
+        { ...seq, label: 'Sequencer 1', assignments: [{ pathogenIndex: 0, samples: 100 }] },
+        { ...seq, label: 'Sequencer 2', assignments: [{ pathogenIndex: 0, samples: 100 }] },
+      ],
+    }
+    const singleCosts = calculateCosts(singleProject)
+    const dualCosts = calculateCosts(dualProject)
+
+    // Reagent costs should double (2 platforms × same runs)
+    expect(dualCosts.sequencingReagents).toBe(singleCosts.sequencingReagents * 2)
+    // Library prep should double
+    expect(dualCosts.libraryPrep).toBe(singleCosts.libraryPrep * 2)
+    // Equipment stays the same (shared)
+    expect(dualCosts.equipment).toBe(singleCosts.equipment)
+    // Personnel stays the same (shared)
+    expect(dualCosts.personnel).toBe(singleCosts.personnel)
+  })
+
+  it('assignment matrix: no assignments falls back to samplesPerYear (back-compat)', () => {
+    // Sequencers without assignments field at all — should use global total
+    const project = {
+      ...createDefaultProject(),
+      pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 100 }],
+      sequencers: [{
+        platformId: 'illumina',
+        reagentKitName: 'test',
+        reagentKitPrice: 1000,
+        samplesPerRun: 50,
+        coverageX: 100,
+        bufferPct: 20,
+        retestPct: 0,
+        libPrepKitName: '',
+        libPrepCostPerSample: 0,
+        enrichment: false,
+        controlsPerRun: 0,
+        enabled: true,
+        label: 'Sequencer 1',
+        captureAll: false,
+        minReadsPerSample: 100_000,
+        assignments: [],
+      }],
+      consumables: [],
+      equipment: [],
+      personnel: [],
+      facility: [],
+      transport: [],
+      bioinformatics: { type: 'none' as const, cloudPlatform: '', costPerSampleUsd: 0, annualServerCostUsd: 0 },
+      qms: [],
+    }
+    const costs = calculateCosts(project)
+    // ceil(100/50)=2 runs × $1000 = $2000 (same as old behaviour)
+    expect(costs.sequencingReagents).toBe(2_000)
   })
 
   it('multi-pathogen: total samplesPerYear is sum across pathogens', () => {

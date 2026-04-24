@@ -98,6 +98,17 @@ const REQUIRED_KEYS = [
   'label_reagent_kit_cost_per_run',
   'label_lib_prep_cost_per_sample',
   'label_sequencer_n',
+  // Assignment matrix keys
+  'matrix_title',
+  'matrix_defined',
+  'matrix_assigned',
+  'matrix_delta',
+  'matrix_delta_tooltip',
+  'matrix_distribute',
+  'matrix_all_to_first',
+  'matrix_clear',
+  'matrix_summary',
+  'matrix_not_assigned_hint',
 ]
 
 describe('i18n — all locales have required keys', () => {

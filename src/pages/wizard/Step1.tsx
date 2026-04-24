@@ -45,7 +45,20 @@ export default function Step1() {
   }
 
   function removePathogen(index: number) {
-    updateProject({ pathogens: pathogens.filter((_, i) => i !== index) })
+    // Strip assignments for the removed pathogen and re-index remaining ones
+    const updatedSequencers = project.sequencers.map(seq => ({
+      ...seq,
+      assignments: (seq.assignments ?? [])
+        .filter(a => a.pathogenIndex !== index)
+        .map(a => ({
+          ...a,
+          pathogenIndex: a.pathogenIndex > index ? a.pathogenIndex - 1 : a.pathogenIndex,
+        })),
+    }))
+    updateProject({
+      pathogens: pathogens.filter((_, i) => i !== index),
+      sequencers: updatedSequencers,
+    })
   }
 
   return (

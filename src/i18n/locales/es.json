@@ -48,7 +48,7 @@
   "field_min_reads": "Lecturas mínimas por muestra (captura total)",
   "label_enabled": "Habilitado",
   "label_effective": "efectivo (después de controles)",
-  "btn_add_sequencer": "+ Agregar segundo secuenciador",
+  "btn_add_sequencer": "+ Agregar secuenciador",
   "label_max_reads": "Máx. lecturas",
   "label_read_length": "Longitud de lectura",
   "label_list_price": "Precio de lista",
@@ -258,5 +258,15 @@
   "label_salary_attributed": "Salario atribuido",
   "label_capture_all_mode_short": "Capture-all",
   "placeholder_search_kits": "Buscar todos los kits…",
-  "label_no_results": "No se encontraron kits"
+  "label_no_results": "No se encontraron kits",
+  "matrix_title": "Matriz de asignación de muestras",
+  "matrix_defined": "Definidas",
+  "matrix_assigned": "Asignadas",
+  "matrix_delta": "Delta",
+  "matrix_delta_tooltip": "Asignadas menos Definidas. Negativo = muestras no secuenciadas. Positivo = re-secuenciación o comparación entre plataformas. Ambos están permitidos.",
+  "matrix_distribute": "Distribuir equitativamente",
+  "matrix_all_to_first": "Todo al secuenciador 1",
+  "matrix_clear": "Limpiar",
+  "matrix_summary": "{{defined}} muestras definidas, {{assigned}} asignadas en total ({{delta}} re-runs / no secuenciadas). Los costos reflejan la cifra de {{assigned}}.",
+  "matrix_not_assigned_hint": "Aún no asignado"
 }

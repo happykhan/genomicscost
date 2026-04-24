@@ -67,10 +67,18 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
   const barcodingLimit = selectedLibPrepKit?.barcoding_limit ?? Infinity
 
   // Auto-calc samplesPerRun using weighted multi-pathogen formula (Annex 2)
+  // Build assigned pathogen subset for run sizing
+  const assignedPathogens: PathogenEntry[] = (() => {
+    if (!Array.isArray(sequencer.assignments) || sequencer.assignments.length === 0) return pathogens
+    return sequencer.assignments
+      .filter(a => a.pathogenIndex >= 0 && a.pathogenIndex < pathogens.length && a.samples > 0)
+      .map(a => ({ ...pathogens[a.pathogenIndex], samplesPerYear: a.samples }))
+  })()
+
   useEffect(() => {
     if (!selectedKit) return
     const calculated = calculateSamplesPerRunMulti(
-      pathogens,
+      assignedPathogens.length > 0 ? assignedPathogens : pathogens,
       sequencer.coverageX,
       selectedKit.read_length_bp ?? 0,
       selectedKit.max_reads_per_flowcell ?? 0,
@@ -85,7 +93,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
   }, [ // eslint-disable-line react-hooks/exhaustive-deps
     sequencer.reagentKitName, pathogens, sequencer.coverageX, sequencer.bufferPct,
     sequencer.controlsPerRun, isCaptureAll, sequencer.minReadsPerSample,
-    sequencer.libPrepKitName,
+    sequencer.libPrepKitName, sequencer.assignments,
   ])
 
   const PLATFORM_PREFIX: Record<string, string> = {
@@ -512,20 +520,245 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
   )
 }
 
+// ── Assignment matrix helpers ────────────────────────────────────────────────
+
+function getAssignedSamples(
+  sequencers: SequencerConfig[],
+  seqIdx: number,
+  pathogenIdx: number,
+): number {
+  const seq = sequencers[seqIdx]
+  if (!seq || !Array.isArray(seq.assignments)) return 0
+  const a = seq.assignments.find(x => x.pathogenIndex === pathogenIdx)
+  return a?.samples ?? 0
+}
+
+function setAssignedSamples(
+  sequencers: SequencerConfig[],
+  seqIdx: number,
+  pathogenIdx: number,
+  samples: number,
+): SequencerConfig[] {
+  return sequencers.map((seq, si) => {
+    if (si !== seqIdx) return seq
+    const existing = (seq.assignments ?? []).filter(a => a.pathogenIndex !== pathogenIdx)
+    if (samples > 0) {
+      existing.push({ pathogenIndex: pathogenIdx, samples })
+    }
+    return { ...seq, assignments: existing }
+  })
+}
+
+interface AssignmentMatrixProps {
+  pathogens: PathogenEntry[]
+  sequencers: SequencerConfig[]
+  onUpdate: (sequencers: SequencerConfig[]) => void
+}
+
+function AssignmentMatrix({ pathogens, sequencers, onUpdate }: AssignmentMatrixProps) {
+  const { t } = useTranslation()
+  const enabledSeqs = sequencers
+    .map((s, i) => ({ seq: s, idx: i }))
+    .filter(x => x.seq.enabled)
+
+  if (pathogens.length === 0 || enabledSeqs.length === 0) return null
+
+  function handleCellChange(seqIdx: number, pathogenIdx: number, value: string) {
+    const num = Math.max(0, parseInt(value) || 0)
+    onUpdate(setAssignedSamples(sequencers, seqIdx, pathogenIdx, num))
+  }
+
+  function distributeEvenly() {
+    let updated = sequencers.map(s => ({ ...s, assignments: [] as SequencerConfig['assignments'] }))
+    pathogens.forEach((p, pi) => {
+      const base = Math.floor(p.samplesPerYear / enabledSeqs.length)
+      const remainder = p.samplesPerYear - base * enabledSeqs.length
+      enabledSeqs.forEach(({ idx }, i) => {
+        const samples = base + (i < remainder ? 1 : 0)
+        updated = setAssignedSamples(updated, idx, pi, samples)
+      })
+    })
+    onUpdate(updated)
+  }
+
+  function allToFirst() {
+    let updated = sequencers.map(s => ({ ...s, assignments: [] as SequencerConfig['assignments'] }))
+    if (enabledSeqs.length === 0) return
+    const firstIdx = enabledSeqs[0].idx
+    pathogens.forEach((p, pi) => {
+      updated = setAssignedSamples(updated, firstIdx, pi, p.samplesPerYear)
+    })
+    onUpdate(updated)
+  }
+
+  function clearAll() {
+    onUpdate(sequencers.map(s => ({ ...s, assignments: [] })))
+  }
+
+  // Column sums
+  const colSums = enabledSeqs.map(({ idx }) =>
+    pathogens.reduce((sum, _, pi) => sum + getAssignedSamples(sequencers, idx, pi), 0)
+  )
+  const totalDefined = pathogens.reduce((s, p) => s + p.samplesPerYear, 0)
+  const totalAssigned = colSums.reduce((s, v) => s + v, 0)
+  const grandDelta = totalAssigned - totalDefined
+
+  return (
+    <div className="card p-5 mb-6" style={{ borderLeft: '3px solid var(--gx-accent)' }}>
+      <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--gx-text)' }}>
+        {t('matrix_title')}
+      </h3>
+
+      {/* Helper buttons */}
+      <div className="flex gap-2 mb-3 flex-wrap">
+        <button
+          onClick={distributeEvenly}
+          className="text-xs px-3 py-1 rounded"
+          style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
+        >
+          {t('matrix_distribute')}
+        </button>
+        <button
+          onClick={allToFirst}
+          className="text-xs px-3 py-1 rounded"
+          style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
+        >
+          {t('matrix_all_to_first')}
+        </button>
+        <button
+          onClick={clearAll}
+          className="text-xs px-3 py-1 rounded"
+          style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
+        >
+          {t('matrix_clear')}
+        </button>
+      </div>
+
+      <div style={{ overflowX: 'auto' }}>
+        <table className="w-full text-sm" style={{ borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ borderBottom: '1px solid var(--gx-border)', background: 'var(--gx-bg-alt)' }}>
+              <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>
+                {t('field_pathogen_name')}
+              </th>
+              {enabledSeqs.map(({ seq }) => (
+                <th key={seq.label} className="text-center px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)', minWidth: 90 }}>
+                  {seq.label.length > 16 ? seq.label.slice(0, 14) + '...' : seq.label}
+                </th>
+              ))}
+              <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>
+                {t('matrix_defined')}
+              </th>
+              <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>
+                {t('matrix_assigned')}
+              </th>
+              <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>
+                <Tooltip content={t('matrix_delta_tooltip')} />
+                {' '}{t('matrix_delta')}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {pathogens.map((p, pi) => {
+              const rowAssigned = enabledSeqs.reduce(
+                (sum, { idx }) => sum + getAssignedSamples(sequencers, idx, pi), 0
+              )
+              const delta = rowAssigned - p.samplesPerYear
+              const deltaColor = delta === 0
+                ? 'var(--gx-text-muted)'
+                : delta < 0
+                  ? '#d97706'  // amber
+                  : '#3b82f6'  // blue
+
+              return (
+                <tr key={pi} style={{ borderBottom: '1px solid var(--gx-border)' }}>
+                  <td className="px-3 py-2 text-xs" style={{ color: 'var(--gx-text)' }}>
+                    <span style={{ marginRight: 4, fontSize: '0.7rem', opacity: 0.6 }}>
+                      {p.pathogenType === 'bacterial' ? '🦠' : '🧬'}
+                    </span>
+                    {p.pathogenName}
+                    {delta < 0 && (
+                      <span className="ml-2 text-xs" style={{ color: '#d97706' }} title={t('matrix_not_assigned_hint')}>
+                        ⚠
+                      </span>
+                    )}
+                  </td>
+                  {enabledSeqs.map(({ idx }) => (
+                    <td key={idx} className="px-2 py-2 text-center">
+                      <input
+                        type="number"
+                        min={0}
+                        value={getAssignedSamples(sequencers, idx, pi)}
+                        onChange={e => handleCellChange(idx, pi, e.target.value)}
+                        className={inputClass}
+                        style={{ width: 80, textAlign: 'center', margin: '0 auto' }}
+                      />
+                    </td>
+                  ))}
+                  <td className="px-3 py-2 text-right text-xs" style={{ color: 'var(--gx-text-muted)' }}>
+                    {p.samplesPerYear.toLocaleString()}
+                  </td>
+                  <td className="px-3 py-2 text-right text-xs" style={{ color: 'var(--gx-text)' }}>
+                    {rowAssigned.toLocaleString()}
+                  </td>
+                  <td className="px-3 py-2 text-right text-xs font-semibold" style={{ color: deltaColor }}>
+                    {delta > 0 ? '+' : ''}{delta.toLocaleString()}
+                  </td>
+                </tr>
+              )
+            })}
+            {/* Column totals */}
+            <tr style={{ borderTop: '2px solid var(--gx-border)', background: 'var(--gx-bg-alt)' }}>
+              <td className="px-3 py-2 text-xs font-semibold" style={{ color: 'var(--gx-text-muted)' }}>
+                {t('label_total')}
+              </td>
+              {enabledSeqs.map(({ idx }, i) => (
+                <td key={idx} className="px-3 py-2 text-center text-xs font-semibold" style={{ color: 'var(--gx-text)' }}>
+                  {colSums[i].toLocaleString()}
+                </td>
+              ))}
+              <td className="px-3 py-2 text-right text-xs font-semibold" style={{ color: 'var(--gx-text-muted)' }}>
+                {totalDefined.toLocaleString()}
+              </td>
+              <td className="px-3 py-2 text-right text-xs font-semibold" style={{ color: 'var(--gx-text)' }}>
+                {totalAssigned.toLocaleString()}
+              </td>
+              <td className="px-3 py-2 text-right text-xs font-semibold" style={{
+                color: grandDelta === 0 ? 'var(--gx-text-muted)' : grandDelta < 0 ? '#d97706' : '#3b82f6'
+              }}>
+                {grandDelta > 0 ? '+' : ''}{grandDelta.toLocaleString()}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* Summary line */}
+      <div className="mt-3 text-xs" style={{ color: 'var(--gx-text-muted)' }}>
+        {t('matrix_summary', {
+          defined: totalDefined.toLocaleString(),
+          assigned: totalAssigned.toLocaleString(),
+          delta: (grandDelta >= 0 ? '+' : '') + grandDelta.toLocaleString(),
+        })}
+      </div>
+    </div>
+  )
+}
+
 export default function Step2() {
   const { project, updateProject } = useProject()
   const { t } = useTranslation()
   const { sequencers } = project
 
-  const totalSamplesPerYear = project.pathogens.reduce((sum, p) => sum + p.samplesPerYear, 0)
-
-  function addSecondSequencer() {
-    const newSeq = createDefaultSequencer('Sequencer 2')
+  function addSequencer() {
+    const label = `Sequencer ${sequencers.length + 1}`
+    const newSeq = createDefaultSequencer(label)
     updateProject({ sequencers: [...sequencers, newSeq] })
   }
 
-  // Suppress unused variable warning — totalSamplesPerYear is available for child components if needed
-  void totalSamplesPerYear
+  function handleAssignmentUpdate(updatedSequencers: SequencerConfig[]) {
+    updateProject({ sequencers: updatedSequencers })
+  }
 
   return (
     <div>
@@ -533,6 +766,15 @@ export default function Step2() {
       <p className="text-sm mb-6" style={{ color: 'var(--gx-text-muted)' }}>
         {t('step2_desc')}
       </p>
+
+      {/* Assignment matrix — shown when there are pathogens and sequencers */}
+      {project.pathogens.length > 0 && sequencers.length > 0 && (
+        <AssignmentMatrix
+          pathogens={project.pathogens}
+          sequencers={sequencers}
+          onUpdate={handleAssignmentUpdate}
+        />
+      )}
 
       {sequencers.map((seq, idx) => (
         <SequencerPanel
@@ -544,16 +786,14 @@ export default function Step2() {
         />
       ))}
 
-      {/* Feature 6: add second sequencer */}
-      {sequencers.length < 2 && (
-        <button
-          onClick={addSecondSequencer}
-          className="px-4 py-2 rounded text-sm font-medium"
-          style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
-        >
-          {t('btn_add_sequencer')}
-        </button>
-      )}
+      {/* Unlimited sequencers */}
+      <button
+        onClick={addSequencer}
+        className="px-4 py-2 rounded text-sm font-medium"
+        style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
+      >
+        {t('btn_add_sequencer')}
+      </button>
     </div>
   )
 }

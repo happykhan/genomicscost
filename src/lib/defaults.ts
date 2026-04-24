@@ -25,6 +25,7 @@ export function createDefaultSequencer(label: string): SequencerConfig {
     label,
     captureAll: false,
     minReadsPerSample: 100_000,
+    assignments: [],
   }
 }
 
