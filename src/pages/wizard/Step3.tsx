@@ -238,17 +238,37 @@ export default function Step3() {
                       opacity: item.enabled ? 1 : 0.4,
                     }}
                   >
-                    {/* 5 workflow step checkboxes */}
-                    {WF_STEPS.map(step => (
-                      <td key={step} className="px-2 py-1 text-center">
-                        <input
-                          type="checkbox"
-                          checked={!!item.workflows?.[step]}
-                          onChange={() => toggleWorkflow(idx, step)}
-                          style={{ accentColor: 'var(--gx-accent)', width: 14, height: 14 }}
-                        />
-                      </td>
-                    ))}
+                    {/* 5 workflow step indicators — read-only dot for catalogue items, editable checkbox for custom */}
+                    {(() => {
+                      const isCatalogueItem = catalogue.reagents.some(r => r.name === item.name)
+                      return WF_STEPS.map(step => {
+                        const active = !!item.workflows?.[step]
+                        return (
+                          <td key={step} className="px-2 py-1 text-center">
+                            {isCatalogueItem ? (
+                              <span
+                                title={WF_FULL[step]}
+                                style={{
+                                  display: 'inline-block',
+                                  width: 10, height: 10,
+                                  borderRadius: '50%',
+                                  background: active ? 'var(--gx-accent)' : 'var(--gx-border)',
+                                  flexShrink: 0,
+                                }}
+                              />
+                            ) : (
+                              <input
+                                type="checkbox"
+                                checked={active}
+                                onChange={() => toggleWorkflow(idx, step)}
+                                title={WF_FULL[step]}
+                                style={{ accentColor: 'var(--gx-accent)', width: 14, height: 14 }}
+                              />
+                            )}
+                          </td>
+                        )
+                      })
+                    })()}
 
                     {/* Type badge */}
                     <td className="px-3 py-2">

@@ -24,6 +24,16 @@ import type {
 
 const inputClass = 'border border-[var(--gx-border)] rounded-[var(--gx-radius)] bg-[var(--gx-bg)] text-[var(--gx-text)] p-1.5 text-xs focus:outline-none focus:border-[var(--gx-accent)]'
 
+const WF_STEPS = ['sample_receipt', 'nucleic_acid_extraction', 'pcr_testing', 'ngs_library_preparation', 'sequencing'] as const
+const WF_ABBREV: Record<string, string> = {
+  sample_receipt: 'SR', nucleic_acid_extraction: 'NA', pcr_testing: 'PCR',
+  ngs_library_preparation: 'Lib', sequencing: 'Seq',
+}
+const WF_FULL: Record<string, string> = {
+  sample_receipt: 'Sample receipt', nucleic_acid_extraction: 'Nucleic acid extraction',
+  pcr_testing: 'PCR testing', ngs_library_preparation: 'NGS library preparation', sequencing: 'Sequencing',
+}
+
 // ── Shared helper components ─────────────────────────────────────────────────
 
 function OverrideBadge({ status }: { status: 'none' | 'edited' | 'custom' | 'deleted' }) {
@@ -758,9 +768,17 @@ function ReagentsTab({ onRefresh }: { onRefresh: () => void }) {
     .filter((r): r is BundledReagent => r != null)
     .filter(r => r.name.toLowerCase().includes(search.toLowerCase()))
 
-  function handleEdit(name: string, field: string, value: string | number | null) {
+  function handleEdit(name: string, field: string, value: string | number | string[] | null) {
     setOverride('reagents', name, { [field]: value })
     onRefresh()
+  }
+
+  function handleWorkflowToggle(r: BundledReagent, step: string) {
+    const current: string[] = r.workflows ?? (r.workflow ? [r.workflow] : [])
+    const next = current.includes(step)
+      ? current.filter(s => s !== step)
+      : [...current, step]
+    handleEdit(r.name, 'workflows', next)
   }
 
   function handleDelete(name: string) {
@@ -806,13 +824,14 @@ function ReagentsTab({ onRefresh }: { onRefresh: () => void }) {
               <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Category</th>
               <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Pack size</th>
               <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Qty/sample</th>
-              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Workflow</th>
+              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Workflow steps</th>
               <th className="px-3 py-2"></th>
             </tr>
           </thead>
           <tbody>
             {filtered.map(r => {
               const status = getOverrideStatus('reagents', r.name)
+              const activeSteps = new Set(r.workflows ?? (r.workflow ? [r.workflow] : []))
               return (
                 <tr key={r.name} style={{ borderBottom: '1px solid var(--gx-border)' }}>
                   <td className="px-3 py-2" style={{ color: 'var(--gx-text)', maxWidth: 280 }}>
@@ -826,7 +845,30 @@ function ReagentsTab({ onRefresh }: { onRefresh: () => void }) {
                   <td className="px-3 py-2">
                     <EditableCell value={r.quantity_per_sample} type="number" onChange={v => handleEdit(r.name, 'quantity_per_sample', v)} />
                   </td>
-                  <td className="px-3 py-2"><span className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{r.workflow}</span></td>
+                  <td className="px-3 py-2">
+                    <div className="flex gap-1 flex-wrap">
+                      {WF_STEPS.map(step => {
+                        const active = activeSteps.has(step)
+                        return (
+                          <button
+                            key={step}
+                            onClick={() => handleWorkflowToggle(r, step)}
+                            title={WF_FULL[step]}
+                            className="text-xs px-1.5 py-0.5 rounded"
+                            style={{
+                              background: active ? 'var(--gx-accent)' : 'var(--gx-bg-alt)',
+                              color: active ? 'var(--gx-bg)' : 'var(--gx-text-muted)',
+                              border: `1px solid ${active ? 'var(--gx-accent)' : 'var(--gx-border)'}`,
+                              cursor: 'pointer',
+                              fontWeight: active ? 600 : 400,
+                            }}
+                          >
+                            {WF_ABBREV[step]}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </td>
                   <td className="px-3 py-2">
                     <RowActions status={status} onReset={() => handleReset(r.name)} onDelete={() => handleDelete(r.name)} onRestore={() => handleReset(r.name)} />
                   </td>
@@ -839,7 +881,7 @@ function ReagentsTab({ onRefresh }: { onRefresh: () => void }) {
                 <td className="px-3 py-2"><span className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{r.category}</span></td>
                 <td className="px-3 py-2 text-right text-xs" style={{ color: 'var(--gx-text-muted)' }}>{r.pack_size}</td>
                 <td className="px-3 py-2 text-right text-xs" style={{ color: 'var(--gx-text-muted)' }}>{r.quantity_per_sample}</td>
-                <td className="px-3 py-2"><span className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{r.workflow}</span></td>
+                <td className="px-3 py-2"><span className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{(r.workflows ?? [r.workflow]).join(', ')}</span></td>
                 <td className="px-3 py-2"><RowActions status="deleted" onReset={() => {}} onDelete={() => {}} onRestore={() => handleReset(r.name)} /></td>
               </tr>
             ))}
