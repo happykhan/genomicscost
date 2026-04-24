@@ -1106,11 +1106,27 @@ export default function Catalogue() {
     const reader = new FileReader()
     reader.onload = () => {
       try {
-        importOverrides(reader.result as string)
-        toast.success(t('catalogue_toast_imported'))
+        const result = importOverrides(reader.result as string)
+        const { format, stats } = result
+        const total = stats.edits + stats.additions + stats.deletions
+
+        if (format === 'effective') {
+          if (total === 0) {
+            toast.success('Imported full catalogue (no differences from bundled defaults)')
+          } else {
+            const parts: string[] = []
+            if (stats.edits > 0) parts.push(`${stats.edits} edit${stats.edits !== 1 ? 's' : ''}`)
+            if (stats.additions > 0) parts.push(`${stats.additions} addition${stats.additions !== 1 ? 's' : ''}`)
+            if (stats.deletions > 0) parts.push(`${stats.deletions} deletion${stats.deletions !== 1 ? 's' : ''}`)
+            toast.success(`Imported full catalogue (${parts.join(', ')} after diff)`)
+          }
+        } else {
+          toast.success(`Imported ${total} override${total !== 1 ? 's' : ''}`)
+        }
         refresh()
-      } catch {
-        toast.error(t('catalogue_toast_import_error'))
+      } catch (err) {
+        const message = err instanceof Error ? err.message : t('catalogue_toast_import_error')
+        toast.error(message)
       }
     }
     reader.readAsText(file)

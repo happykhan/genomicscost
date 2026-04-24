@@ -266,14 +266,226 @@ export function exportOverrides(): string {
   return JSON.stringify(loadOverrides(), null, 2)
 }
 
-export function importOverrides(json: string): CatalogueOverrides {
-  const incoming = JSON.parse(json) as CatalogueOverrides
-  const existing = loadOverrides()
+// ── Format detection ────────────────────────────────────────────────────────
 
-  // Merge incoming into existing (incoming wins on conflict)
-  const merged = mergeOverrideSets(existing, incoming)
+/**
+ * Detect whether a parsed JSON blob is in the full effective catalogue format
+ * (arrays) or the sparse overrides format (dicts / partial objects).
+ */
+export function detectImportFormat(parsed: unknown): 'overrides' | 'effective' {
+  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error('Not a valid catalogue JSON — expected overrides or full-catalogue format.')
+  }
+
+  const obj = parsed as Record<string, unknown>
+
+  // Effective format: `platforms` is an array of platform objects
+  if ('platforms' in obj && Array.isArray(obj.platforms)) {
+    return 'effective'
+  }
+
+  // Overrides format: `platforms` is a plain object (dict), or absent but
+  // at least one other sparse-dict section is present
+  if ('platforms' in obj && obj.platforms !== null && typeof obj.platforms === 'object' && !Array.isArray(obj.platforms)) {
+    return 'overrides'
+  }
+
+  const overrideSections = ['equipment', 'library_prep_kits', 'reagents', 'pathogens', 'bioinformatics_cloud']
+  const hasSection = overrideSections.some(s => s in obj)
+  if (hasSection) {
+    return 'overrides'
+  }
+
+  // Empty object is valid overrides (no changes)
+  if (Object.keys(obj).length === 0) {
+    return 'overrides'
+  }
+
+  throw new Error('Not a valid catalogue JSON — expected overrides or full-catalogue format.')
+}
+
+// ── Diff effective catalogue against bundled ─────────────────────────────────
+
+/**
+ * Compare an effective (full) catalogue against the bundled defaults and
+ * produce the minimal CatalogueOverrides that, when merged with bundled,
+ * reproduces the effective catalogue exactly.
+ */
+export function diffAgainstBundled(effective: BundledCatalogue): CatalogueOverrides {
+  const base = bundledCatalogue as unknown as BundledCatalogue
+  const result: CatalogueOverrides = {}
+
+  // Helper: diff two arrays keyed by `name`, returning a sparse override dict.
+  // `keyFields` are never included in the diff (they are identity, not data).
+  function diffNamedArray<T extends { name: string }>(
+    bundledArr: T[],
+    effectiveArr: T[],
+    keyFields: (keyof T)[] = ['name'],
+  ): Record<string, Partial<T> | null> | undefined {
+    const overrides: Record<string, Partial<T> | null> = {}
+    const bundledMap = new Map(bundledArr.map(item => [item.name, item]))
+    const effectiveMap = new Map(effectiveArr.map(item => [item.name, item]))
+
+    // Items in bundled but absent in effective => soft-delete
+    for (const [name] of bundledMap) {
+      if (!effectiveMap.has(name)) {
+        overrides[name] = null
+      }
+    }
+
+    // Items in effective
+    for (const [name, effItem] of effectiveMap) {
+      const bundledItem = bundledMap.get(name)
+      if (!bundledItem) {
+        // Custom addition — store the full record, minus the name key
+        // (the name is already the dict key)
+        const { ...rest } = effItem
+        overrides[name] = rest as Partial<T>
+        continue
+      }
+
+      // Both exist — diff field by field
+      const diff: Record<string, unknown> = {}
+      const allKeys = new Set([...Object.keys(bundledItem), ...Object.keys(effItem)])
+      for (const k of allKeys) {
+        if ((keyFields as string[]).includes(k)) continue
+        const bVal = (bundledItem as Record<string, unknown>)[k]
+        const eVal = (effItem as Record<string, unknown>)[k]
+        if (!valuesEqual(bVal, eVal)) {
+          diff[k] = eVal
+        }
+      }
+      if (Object.keys(diff).length > 0) {
+        overrides[name] = diff as Partial<T>
+      }
+    }
+
+    return Object.keys(overrides).length > 0 ? overrides : undefined
+  }
+
+  // Simple sections
+  result.equipment = diffNamedArray(base.equipment, effective.equipment)
+  result.library_prep_kits = diffNamedArray(base.library_prep_kits, effective.library_prep_kits)
+  result.reagents = diffNamedArray(base.reagents, effective.reagents)
+  result.pathogens = diffNamedArray(base.pathogens, effective.pathogens)
+
+  // Bioinformatics cloud platforms
+  result.bioinformatics_cloud = diffNamedArray(
+    base.bioinformatics_cloud.cloud_platforms,
+    effective.bioinformatics_cloud.cloud_platforms,
+  )
+
+  // Platforms and nested reagent kits
+  for (const effPlatform of effective.platforms) {
+    const bundledPlatform = base.platforms.find(p => p.id === effPlatform.id)
+    if (!bundledPlatform) continue
+    const kitOverrides = diffNamedArray(bundledPlatform.reagent_kits, effPlatform.reagent_kits)
+    if (kitOverrides) {
+      if (!result.platforms) result.platforms = {}
+      result.platforms[effPlatform.id] = { reagent_kits: kitOverrides }
+    }
+  }
+
+  // Clean up undefined sections
+  const sections = ['equipment', 'library_prep_kits', 'reagents', 'pathogens', 'bioinformatics_cloud'] as const
+  for (const s of sections) {
+    if (result[s] === undefined) delete result[s]
+  }
+
+  return result
+}
+
+/** Deep-equal check for JSON-serialisable values. */
+function valuesEqual(a: unknown, b: unknown): boolean {
+  if (a === b) return true
+  if (a === null || b === null) return false
+  if (typeof a !== typeof b) return false
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length !== b.length) return false
+    return a.every((v, i) => valuesEqual(v, b[i]))
+  }
+  if (typeof a === 'object' && typeof b === 'object') {
+    const aKeys = Object.keys(a as Record<string, unknown>)
+    const bKeys = Object.keys(b as Record<string, unknown>)
+    if (aKeys.length !== bKeys.length) return false
+    return aKeys.every(k =>
+      valuesEqual(
+        (a as Record<string, unknown>)[k],
+        (b as Record<string, unknown>)[k],
+      ),
+    )
+  }
+  return false
+}
+
+// ── Import result type ──────────────────────────────────────────────────────
+
+export interface ImportResult {
+  overrides: CatalogueOverrides
+  format: 'overrides' | 'effective'
+  stats: { edits: number; additions: number; deletions: number }
+}
+
+export function importOverrides(json: string): ImportResult {
+  const parsed = JSON.parse(json)
+  const format = detectImportFormat(parsed)
+  const overrides = format === 'effective'
+    ? diffAgainstBundled(parsed as BundledCatalogue)
+    : (parsed as CatalogueOverrides)
+
+  const existing = loadOverrides()
+  const merged = mergeOverrideSets(existing, overrides)
   saveOverrides(merged)
-  return merged
+
+  // Compute stats from the incoming overrides (not the merged result)
+  const stats = countOverrideStats(overrides)
+
+  return { overrides: merged, format, stats }
+}
+
+/** Count edits, additions, and deletions in an overrides object. */
+function countOverrideStats(ov: CatalogueOverrides): { edits: number; additions: number; deletions: number } {
+  const base = bundledCatalogue as unknown as BundledCatalogue
+  let edits = 0
+  let additions = 0
+  let deletions = 0
+
+  function countSection<T extends { name: string }>(
+    bundledArr: T[],
+    section: Record<string, Partial<T> | null> | undefined,
+  ) {
+    if (!section) return
+    const bundledNames = new Set(bundledArr.map(item => item.name))
+    for (const [key, value] of Object.entries(section)) {
+      if (value === null) deletions++
+      else if (bundledNames.has(key)) edits++
+      else additions++
+    }
+  }
+
+  countSection(base.equipment, ov.equipment)
+  countSection(base.library_prep_kits, ov.library_prep_kits)
+  countSection(base.reagents, ov.reagents)
+  countSection(base.pathogens, ov.pathogens)
+  countSection(base.bioinformatics_cloud.cloud_platforms, ov.bioinformatics_cloud)
+
+  if (ov.platforms) {
+    for (const [pid, pov] of Object.entries(ov.platforms)) {
+      if (!pov.reagent_kits) continue
+      const bundledPlatform = base.platforms.find(p => p.id === pid)
+      if (bundledPlatform) {
+        countSection(bundledPlatform.reagent_kits, pov.reagent_kits)
+      } else {
+        // All kits are additions for an unknown platform
+        for (const value of Object.values(pov.reagent_kits)) {
+          if (value === null) deletions++
+          else additions++
+        }
+      }
+    }
+  }
+
+  return { edits, additions, deletions }
 }
 
 function mergeOverrideSets(a: CatalogueOverrides, b: CatalogueOverrides): CatalogueOverrides {

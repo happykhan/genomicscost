@@ -11,8 +11,10 @@ import {
   exportEffective,
   getOverrideStatus,
   getBundledCatalogue,
+  detectImportFormat,
+  diffAgainstBundled,
 } from './catalogue'
-import type { CatalogueOverrides } from './catalogue'
+import type { CatalogueOverrides, BundledCatalogue } from './catalogue'
 
 beforeEach(() => {
   localStorage.clear()
@@ -245,6 +247,15 @@ describe('export / import round-trip', () => {
     expect(restored.equipment?.A).toEqual({ unit_cost_usd: 1 })
     expect(restored.reagents?.B).toEqual({ quantity_per_sample: 2 })
   })
+
+  it('returns format and stats for overrides import', () => {
+    const incoming: CatalogueOverrides = {
+      equipment: { 'NewItem': { unit_cost_usd: 20 } },
+    }
+    const result = importOverrides(JSON.stringify(incoming))
+    expect(result.format).toBe('overrides')
+    expect(result.stats.additions).toBe(1)
+  })
 })
 
 describe('exportEffective', () => {
@@ -297,5 +308,207 @@ describe('getOverrideStatus', () => {
 
     setOverride('platforms', 'Custom Kit XYZ', { unit_price_usd: 50 }, pid)
     expect(getOverrideStatus('platforms', 'Custom Kit XYZ', pid)).toBe('custom')
+  })
+})
+
+describe('detectImportFormat', () => {
+  it('detects overrides format (dict platforms)', () => {
+    expect(detectImportFormat({
+      platforms: { illumina: { reagent_kits: {} } },
+    })).toBe('overrides')
+  })
+
+  it('detects overrides format (no platforms, has equipment dict)', () => {
+    expect(detectImportFormat({
+      equipment: { 'Some Item': { unit_cost_usd: 100 } },
+    })).toBe('overrides')
+  })
+
+  it('detects overrides format (empty object)', () => {
+    expect(detectImportFormat({})).toBe('overrides')
+  })
+
+  it('detects effective format (array platforms)', () => {
+    expect(detectImportFormat({
+      platforms: [{ id: 'illumina', name: 'Illumina', reagent_kits: [] }],
+    })).toBe('effective')
+  })
+
+  it('throws on null input', () => {
+    expect(() => detectImportFormat(null)).toThrow('Not a valid catalogue JSON')
+  })
+
+  it('throws on array input', () => {
+    expect(() => detectImportFormat([1, 2, 3])).toThrow('Not a valid catalogue JSON')
+  })
+
+  it('throws on unrecognised shape (no known sections)', () => {
+    expect(() => detectImportFormat({ foo: 'bar', baz: 42 })).toThrow('Not a valid catalogue JSON')
+  })
+
+  it('throws on primitive input', () => {
+    expect(() => detectImportFormat('hello')).toThrow('Not a valid catalogue JSON')
+  })
+})
+
+describe('diffAgainstBundled', () => {
+  it('returns empty overrides for unmodified catalogue', () => {
+    const effective = getEffectiveCatalogue()
+    const diff = diffAgainstBundled(effective)
+    // All sections should be absent (no differences)
+    expect(diff.equipment).toBeUndefined()
+    expect(diff.library_prep_kits).toBeUndefined()
+    expect(diff.reagents).toBeUndefined()
+    expect(diff.pathogens).toBeUndefined()
+    expect(diff.bioinformatics_cloud).toBeUndefined()
+    expect(diff.platforms).toBeUndefined()
+  })
+
+  it('round-trip: perturb fields, diff, merge, assert equality', () => {
+    const bundled = getBundledCatalogue()
+    // Deep-clone the bundled catalogue and perturb some fields
+    const perturbed: BundledCatalogue = JSON.parse(JSON.stringify(bundled))
+    perturbed.equipment[0].unit_cost_usd = 99999
+    if (perturbed.pathogens.length > 1) {
+      perturbed.pathogens[1].required_coverage_x = 500
+    }
+    if (perturbed.platforms[0].reagent_kits.length > 0) {
+      perturbed.platforms[0].reagent_kits[0].unit_price_usd = 1
+    }
+
+    const diff = diffAgainstBundled(perturbed)
+    // Apply the diff back onto bundled
+    const reconstructed = getEffectiveCatalogue(diff)
+
+    // The reconstructed catalogue should match the perturbed one
+    expect(reconstructed.equipment[0].unit_cost_usd).toBe(99999)
+    if (bundled.pathogens.length > 1) {
+      expect(reconstructed.pathogens[1].required_coverage_x).toBe(500)
+    }
+    if (bundled.platforms[0].reagent_kits.length > 0) {
+      expect(reconstructed.platforms[0].reagent_kits[0].unit_price_usd).toBe(1)
+    }
+  })
+
+  it('detects deleted rows (present in bundled, absent in effective)', () => {
+    const bundled = getBundledCatalogue()
+    const perturbed: BundledCatalogue = JSON.parse(JSON.stringify(bundled))
+    const removedName = perturbed.reagents[0].name
+    perturbed.reagents = perturbed.reagents.slice(1)
+
+    const diff = diffAgainstBundled(perturbed)
+    expect(diff.reagents).toBeDefined()
+    expect(diff.reagents![removedName]).toBeNull()
+  })
+
+  it('detects custom additions (present in effective, absent in bundled)', () => {
+    const bundled = getBundledCatalogue()
+    const perturbed: BundledCatalogue = JSON.parse(JSON.stringify(bundled))
+    perturbed.equipment.push({
+      name: 'My Custom Gadget',
+      category: 'lab_equipment',
+      workflow_step: 'sequencing',
+      unit_cost_usd: 12345,
+      catalog_ref: null,
+      recommended_quantity: 2,
+      comment: null,
+    })
+
+    const diff = diffAgainstBundled(perturbed)
+    expect(diff.equipment).toBeDefined()
+    expect(diff.equipment!['My Custom Gadget']).toBeDefined()
+    expect(diff.equipment!['My Custom Gadget']).not.toBeNull()
+    expect((diff.equipment!['My Custom Gadget'] as Record<string, unknown>).unit_cost_usd).toBe(12345)
+  })
+
+  it('diff is minimal — unchanged fields are excluded', () => {
+    const bundled = getBundledCatalogue()
+    const perturbed: BundledCatalogue = JSON.parse(JSON.stringify(bundled))
+    perturbed.equipment[0].unit_cost_usd = 77777
+
+    const diff = diffAgainstBundled(perturbed)
+    const equipName = bundled.equipment[0].name
+    expect(diff.equipment).toBeDefined()
+    const entry = diff.equipment![equipName] as Record<string, unknown>
+    // Only the changed field should be in the diff
+    expect(entry).toEqual({ unit_cost_usd: 77777 })
+    // Name should not be in the diff (it is the key)
+    expect(entry.name).toBeUndefined()
+    // Other unchanged fields should not be in the diff
+    expect(entry.category).toBeUndefined()
+  })
+})
+
+describe('importOverrides with full catalogue JSON', () => {
+  it('full-catalogue import produces correct overrides', () => {
+    const bundled = getBundledCatalogue()
+    const perturbed: BundledCatalogue = JSON.parse(JSON.stringify(bundled))
+    perturbed.equipment[0].unit_cost_usd = 42
+
+    const result = importOverrides(JSON.stringify(perturbed))
+    expect(result.format).toBe('effective')
+    expect(result.stats.edits).toBeGreaterThanOrEqual(1)
+
+    // The effective catalogue should now match the perturbed input
+    const effective = getEffectiveCatalogue()
+    expect(effective.equipment[0].unit_cost_usd).toBe(42)
+  })
+
+  it('round-trip: export effective -> re-import -> no net changes', () => {
+    // Start with a clean slate
+    resetAll()
+    const json = exportEffective()
+    const result = importOverrides(json)
+    expect(result.format).toBe('effective')
+    // No differences from bundled means all stats zero
+    expect(result.stats.edits).toBe(0)
+    expect(result.stats.additions).toBe(0)
+    expect(result.stats.deletions).toBe(0)
+  })
+
+  it('deleting a bundled row by omitting it from full catalogue', () => {
+    resetAll()
+    const bundled = getBundledCatalogue()
+    const perturbed: BundledCatalogue = JSON.parse(JSON.stringify(bundled))
+    const deletedName = perturbed.equipment[0].name
+    perturbed.equipment = perturbed.equipment.slice(1)
+
+    const result = importOverrides(JSON.stringify(perturbed))
+    expect(result.format).toBe('effective')
+    expect(result.stats.deletions).toBeGreaterThanOrEqual(1)
+
+    // The item should be gone from effective catalogue
+    const effective = getEffectiveCatalogue()
+    expect(effective.equipment.find(e => e.name === deletedName)).toBeUndefined()
+  })
+
+  it('full catalogue with edits + additions + deletions reports correct stats', () => {
+    resetAll()
+    const bundled = getBundledCatalogue()
+    const perturbed: BundledCatalogue = JSON.parse(JSON.stringify(bundled))
+
+    // Edit
+    perturbed.equipment[0].unit_cost_usd = 11111
+    // Delete (remove last reagent)
+    perturbed.reagents = perturbed.reagents.slice(0, -1)
+    // Add
+    perturbed.pathogens.push({
+      name: 'Test Virus X',
+      type: 'Virus',
+      genome_type: 'RNA',
+      genome_size_mb: 0.03,
+      required_coverage_x: 1000,
+    })
+
+    const result = importOverrides(JSON.stringify(perturbed))
+    expect(result.format).toBe('effective')
+    expect(result.stats.edits).toBeGreaterThanOrEqual(1)
+    expect(result.stats.additions).toBeGreaterThanOrEqual(1)
+    expect(result.stats.deletions).toBeGreaterThanOrEqual(1)
+
+    // Verify effective catalogue
+    const effective = getEffectiveCatalogue()
+    expect(effective.equipment[0].unit_cost_usd).toBe(11111)
+    expect(effective.pathogens.find(p => p.name === 'Test Virus X')).toBeDefined()
   })
 })
