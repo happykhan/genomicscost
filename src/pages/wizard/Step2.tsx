@@ -482,27 +482,38 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
             value={sequencer.libPrepKitName}
             onChange={e => updateSequencer(index, { libPrepKitName: e.target.value })}
           >
-            <option value="">Other library preparation kit (enter cost below)</option>
+            <option value="">Custom / other kit</option>
             {libPrepKits.map(k => (
               <option key={k.name} value={k.name}>{k.name}</option>
             ))}
           </select>
+          {selectedLibPrepKit && (
+            <div className="text-xs mt-1 flex gap-4" style={{ color: 'var(--gx-text-muted)' }}>
+              {selectedLibPrepKit.pack_size && <span>Pack size: {selectedLibPrepKit.pack_size} reactions</span>}
+              {selectedLibPrepKit.barcoding_limit && <span>Barcoding limit: {selectedLibPrepKit.barcoding_limit}</span>}
+            </div>
+          )}
         </div>
 
-        {/* Library prep cost per sample — only shown for custom/other kits */}
-        {!sequencer.libPrepKitName && (
-          <div>
-            <label className={labelClass}>{t('field_lib_prep_cost')}</label>
-            <input
-              type="number"
-              className={inputClass}
-              value={sequencer.libPrepCostPerSample}
-              min={0}
-              step={0.5}
-              onChange={e => updateSequencer(index, { libPrepCostPerSample: parseFloat(e.target.value) || 0 })}
-            />
-          </div>
-        )}
+        {/* Library prep cost per sample — always shown so user can set local price */}
+        <div>
+          <label className={labelClass}>
+            {t('field_lib_prep_cost')}
+            {selectedLibPrepKit?.pack_size && (
+              <span className="ml-2 normal-case font-normal" style={{ color: 'var(--gx-text-muted)' }}>
+                — enter local kit price ÷ {selectedLibPrepKit.pack_size} reactions
+              </span>
+            )}
+          </label>
+          <input
+            type="number"
+            className={inputClass}
+            value={sequencer.libPrepCostPerSample}
+            min={0}
+            step={0.5}
+            onChange={e => updateSequencer(index, { libPrepCostPerSample: parseFloat(e.target.value) || 0 })}
+          />
+        </div>
 
         {/* Enrichment toggle */}
         <div>
