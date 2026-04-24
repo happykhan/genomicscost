@@ -179,52 +179,74 @@ export default function Step6() {
       <section className="mb-8">
         <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--gx-text)' }}>{t('field_transport')}</h3>
         <div className="card mb-2" style={{ overflowX: 'auto' }}>
-          <table className="w-full text-sm" style={{ minWidth: 380 }}>
+          <table className="w-full text-sm" style={{ minWidth: 560 }}>
             <thead>
               <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
-                <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_label')}</th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}><span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>{t('col_annual_cost_transport')}<Tooltip content={t('tooltip_transport_cost')} /></span></th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_pct_seq')}</th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual_attr')}</th>
+                <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Transportation service</th>
+                <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Shipment method</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Annual cost (USD)</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>% for sequencing</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Cost/sample</th>
                 <th className="px-3 py-2"></th>
               </tr>
             </thead>
             <tbody>
-              {transport.map((tr, idx) => (
-                <tr key={idx} style={{ borderBottom: '1px solid var(--gx-border)' }}>
-                  <td className="px-3 py-2">
-                    <input type="text" value={tr.label} onChange={e => updateTransportRow(idx, { label: e.target.value })} className={inputClass} style={{ width: '100%' }} />
-                  </td>
-                  <td className="px-3 py-2">
-                    <input type="number" value={tr.annualCostUsd} min={0} onChange={e => updateTransportRow(idx, { annualCostUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 120, textAlign: 'right' }} />
-                  </td>
-                  <td className="px-3 py-2">
-                    <input type="number" value={tr.pctSequencing ?? 100} min={0} max={100} onChange={e => updateTransportRow(idx, { pctSequencing: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 70, textAlign: 'right' }} />
-                  </td>
-                  <td className="px-3 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>
-                    {fmt(tr.annualCostUsd * (tr.pctSequencing ?? 100) / 100)}
-                  </td>
-                  <td className="px-3 py-2">
-                    <button onClick={() => removeTransportRow(idx)} className="text-xs px-2 py-0.5 rounded" style={{ color: 'var(--gx-text-muted)', background: 'none', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>×</button>
-                  </td>
-                </tr>
-              ))}
+              {transport.map((tr, idx) => {
+                const attributed = tr.annualCostUsd * (tr.pctSequencing ?? 100) / 100
+                const perSample = samplesPerYear > 0 ? attributed / samplesPerYear : 0
+                return (
+                  <tr key={idx} style={{ borderBottom: '1px solid var(--gx-border)' }}>
+                    <td className="px-3 py-2">
+                      <input type="text" value={tr.label} onChange={e => updateTransportRow(idx, { label: e.target.value })} className={inputClass} style={{ width: '100%', minWidth: 160 }} />
+                    </td>
+                    <td className="px-3 py-2">
+                      <input type="text" value={tr.shipmentMethod ?? ''} placeholder="e.g. Courier" onChange={e => updateTransportRow(idx, { shipmentMethod: e.target.value })} className={inputClass} style={{ width: 110 }} />
+                    </td>
+                    <td className="px-3 py-2">
+                      <input type="number" value={tr.annualCostUsd} min={0} onChange={e => updateTransportRow(idx, { annualCostUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 110, textAlign: 'right' }} />
+                    </td>
+                    <td className="px-3 py-2">
+                      <input type="number" value={tr.pctSequencing ?? 100} min={0} max={100} onChange={e => updateTransportRow(idx, { pctSequencing: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 70, textAlign: 'right' }} />
+                    </td>
+                    <td className="px-3 py-2 text-right text-xs" style={{ color: 'var(--gx-text-muted)' }}>
+                      ${fmt(perSample)}
+                    </td>
+                    <td className="px-3 py-2">
+                      <button onClick={() => removeTransportRow(idx)} className="text-xs px-2 py-0.5 rounded" style={{ color: 'var(--gx-text-muted)', background: 'none', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>×</button>
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
+            <tfoot>
+              <tr style={{ borderTop: '1px solid var(--gx-border)', background: 'var(--gx-bg-alt)' }}>
+                <td colSpan={2} className="px-3 py-2 text-xs font-semibold" style={{ color: 'var(--gx-text-muted)' }}>Total annual transport-related cost</td>
+                <td className="px-3 py-2 text-right text-xs font-semibold" style={{ color: 'var(--gx-text)' }}>${fmt(transportTotal)}</td>
+                <td />
+                <td className="px-3 py-2 text-right text-xs font-semibold" style={{ color: 'var(--gx-text)' }}>
+                  ${fmt(samplesPerYear > 0 ? transportTotal / samplesPerYear : 0)}
+                </td>
+                <td />
+              </tr>
+            </tfoot>
           </table>
         </div>
-        <div className="flex justify-between items-center mb-3">
+        <div className="flex justify-start items-center mb-4">
           <button onClick={addTransportRow} className="px-3 py-1.5 rounded text-xs font-medium" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>{t('btn_add')}</button>
-          <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_total')}: <strong style={{ color: 'var(--gx-accent)' }}>${fmt(transportTotal)}</strong></div>
         </div>
 
-        {/* Combined facility + transport output */}
-        <div className="p-3 rounded" style={{ background: 'var(--gx-bg-alt)', border: '1px solid var(--gx-border)' }}>
-          <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_facility_transport_total')}</div>
-          <div className="text-sm font-semibold" style={{ color: 'var(--gx-accent)' }}>
-            ${fmt(facilityTransportTotal)}
-            <span className="font-normal text-xs ml-2" style={{ color: 'var(--gx-text-muted)' }}>
-              (${fmt(facilityTransportPerSample)}/{t('label_per_sample_unit')})
-            </span>
+        {/* Combined facility + transport calculated costs */}
+        <div className="p-4 rounded" style={{ background: 'var(--gx-bg-alt)', border: '1px solid var(--gx-border)' }}>
+          <div className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--gx-text-muted)' }}>Calculated costs — Facility and transport</div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total annual facility and transportation cost</div>
+              <div className="text-sm font-semibold" style={{ color: 'var(--gx-accent)' }}>${fmt(facilityTransportTotal)}</div>
+            </div>
+            <div>
+              <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Facility and transportation cost per sample</div>
+              <div className="text-sm font-semibold" style={{ color: 'var(--gx-accent)' }}>${fmt(facilityTransportPerSample)}</div>
+            </div>
           </div>
         </div>
       </section>
