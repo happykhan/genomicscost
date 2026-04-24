@@ -38,6 +38,7 @@ export default function Step7() {
     { label: t('label_equipment'), value: costs.equipment },
     { label: t('label_personnel'), value: costs.personnel },
     { label: t('label_training'), value: costs.training },
+    { label: t('label_admin_overhead'), value: costs.adminCost },
     { label: t('label_facility'), value: costs.facility },
     { label: t('label_transport'), value: costs.transport },
     { label: t('label_bioinformatics'), value: costs.bioinformatics },
@@ -115,11 +116,14 @@ export default function Step7() {
 
     // Personnel sheet
     const persData = [
-      [t('col_role'), t('col_salary'), t('col_pct_time'), t('col_training'), t('col_annual_cost')],
+      [t('col_role'), t('col_salary'), t('col_pct_time'), t('col_annual_cost')],
       ...project.personnel.map(p => [
-        p.role, p.annualSalaryUsd, p.pctTime, p.trainingCostUsd,
-        (p.annualSalaryUsd * p.pctTime / 100) + p.trainingCostUsd,
+        p.role, p.annualSalaryUsd, p.pctTime,
+        p.annualSalaryUsd * p.pctTime / 100,
       ]),
+      [],
+      [t('label_training'), project.trainingGroupCostUsd ?? 0],
+      ...(project.adminCostPct > 0 ? [[t('label_admin_overhead'), costs.adminCost]] : []),
     ]
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(persData), 'Personnel')
 
@@ -368,6 +372,7 @@ export default function Step7() {
           { label: t('label_equipment'),             value: costs.equipment,            color: CAT_COLORS[3] },
           { label: t('label_personnel'),             value: costs.personnel,            color: CAT_COLORS[4] },
           { label: t('label_training'),              value: costs.training,             color: CAT_COLORS[5] },
+          { label: t('label_admin_overhead'),        value: costs.adminCost,            color: '#94a3b8' },
           { label: t('label_facility'),              value: costs.facility,             color: CAT_COLORS[6] },
           { label: t('label_transport'),             value: costs.transport,            color: CAT_COLORS[7] },
           { label: t('label_bioinformatics'),        value: costs.bioinformatics,       color: CAT_COLORS[8] },
@@ -551,7 +556,6 @@ export default function Step7() {
                   <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_salary')}</th>
                   <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_pct_time')}</th>
                   <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('label_salary_attributed')}</th>
-                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_training')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -563,11 +567,24 @@ export default function Step7() {
                     <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a', fontWeight: 600 }}>
                       ${fmt(p.annualSalaryUsd * p.pctTime / 100)}
                     </td>
-                    <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a' }}>
-                      {p.trainingCostUsd > 0 ? `$${fmt(p.trainingCostUsd)}` : '—'}
-                    </td>
                   </tr>
                 ))}
+                {/* Group-level training */}
+                <tr style={{ borderTop: '1px solid #e2e8f0' }}>
+                  <td colSpan={3} style={{ padding: '4px 8px', color: '#475569' }}>{t('label_training')}</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a', fontWeight: 600 }}>
+                    ${fmt(project.trainingGroupCostUsd ?? 0)}
+                  </td>
+                </tr>
+                {/* Admin overhead if set */}
+                {(project.adminCostPct ?? 0) > 0 && (
+                  <tr>
+                    <td colSpan={3} style={{ padding: '4px 8px', color: '#475569' }}>{t('label_admin_overhead')} ({project.adminCostPct}%)</td>
+                    <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a', fontWeight: 600 }}>
+                      ${fmt(costs.adminCost)}
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

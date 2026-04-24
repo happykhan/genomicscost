@@ -10,6 +10,7 @@ export default function Step5() {
   const { project, updateProject } = useProject()
   const { t } = useTranslation()
   const { personnel } = project
+  const samplesPerYear = project.pathogens.reduce((sum, p) => sum + p.samplesPerYear, 0)
 
   function updatePerson(index: number, patch: Partial<typeof personnel[0]>) {
     const next = personnel.map((p, i) => i === index ? { ...p, ...patch } : p)
@@ -18,7 +19,7 @@ export default function Step5() {
 
   function addPerson() {
     updateProject({
-      personnel: [...personnel, { role: 'New role', annualSalaryUsd: 30000, pctTime: 20, trainingCostUsd: 1000 }],
+      personnel: [...personnel, { role: 'New role', annualSalaryUsd: 30000, pctTime: 20 }],
     })
   }
 
@@ -27,7 +28,13 @@ export default function Step5() {
   }
 
   const salaryTotal = personnel.reduce((sum, p) => sum + p.annualSalaryUsd * p.pctTime / 100, 0)
-  const trainingTotal = personnel.reduce((sum, p) => sum + (p.trainingCostUsd ?? 0), 0)
+  const trainingTotal = project.trainingGroupCostUsd ?? 0
+  const adminPct = project.adminCostPct ?? 0
+  const adminCost = (salaryTotal + trainingTotal) * adminPct / 100
+  const totalPersonnelTraining = salaryTotal + trainingTotal + adminCost
+  const trainingPerSample = samplesPerYear > 0 ? trainingTotal / samplesPerYear : 0
+  const totalPerSample = samplesPerYear > 0 ? totalPersonnelTraining / samplesPerYear : 0
+  const adminPerSample = samplesPerYear > 0 ? adminCost / samplesPerYear : 0
 
   return (
     <div>
@@ -39,7 +46,6 @@ export default function Step5() {
       <div className="flex flex-col gap-3">
         {personnel.map((person, idx) => {
           const annualCost = person.annualSalaryUsd * person.pctTime / 100
-          const training = person.trainingCostUsd ?? 0
           return (
             <div key={idx} className="card p-4">
               <div className="flex flex-wrap gap-4 items-start">
@@ -82,27 +88,11 @@ export default function Step5() {
                   />
                 </div>
 
-                {/* Feature 1: Training cost per year */}
-                <div style={{ width: 130 }}>
-                  <label className={labelClass}>{t('col_training')}<Tooltip content={t('tooltip_training_cost')} /></label>
-                  <input
-                    type="number"
-                    value={training}
-                    min={0}
-                    onChange={e => updatePerson(idx, { trainingCostUsd: parseInt(e.target.value) || 0 })}
-                    className={inputClass}
-                    style={{ width: '100%' }}
-                  />
-                </div>
-
                 {/* Annual attributed */}
                 <div style={{ minWidth: 100, textAlign: 'right' }}>
                   <label className={labelClass}>{t('col_annual_cost')}</label>
                   <div className="text-sm font-semibold pt-2" style={{ color: 'var(--gx-accent)' }}>
                     ${fmt(annualCost)}
-                  </div>
-                  <div className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)' }}>
-                    {t('label_plus_training', { amount: fmt(training) })}
                   </div>
                 </div>
 
@@ -128,16 +118,68 @@ export default function Step5() {
         >
           {t('btn_add')}
         </button>
-        <div className="text-sm font-semibold flex gap-4">
+        <div className="text-sm font-semibold">
           <span>
             {t('label_salaries')}: <span style={{ color: 'var(--gx-accent)' }}>${fmt(salaryTotal)}</span>
           </span>
-          <span>
-            {t('label_training')}: <span style={{ color: 'var(--gx-accent)' }}>${fmt(trainingTotal)}</span>
-          </span>
-          <span>
-            {t('label_total_personnel')}: <span style={{ color: 'var(--gx-accent)' }}>${fmt(salaryTotal + trainingTotal)}</span>
-          </span>
+        </div>
+      </div>
+
+      {/* Group-level training and admin cost */}
+      <div className="card p-4 mt-6">
+        <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--gx-text)' }}>Training and admin overhead</h3>
+        <div className="flex flex-wrap gap-6 items-end">
+          <div style={{ width: 200 }}>
+            <label className={labelClass}>Annual training cost (USD)<Tooltip content="Total annual training budget for the entire sequencing team. Covers wet-lab and bioinformatics training." /></label>
+            <input
+              type="number"
+              value={project.trainingGroupCostUsd ?? 5000}
+              min={0}
+              onChange={e => updateProject({ trainingGroupCostUsd: parseInt(e.target.value) || 0 })}
+              className={inputClass}
+              style={{ width: '100%' }}
+            />
+          </div>
+          <div style={{ width: 180 }}>
+            <label className={labelClass}>Additional admin cost %<Tooltip content="Administrative overhead percentage applied to the combined personnel and training cost. E.g. 10% adds 10% of (salaries + training) as an admin line item." /></label>
+            <input
+              type="number"
+              value={project.adminCostPct ?? 0}
+              min={0}
+              max={50}
+              step={1}
+              onChange={e => updateProject({ adminCostPct: Math.min(50, parseInt(e.target.value) || 0) })}
+              className={inputClass}
+              style={{ width: '100%' }}
+            />
+          </div>
+        </div>
+
+        {/* Summary outputs */}
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="p-3 rounded" style={{ background: 'var(--gx-bg-alt)', border: '1px solid var(--gx-border)' }}>
+            <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Annual training cost</div>
+            <div className="text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>${fmt(trainingTotal)}</div>
+            <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>
+              ${fmt(trainingPerSample)}/sample
+            </div>
+          </div>
+          {adminPct > 0 && (
+            <div className="p-3 rounded" style={{ background: 'var(--gx-bg-alt)', border: '1px solid var(--gx-border)' }}>
+              <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Admin cost ({adminPct}%)</div>
+              <div className="text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>${fmt(adminCost)}</div>
+              <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>
+                ${fmt(adminPerSample)}/sample
+              </div>
+            </div>
+          )}
+          <div className="p-3 rounded" style={{ background: 'var(--gx-bg-alt)', border: '1px solid var(--gx-border)' }}>
+            <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total personnel + training{adminPct > 0 ? ' + admin' : ''}</div>
+            <div className="text-sm font-semibold" style={{ color: 'var(--gx-accent)' }}>${fmt(totalPersonnelTraining)}</div>
+            <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>
+              ${fmt(totalPerSample)}/sample
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -13,12 +13,24 @@ const WORKFLOW_KEYS: Record<string, string> = {
   null: 'wf_other',
 }
 
+// Keywords that indicate a viral-specific reagent
+const VIRAL_KEYWORDS = ['viral transport', 'vtm', 'rna extraction', 'rt-pcr']
+
+function isViralReagent(name: string): boolean {
+  const lower = name.toLowerCase()
+  return VIRAL_KEYWORDS.some(kw => lower.includes(kw))
+}
+
 export default function Step3() {
   const { project, updateProject } = useProject()
   const { t } = useTranslation()
   const catalogue = getEffectiveCatalogue()
   const { consumables } = project
   const samplesPerYear = project.pathogens.reduce((sum, p) => sum + p.samplesPerYear, 0)
+
+  // Determine if all pathogens are bacterial
+  const allBacterial = project.pathogens.length > 0 &&
+    project.pathogens.every(p => p.pathogenType === 'bacterial')
 
   function updateConsumable(index: number, patch: Partial<typeof consumables[0]>) {
     const next = consumables.map((c, i) => i === index ? { ...c, ...patch } : c)
@@ -29,13 +41,32 @@ export default function Step3() {
     updateProject({
       consumables: [
         ...consumables,
-        { name: 'Custom item', unitCostUsd: 0, quantityPerSample: 1, enabled: true },
+        { name: '', unitCostUsd: 0, quantityPerSample: 1, enabled: true },
       ],
     })
   }
 
   function removeConsumable(index: number) {
     updateProject({ consumables: consumables.filter((_, i) => i !== index) })
+  }
+
+  // Auto-fill from catalogue when a datalist item is selected
+  function handleNameChange(index: number, newName: string) {
+    const catItem = catalogue.reagents.find(r => r.name === newName)
+    if (catItem) {
+      const packSize = catItem.pack_size ?? 1
+      const qtyPerSample = packSize > 1
+        ? parseFloat(((catItem.quantity_per_sample ?? 1) / packSize).toFixed(4))
+        : (catItem.quantity_per_sample ?? 1)
+      updateConsumable(index, {
+        name: newName,
+        unitCostUsd: 5, // placeholder — user must enter local price
+        quantityPerSample: qtyPerSample,
+        workflow: catItem.workflow ?? undefined,
+      })
+    } else {
+      updateConsumable(index, { name: newName })
+    }
   }
 
   // Group consumables by their catalogue workflow if possible
@@ -55,6 +86,9 @@ export default function Step3() {
     .filter(c => c.enabled)
     .reduce((sum, c) => sum + Math.ceil(samplesPerYear * c.quantityPerSample) * c.unitCostUsd, 0)
 
+  // Build datalist options from catalogue reagents
+  const catalogueReagentNames = catalogue.reagents.map(r => r.name)
+
   return (
     <div>
       <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>{t('step3_title')}</h2>
@@ -66,9 +100,13 @@ export default function Step3() {
           {samplesPerYear.toLocaleString()} {t('label_samples_per_yr')}
         </span>
       </div>
-      <div className="text-xs mb-4 p-3 rounded" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text-muted)', border: '1px solid var(--gx-border)' }}>
-        {t('note_placeholder_costs')}
-      </div>
+
+      {/* Datalist for catalogue autocomplete */}
+      <datalist id="catalogue-reagents">
+        {catalogueReagentNames.map(name => (
+          <option key={name} value={name} />
+        ))}
+      </datalist>
 
       {grouped.map(group => (
         <div key={group.workflow} className="mb-6">
@@ -92,6 +130,7 @@ export default function Step3() {
                   const annualCost = item.enabled
                     ? Math.ceil(samplesPerYear * item.quantityPerSample) * item.unitCostUsd
                     : 0
+                  const showViralWarning = allBacterial && item.enabled && isViralReagent(item.name)
                   return (
                     <tr
                       key={item.idx}
@@ -101,13 +140,27 @@ export default function Step3() {
                       }}
                     >
                       <td className="px-3 py-2" style={{ color: 'var(--gx-text)' }}>
-                        <input
-                          type="text"
-                          value={item.name}
-                          onChange={e => updateConsumable(item.idx, { name: e.target.value })}
-                          className={inputClass}
-                          style={{ width: '100%', minWidth: 120 }}
-                        />
+                        <div className="flex flex-col gap-1">
+                          <input
+                            type="text"
+                            list="catalogue-reagents"
+                            value={item.name}
+                            placeholder="Type to search catalogue..."
+                            onChange={e => handleNameChange(item.idx, e.target.value)}
+                            className={inputClass}
+                            style={{ width: '100%', minWidth: 120 }}
+                          />
+                          {showViralWarning && (
+                            <span className="text-xs px-2 py-0.5 rounded-full inline-block" style={{
+                              background: '#fef3c7',
+                              color: '#92400e',
+                              border: '1px solid #fcd34d',
+                              width: 'fit-content',
+                            }}>
+                              Viral reagent — may not apply to bacterial pathogens
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-3 py-2">
                         <input

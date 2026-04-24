@@ -121,8 +121,9 @@ export interface PersonnelItem {
   role: string
   annualSalaryUsd: number
   pctTime: number  // 0-100
-  // Feature 1: training costs
-  trainingCostUsd: number
+  // Legacy field — kept for migration from old saved projects only.
+  // New projects use Project.trainingGroupCostUsd instead.
+  trainingCostUsd?: number
 }
 
 export interface FacilityItem {
@@ -131,11 +132,37 @@ export interface FacilityItem {
   pctSequencing: number  // 0-100
 }
 
+export interface BioCloudItem {
+  name: string
+  description: string
+  pricePerUnit: number
+  quantity: number
+  totalSamplesAllPathogens: number  // total samples across all pathogens
+  samplesThisScenario: number       // samples for the costed pathogens
+  enabled: boolean
+  notes?: string
+}
+
+export interface BioInhouseItem {
+  name: string
+  description: string
+  pricePerUnit: number
+  quantity: number
+  pctUse: number          // % of use for sequencing (0-100)
+  lifespanYears: number
+  ageYears: number
+  enabled: boolean
+}
+
 export interface BioinformaticsConfig {
   type: 'cloud' | 'inhouse' | 'hybrid' | 'none'
-  cloudPlatform: string
-  costPerSampleUsd: number
-  annualServerCostUsd: number
+  // Legacy fields — kept for migration from old saved projects
+  cloudPlatform?: string
+  costPerSampleUsd?: number
+  annualServerCostUsd?: number
+  // New structured items
+  cloudItems: BioCloudItem[]
+  inhouseItems: BioInhouseItem[]
 }
 
 export interface QMSItem {
@@ -170,6 +197,10 @@ export interface Project {
   qms: QMSItem[]
   exchangeRate: number
   currency: string
+  // WHO GCT: group-level training cost (not per-person)
+  trainingGroupCostUsd: number
+  // WHO GCT: admin overhead % applied to personnel + training subtotal
+  adminCostPct: number
 }
 
 export interface CostBreakdown {
@@ -185,8 +216,13 @@ export interface CostBreakdown {
   bioinformatics: number
   qms: number
   training: number
+  adminCost: number       // admin overhead % applied to personnel + training
   total: number
   costPerSample: number
   // Feature 5: workflow breakdown
   workflowBreakdown: Record<string, number>
+  // Per-sequencer reagent costs (for Step 7 category table)
+  perSequencerReagents: Array<{ label: string; reagents: number; libraryPrep: number }>
+  // Potential purchases to reach recommended equipment quantities
+  potentialPurchases: number
 }

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useMemo, useCallback } from 'react'
 import type { Project, SequencerConfig, CostBreakdown } from '../types'
 import { calculateCosts } from '../lib/calculations'
-import { createDefaultProject, createDefaultSequencer } from '../lib/defaults'
+import { createDefaultProject, createDefaultCloudItems, createDefaultInhouseItems } from '../lib/defaults'
 import LZString from 'lz-string'
 
 const STORAGE_KEY = 'genomicscost-projects'
@@ -20,7 +20,7 @@ interface ProjectContextValue {
 
 const ProjectContext = createContext<ProjectContextValue | null>(null)
 
-// ── Migration: handle old saved projects that had singular `sequencer` ────────
+// ── Migration: handle old saved projects ────────────────────────────────────
 function migrateProject(raw: unknown): Project {
   const p = raw as Record<string, unknown>
 
@@ -57,7 +57,7 @@ function migrateProject(raw: unknown): Project {
   }
   // Ensure sequencers is always an array
   if (!Array.isArray(p.sequencers) || p.sequencers.length === 0) {
-    p.sequencers = [createDefaultSequencer('Sequencer 1')]
+    p.sequencers = [createDefaultProject().sequencers[0]]
   }
   // Ensure each sequencer has the new fields (spread first so explicit values win over defaults)
   p.sequencers = (p.sequencers as SequencerConfig[]).map((s, i) => {
@@ -85,13 +85,31 @@ function migrateProject(raw: unknown): Project {
       }))
     }
   }
-  // Ensure personnel have trainingCostUsd
-  if (Array.isArray(p.personnel)) {
-    p.personnel = (p.personnel as Array<Record<string, unknown>>).map(person => ({
-      trainingCostUsd: 1000,
-      ...person,
-    }))
+
+  // Migrate per-person trainingCostUsd to group-level trainingGroupCostUsd
+  if (p.trainingGroupCostUsd === undefined) {
+    let groupTraining = 5000
+    if (Array.isArray(p.personnel)) {
+      const personnelArr = p.personnel as Array<Record<string, unknown>>
+      const sum = personnelArr.reduce((acc, person) => acc + ((person.trainingCostUsd as number) ?? 0), 0)
+      if (sum > 0) groupTraining = sum
+    }
+    p.trainingGroupCostUsd = groupTraining
   }
+  // Strip per-person trainingCostUsd (no longer used in calculations)
+  if (Array.isArray(p.personnel)) {
+    p.personnel = (p.personnel as Array<Record<string, unknown>>).map(person => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { trainingCostUsd: _legacy, ...rest } = person
+      return rest
+    })
+  }
+
+  // Ensure adminCostPct exists
+  if (p.adminCostPct === undefined) {
+    p.adminCostPct = 0
+  }
+
   // Ensure equipment has lifespanYears
   if (Array.isArray(p.equipment)) {
     p.equipment = (p.equipment as Array<Record<string, unknown>>).map(eq => ({
@@ -99,6 +117,41 @@ function migrateProject(raw: unknown): Project {
       ...eq,
     }))
   }
+
+  // Migrate old BioinformaticsConfig (flat fields) to new structure with cloudItems/inhouseItems
+  if (p.bioinformatics) {
+    const bio = p.bioinformatics as Record<string, unknown>
+    if (!Array.isArray(bio.cloudItems)) {
+      bio.cloudItems = createDefaultCloudItems()
+      // If old config had a cloud platform and cost, enable that item
+      if (bio.cloudPlatform && (bio.costPerSampleUsd as number) > 0) {
+        const items = bio.cloudItems as Array<Record<string, unknown>>
+        const match = items.find(item => (item.name as string) === bio.cloudPlatform)
+        if (match) {
+          match.pricePerUnit = bio.costPerSampleUsd
+          match.quantity = 1
+          match.enabled = true
+        }
+      }
+    }
+    if (!Array.isArray(bio.inhouseItems)) {
+      bio.inhouseItems = createDefaultInhouseItems()
+      // If old config had an annual server cost, enable the first in-house item with that cost
+      if ((bio.annualServerCostUsd as number) > 0) {
+        const items = bio.inhouseItems as Array<Record<string, unknown>>
+        if (items.length > 0) {
+          items[0].pricePerUnit = bio.annualServerCostUsd
+          items[0].enabled = true
+        }
+      }
+    }
+  }
+
+  // Ensure facility has the 12 standard items (for existing projects, keep their rows)
+  if (!Array.isArray(p.facility) || (p.facility as unknown[]).length === 0) {
+    p.facility = createDefaultProject().facility
+  }
+
   return p as unknown as Project
 }
 

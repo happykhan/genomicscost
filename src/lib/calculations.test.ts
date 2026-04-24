@@ -200,7 +200,9 @@ describe('calculateCosts', () => {
       personnel: [],
       facility: [],
       transport: [],
-      bioinformatics: { type: 'none' as const, cloudPlatform: '', costPerSampleUsd: 0, annualServerCostUsd: 0 },
+      bioinformatics: { type: 'none' as const, cloudItems: [], inhouseItems: [] },
+      trainingGroupCostUsd: 0,
+      adminCostPct: 0,
       qms: [],
     }
     const costs = calculateCosts(project)
@@ -235,7 +237,9 @@ describe('calculateCosts', () => {
       personnel: [],
       facility: [],
       transport: [],
-      bioinformatics: { type: 'none' as const, cloudPlatform: '', costPerSampleUsd: 0, annualServerCostUsd: 0 },
+      bioinformatics: { type: 'none' as const, cloudItems: [], inhouseItems: [] },
+      trainingGroupCostUsd: 0,
+      adminCostPct: 0,
       qms: [],
     }
     const costs = calculateCosts(project)
@@ -271,7 +275,9 @@ describe('calculateCosts', () => {
       personnel: [],
       facility: [],
       transport: [],
-      bioinformatics: { type: 'none' as const, cloudPlatform: '', costPerSampleUsd: 0, annualServerCostUsd: 0 },
+      bioinformatics: { type: 'none' as const, cloudItems: [], inhouseItems: [] },
+      trainingGroupCostUsd: 0,
+      adminCostPct: 0,
       qms: [],
     }
     const costs = calculateCosts(project)
@@ -313,7 +319,9 @@ describe('calculateCosts', () => {
       personnel: [],
       facility: [],
       transport: [],
-      bioinformatics: { type: 'none' as const, cloudPlatform: '', costPerSampleUsd: 0, annualServerCostUsd: 0 },
+      bioinformatics: { type: 'none' as const, cloudItems: [], inhouseItems: [] },
+      trainingGroupCostUsd: 0,
+      adminCostPct: 0,
       qms: [],
     }
     const costs = calculateCosts(project)
@@ -347,7 +355,9 @@ describe('calculateCosts', () => {
       personnel: [],
       facility: [],
       transport: [],
-      bioinformatics: { type: 'none' as const, cloudPlatform: '', costPerSampleUsd: 0, annualServerCostUsd: 0 },
+      bioinformatics: { type: 'none' as const, cloudItems: [], inhouseItems: [] },
+      trainingGroupCostUsd: 0,
+      adminCostPct: 0,
       qms: [],
     }
     const costs = calculateCosts(project)
@@ -373,8 +383,10 @@ describe('calculateCosts', () => {
       personnel: [],
       facility: [],
       transport: [],
-      bioinformatics: { type: 'none' as const, cloudPlatform: '', costPerSampleUsd: 0, annualServerCostUsd: 0 },
+      bioinformatics: { type: 'none' as const, cloudItems: [], inhouseItems: [] },
       qms: [],
+      trainingGroupCostUsd: 0,
+      adminCostPct: 0,
     }
     const costs = calculateCosts(project)
     // iSeq: 19900/10 + 19900*0.15 = 1990 + 2985 = 4975
@@ -400,7 +412,9 @@ describe('calculateCosts', () => {
         { label: 'Utilities', monthlyCostUsd: 500, pctSequencing: 50 },
       ],
       transport: [],
-      bioinformatics: { type: 'none' as const, cloudPlatform: '', costPerSampleUsd: 0, annualServerCostUsd: 0 },
+      bioinformatics: { type: 'none' as const, cloudItems: [], inhouseItems: [] },
+      trainingGroupCostUsd: 0,
+      adminCostPct: 0,
       qms: [],
     }
     const costs = calculateCosts(project)
@@ -418,7 +432,9 @@ describe('calculateCosts', () => {
       personnel: [],
       facility: [],
       transport: [],
-      bioinformatics: { type: 'none' as const, cloudPlatform: '', costPerSampleUsd: 0, annualServerCostUsd: 0 },
+      bioinformatics: { type: 'none' as const, cloudItems: [], inhouseItems: [] },
+      trainingGroupCostUsd: 0,
+      adminCostPct: 0,
       qms: [
         { activity: 'ISO 15189 accreditation', costUsd: 10_000, quantity: 1, pctSequencing: 85, enabled: true },
         { activity: 'External QA', costUsd: 2_000, quantity: 2, pctSequencing: 100, enabled: true },
@@ -430,7 +446,7 @@ describe('calculateCosts', () => {
     expect(costs.qms).toBe(12_500)
   })
 
-  it('cloud bioinformatics: costPerSample × samplesPerYear', () => {
+  it('cloud bioinformatics: pricePerUnit × qty × samplesThisScenario / totalSamples', () => {
     const project = {
       ...createDefaultProject(),
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 200 }],
@@ -440,14 +456,24 @@ describe('calculateCosts', () => {
       personnel: [],
       facility: [],
       transport: [],
-      bioinformatics: { type: 'cloud' as const, cloudPlatform: 'BaseSpace', costPerSampleUsd: 3, annualServerCostUsd: 0 },
+      bioinformatics: {
+        type: 'cloud' as const,
+        cloudItems: [
+          // Annual licence of $600, used for all 200 samples
+          { name: 'BaseSpace', description: '', pricePerUnit: 600, quantity: 1, totalSamplesAllPathogens: 200, samplesThisScenario: 200, enabled: true },
+        ],
+        inhouseItems: [],
+      },
+      trainingGroupCostUsd: 0,
+      adminCostPct: 0,
       qms: [],
     }
     const costs = calculateCosts(project)
+    // 600 * 1 * 200/200 = $600
     expect(costs.bioinformatics).toBe(600)
   })
 
-  it('hybrid bioinformatics: cloud cost + server cost', () => {
+  it('hybrid bioinformatics: cloud cost + inhouse depreciation', () => {
     const project = {
       ...createDefaultProject(),
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 200 }],
@@ -457,15 +483,26 @@ describe('calculateCosts', () => {
       personnel: [],
       facility: [],
       transport: [],
-      bioinformatics: { type: 'hybrid' as const, cloudPlatform: 'BaseSpace', costPerSampleUsd: 3, annualServerCostUsd: 6_000 },
+      bioinformatics: {
+        type: 'hybrid' as const,
+        cloudItems: [
+          // Annual licence of $600
+          { name: 'BaseSpace', description: '', pricePerUnit: 600, quantity: 1, totalSamplesAllPathogens: 200, samplesThisScenario: 200, enabled: true },
+        ],
+        inhouseItems: [
+          { name: 'Workstation', description: '', pricePerUnit: 6_000, quantity: 1, pctUse: 100, lifespanYears: 1, ageYears: 0, enabled: true },
+        ],
+      },
+      trainingGroupCostUsd: 0,
+      adminCostPct: 0,
       qms: [],
     }
     const costs = calculateCosts(project)
-    // cloud: 200 × $3 = $600; server: $6,000; total bio = $6,600
+    // cloud: 600 * 1 * 200/200 = $600; inhouse: $6,000/1yr = $6,000; total bio = $6,600
     expect(costs.bioinformatics).toBe(6_600)
   })
 
-  it('inhouse bioinformatics: annualServerCostUsd', () => {
+  it('inhouse bioinformatics: depreciation of inhouse items', () => {
     const project = {
       ...createDefaultProject(),
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 200 }],
@@ -475,14 +512,22 @@ describe('calculateCosts', () => {
       personnel: [],
       facility: [],
       transport: [],
-      bioinformatics: { type: 'inhouse' as const, cloudPlatform: '', costPerSampleUsd: 0, annualServerCostUsd: 12_000 },
+      bioinformatics: {
+        type: 'inhouse' as const,
+        cloudItems: [],
+        inhouseItems: [
+          { name: 'Server', description: '', pricePerUnit: 12_000, quantity: 1, pctUse: 100, lifespanYears: 1, ageYears: 0, enabled: true },
+        ],
+      },
+      trainingGroupCostUsd: 0,
+      adminCostPct: 0,
       qms: [],
     }
     const costs = calculateCosts(project)
     expect(costs.bioinformatics).toBe(12_000)
   })
 
-  it('training costs: sum of trainingCostUsd per personnel role', () => {
+  it('training costs: group-level trainingGroupCostUsd on project', () => {
     const project = {
       ...createDefaultProject(),
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 100 }],
@@ -490,12 +535,14 @@ describe('calculateCosts', () => {
       consumables: [],
       equipment: [],
       personnel: [
-        { role: 'Lab tech', annualSalaryUsd: 30_000, pctTime: 50, trainingCostUsd: 1_500 },
-        { role: 'Bioinformatician', annualSalaryUsd: 50_000, pctTime: 30, trainingCostUsd: 2_000 },
+        { role: 'Lab tech', annualSalaryUsd: 30_000, pctTime: 50 },
+        { role: 'Bioinformatician', annualSalaryUsd: 50_000, pctTime: 30 },
       ],
       facility: [],
       transport: [],
-      bioinformatics: { type: 'none' as const, cloudPlatform: '', costPerSampleUsd: 0, annualServerCostUsd: 0 },
+      bioinformatics: { type: 'none' as const, cloudItems: [], inhouseItems: [] },
+      trainingGroupCostUsd: 3_500,
+      adminCostPct: 0,
       qms: [],
     }
     const costs = calculateCosts(project)
@@ -552,7 +599,9 @@ describe('calculateCosts', () => {
       personnel: [],
       facility: [],
       transport: [],
-      bioinformatics: { type: 'none' as const, cloudPlatform: '', costPerSampleUsd: 0, annualServerCostUsd: 0 },
+      bioinformatics: { type: 'none' as const, cloudItems: [], inhouseItems: [] },
+      trainingGroupCostUsd: 0,
+      adminCostPct: 0,
       qms: [],
     }
     const costs = calculateCosts(project)
@@ -588,7 +637,9 @@ describe('calculateCosts', () => {
       personnel: [],
       facility: [],
       transport: [],
-      bioinformatics: { type: 'none' as const, cloudPlatform: '', costPerSampleUsd: 0, annualServerCostUsd: 0 },
+      bioinformatics: { type: 'none' as const, cloudItems: [], inhouseItems: [] },
+      trainingGroupCostUsd: 0,
+      adminCostPct: 0,
       qms: [],
     }
     const costs = calculateCosts(project)
@@ -630,7 +681,9 @@ describe('calculateCosts', () => {
       personnel: [],
       facility: [],
       transport: [],
-      bioinformatics: { type: 'none' as const, cloudPlatform: '', costPerSampleUsd: 0, annualServerCostUsd: 0 },
+      bioinformatics: { type: 'none' as const, cloudItems: [], inhouseItems: [] },
+      trainingGroupCostUsd: 0,
+      adminCostPct: 0,
       qms: [],
     }
     const singleProject = {
@@ -676,10 +729,12 @@ describe('calculateCosts', () => {
       ],
       consumables: [],
       equipment: [{ name: 'iSeq', category: 'sequencing_platform', status: 'buy' as const, unitCostUsd: 19_900, quantity: 1, lifespanYears: 10 }],
-      personnel: [{ role: 'Tech', annualSalaryUsd: 30_000, pctTime: 50, trainingCostUsd: 0 }],
+      personnel: [{ role: 'Tech', annualSalaryUsd: 30_000, pctTime: 50 }],
       facility: [],
       transport: [],
-      bioinformatics: { type: 'none' as const, cloudPlatform: '', costPerSampleUsd: 0, annualServerCostUsd: 0 },
+      bioinformatics: { type: 'none' as const, cloudItems: [], inhouseItems: [] },
+      trainingGroupCostUsd: 0,
+      adminCostPct: 0,
       qms: [],
     }
     const dualProject = {
@@ -730,7 +785,9 @@ describe('calculateCosts', () => {
       personnel: [],
       facility: [],
       transport: [],
-      bioinformatics: { type: 'none' as const, cloudPlatform: '', costPerSampleUsd: 0, annualServerCostUsd: 0 },
+      bioinformatics: { type: 'none' as const, cloudItems: [], inhouseItems: [] },
+      trainingGroupCostUsd: 0,
+      adminCostPct: 0,
       qms: [],
     }
     const costs = calculateCosts(project)
@@ -751,11 +808,20 @@ describe('calculateCosts', () => {
       personnel: [],
       facility: [],
       transport: [],
-      bioinformatics: { type: 'cloud' as const, cloudPlatform: 'BaseSpace', costPerSampleUsd: 3, annualServerCostUsd: 0 },
+      bioinformatics: {
+        type: 'cloud' as const,
+        cloudItems: [
+          // Annual licence cost $450 covering all 150 samples
+          { name: 'BaseSpace', description: '', pricePerUnit: 450, quantity: 1, totalSamplesAllPathogens: 150, samplesThisScenario: 150, enabled: true },
+        ],
+        inhouseItems: [],
+      },
+      trainingGroupCostUsd: 0,
+      adminCostPct: 0,
       qms: [],
     }
     const costs = calculateCosts(project)
-    // total samples = 150; cloud bio = 150 × $3 = $450
+    // total samples = 150; cloud bio = 450 * 1 * 150/150 = $450
     expect(costs.bioinformatics).toBe(450)
     expect(costs.costPerSample).toBeCloseTo(450 / 150, 10)
   })

@@ -296,7 +296,9 @@ describe('WHO GCT — Equipment', () => {
       personnel: [],
       facility: [],
       transport: [],
-      bioinformatics: { type: 'none' as const, cloudPlatform: '', costPerSampleUsd: 0, annualServerCostUsd: 0 },
+      bioinformatics: { type: 'none' as const, cloudItems: [], inhouseItems: [] },
+      trainingGroupCostUsd: 0,
+      adminCostPct: 0,
       qms: [],
     })
     const costs = calculateCosts(project)
@@ -317,22 +319,24 @@ describe('WHO GCT — Personnel', () => {
     const project = makeProject({
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral', genomeSizeMb: 0.03, samplesPerYear: 100 }],
       personnel: [
-        { role: 'Lab manager', annualSalaryUsd: 50_000, pctTime: 50, trainingCostUsd: 0 },
-        { role: 'Bioinformatician', annualSalaryUsd: 60_000, pctTime: 25, trainingCostUsd: 0 },
+        { role: 'Lab manager', annualSalaryUsd: 50_000, pctTime: 50 },
+        { role: 'Bioinformatician', annualSalaryUsd: 60_000, pctTime: 25 },
       ],
+      trainingGroupCostUsd: 0,
     })
     const costs = calculateCosts(project)
     // (50,000 × 50%) + (60,000 × 25%) = 25,000 + 15,000 = 40,000
     expect(costs.personnel).toBe(40_000)
   })
 
-  it('training cost is summed across all personnel', () => {
+  it('training cost uses project-level trainingGroupCostUsd', () => {
     const project = makeProject({
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral', genomeSizeMb: 0.03, samplesPerYear: 100 }],
       personnel: [
-        { role: 'Lab manager', annualSalaryUsd: 50_000, pctTime: 50, trainingCostUsd: 500 },
-        { role: 'Technician', annualSalaryUsd: 30_000, pctTime: 100, trainingCostUsd: 300 },
+        { role: 'Lab manager', annualSalaryUsd: 50_000, pctTime: 50 },
+        { role: 'Technician', annualSalaryUsd: 30_000, pctTime: 100 },
       ],
+      trainingGroupCostUsd: 800,
     })
     const costs = calculateCosts(project)
     expect(costs.training).toBe(800)
@@ -407,31 +411,54 @@ describe('WHO GCT — Transport', () => {
 //   hybrid:  samples × cost_per_sample + annual_server_cost
 
 describe('WHO GCT — Bioinformatics', () => {
-  it('cloud: samples × cost_per_sample', () => {
+  it('cloud: pricePerUnit × qty × samplesThisScenario / totalSamplesAllPathogens', () => {
     const project = makeProject({
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral', genomeSizeMb: 0.03, samplesPerYear: 200 }],
-      bioinformatics: { type: 'cloud', cloudPlatform: '', costPerSampleUsd: 5, annualServerCostUsd: 0 },
+      bioinformatics: {
+        type: 'cloud',
+        cloudItems: [
+          { name: 'BaseSpace', description: '', pricePerUnit: 1_000, quantity: 1, totalSamplesAllPathogens: 200, samplesThisScenario: 200, enabled: true },
+        ],
+        inhouseItems: [],
+      },
+      trainingGroupCostUsd: 0,
     })
     const costs = calculateCosts(project)
     expect(costs.bioinformatics).toBe(1_000)
   })
 
-  it('inhouse: annual server cost', () => {
+  it('inhouse: depreciation of inhouse items', () => {
     const project = makeProject({
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral', genomeSizeMb: 0.03, samplesPerYear: 200 }],
-      bioinformatics: { type: 'inhouse', cloudPlatform: '', costPerSampleUsd: 0, annualServerCostUsd: 12_000 },
+      bioinformatics: {
+        type: 'inhouse',
+        cloudItems: [],
+        inhouseItems: [
+          { name: 'Server', description: '', pricePerUnit: 12_000, quantity: 1, pctUse: 100, lifespanYears: 1, ageYears: 0, enabled: true },
+        ],
+      },
+      trainingGroupCostUsd: 0,
     })
     const costs = calculateCosts(project)
     expect(costs.bioinformatics).toBe(12_000)
   })
 
-  it('hybrid: samples × cost_per_sample + annual server', () => {
+  it('hybrid: cloud cost + inhouse depreciation', () => {
     const project = makeProject({
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral', genomeSizeMb: 0.03, samplesPerYear: 200 }],
-      bioinformatics: { type: 'hybrid', cloudPlatform: '', costPerSampleUsd: 2, annualServerCostUsd: 5_000 },
+      bioinformatics: {
+        type: 'hybrid',
+        cloudItems: [
+          { name: 'BaseSpace', description: '', pricePerUnit: 400, quantity: 1, totalSamplesAllPathogens: 200, samplesThisScenario: 200, enabled: true },
+        ],
+        inhouseItems: [
+          { name: 'Server', description: '', pricePerUnit: 5_000, quantity: 1, pctUse: 100, lifespanYears: 1, ageYears: 0, enabled: true },
+        ],
+      },
+      trainingGroupCostUsd: 0,
     })
     const costs = calculateCosts(project)
-    // 200 × $2 + $5,000 = $5,400
+    // cloud: 400 * 1 * 200/200 = $400; inhouse: $5,000/1yr = $5,000; total bio = $5,400
     expect(costs.bioinformatics).toBe(5_400)
   })
 })
@@ -545,15 +572,23 @@ describe('WHO GCT — end-to-end scenario', () => {
         { name: 'Illumina iSeq 100', category: 'sequencing_platform', status: 'buy' as const, unitCostUsd: 19_900, quantity: 1, lifespanYears: 8, ageYears: 0, pctSequencing: 100 },
       ],
       personnel: [
-        { role: 'Lab manager', annualSalaryUsd: 50_000, pctTime: 50, trainingCostUsd: 500 },
+        { role: 'Lab manager', annualSalaryUsd: 50_000, pctTime: 50 },
       ],
+      trainingGroupCostUsd: 500,
+      adminCostPct: 0,
       facility: [
         { label: 'Rent + utilities', monthlyCostUsd: 1_000, pctSequencing: 10 },
       ],
       transport: [
         { label: 'Sample courier', annualCostUsd: 500, pctSequencing: 100 },
       ],
-      bioinformatics: { type: 'cloud' as const, cloudPlatform: '', costPerSampleUsd: 5, annualServerCostUsd: 0 },
+      bioinformatics: {
+        type: 'cloud' as const,
+        cloudItems: [
+          { name: 'BaseSpace', description: '', pricePerUnit: 500, quantity: 1, totalSamplesAllPathogens: 100, samplesThisScenario: 100, enabled: true },
+        ],
+        inhouseItems: [],
+      },
       qms: [
         { activity: 'EQA – NGS', costUsd: 2_300, quantity: 1, pctSequencing: 100, enabled: true },
       ],
@@ -767,15 +802,17 @@ describe('WHO GCT — full demo workbook scenario', () => {
       ],
       personnel: [
         // To match workbook: base salary sum = 18000, with 10% admin overhead = 19800
-        // Our model: personnel = sum(salary * pctTime/100)
-        // Encode admin-adjusted values directly:
-        { role: 'Clinical microbiologist', annualSalaryUsd: 16_500, pctTime: 10, trainingCostUsd: 0 },
-        { role: 'Laboratory manager', annualSalaryUsd: 22_000, pctTime: 2, trainingCostUsd: 0 },
-        { role: 'Bioinformatician', annualSalaryUsd: 13_200, pctTime: 30, trainingCostUsd: 0 },
-        { role: 'Molecular biologist', annualSalaryUsd: 16_500, pctTime: 30, trainingCostUsd: 0 },
-        { role: 'Laboratory technician 1', annualSalaryUsd: 8_800, pctTime: 25, trainingCostUsd: 0 },
-        { role: 'Laboratory technician 2', annualSalaryUsd: 8_800, pctTime: 75, trainingCostUsd: 5_000 },
+        // Our model: personnel = sum(salary * pctTime/100), admin via adminCostPct
+        // Encode admin-adjusted values directly (admin baked in):
+        { role: 'Clinical microbiologist', annualSalaryUsd: 16_500, pctTime: 10 },
+        { role: 'Laboratory manager', annualSalaryUsd: 22_000, pctTime: 2 },
+        { role: 'Bioinformatician', annualSalaryUsd: 13_200, pctTime: 30 },
+        { role: 'Molecular biologist', annualSalaryUsd: 16_500, pctTime: 30 },
+        { role: 'Laboratory technician 1', annualSalaryUsd: 8_800, pctTime: 25 },
+        { role: 'Laboratory technician 2', annualSalaryUsd: 8_800, pctTime: 75 },
       ],
+      trainingGroupCostUsd: 5_000,
+      adminCostPct: 0,   // admin overhead already baked into the salary figures above
       facility: [
         // Workbook: total monthly $2,850, 20% sequencing → annual $6,840
         { label: 'Rent + utilities + maintenance', monthlyCostUsd: 2_850, pctSequencing: 20 },
@@ -786,9 +823,14 @@ describe('WHO GCT — full demo workbook scenario', () => {
       ],
       bioinformatics: {
         type: 'hybrid' as const,
-        cloudPlatform: 'BaseSpace',
-        costPerSampleUsd: 0.1953125,   // $156.25 / 800 samples
-        annualServerCostUsd: 3_183.60, // in-house depreciation from workbook
+        cloudItems: [
+          // $156.25 cloud cost for 800 samples
+          { name: 'BaseSpace', description: '', pricePerUnit: 156.25, quantity: 1, totalSamplesAllPathogens: 800, samplesThisScenario: 800, enabled: true },
+        ],
+        inhouseItems: [
+          // In-house depreciation: $3,183.60/yr (modelled as pricePerUnit with 1yr lifespan)
+          { name: 'In-house server', description: '', pricePerUnit: 3_183.60, quantity: 1, pctUse: 100, lifespanYears: 1, ageYears: 0, enabled: true },
+        ],
       },
       qms: [
         // Workbook QMS: BSC cert $300*1*50% = $150, IQC $200*2*10% = $40, total=$190

@@ -1,8 +1,8 @@
 import { useProject } from '../../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
-import { getEffectiveCatalogue } from '../../lib/catalogue'
 import Tooltip from '../../components/Tooltip'
 import { fmt } from '../../lib/format'
+import type { BioCloudItem, BioInhouseItem } from '../../types'
 
 const inputClass = 'border border-[var(--gx-border)] rounded-[var(--gx-radius)] bg-[var(--gx-bg)] text-[var(--gx-text)] p-2 text-sm focus:outline-none focus:border-[var(--gx-accent)]'
 const labelClass = 'text-xs text-[var(--gx-text-muted)] uppercase tracking-wider mb-1 block'
@@ -10,9 +10,8 @@ const labelClass = 'text-xs text-[var(--gx-text-muted)] uppercase tracking-wider
 export default function Step6() {
   const { project, updateProject } = useProject()
   const { t } = useTranslation()
-  const catalogue = getEffectiveCatalogue()
-  const CLOUD_PLATFORMS = catalogue.bioinformatics_cloud.cloud_platforms.map(p => p.name)
   const { facility, transport, bioinformatics, qms } = project
+  const samplesPerYear = project.pathogens.reduce((sum, p) => sum + p.samplesPerYear, 0)
 
   // ── Facility ─────────────────────────────────────────────────────────────────
   function updateFacilityRow(idx: number, patch: Partial<typeof facility[0]>) {
@@ -36,14 +35,76 @@ export default function Step6() {
     updateProject({ transport: transport.filter((_, i) => i !== idx) })
   }
 
+  // ── Bioinformatics ────────────────────────────────────────────────────────────
+  function updateCloudItem(idx: number, patch: Partial<BioCloudItem>) {
+    const next = bioinformatics.cloudItems.map((c, i) => i === idx ? { ...c, ...patch } : c)
+    updateProject({ bioinformatics: { ...bioinformatics, cloudItems: next } })
+  }
+  function addCloudItem() {
+    const newItem: BioCloudItem = {
+      name: '', description: '', pricePerUnit: 0, quantity: 1,
+      totalSamplesAllPathogens: samplesPerYear, samplesThisScenario: samplesPerYear,
+      enabled: true, notes: '',
+    }
+    updateProject({ bioinformatics: { ...bioinformatics, cloudItems: [...bioinformatics.cloudItems, newItem] } })
+  }
+  function removeCloudItem(idx: number) {
+    updateProject({ bioinformatics: { ...bioinformatics, cloudItems: bioinformatics.cloudItems.filter((_, i) => i !== idx) } })
+  }
+
+  function updateInhouseItem(idx: number, patch: Partial<BioInhouseItem>) {
+    const next = bioinformatics.inhouseItems.map((c, i) => i === idx ? { ...c, ...patch } : c)
+    updateProject({ bioinformatics: { ...bioinformatics, inhouseItems: next } })
+  }
+  function addInhouseItem() {
+    const newItem: BioInhouseItem = {
+      name: '', description: '', pricePerUnit: 0, quantity: 1,
+      pctUse: 100, lifespanYears: 5, ageYears: 0, enabled: true,
+    }
+    updateProject({ bioinformatics: { ...bioinformatics, inhouseItems: [...bioinformatics.inhouseItems, newItem] } })
+  }
+  function removeInhouseItem(idx: number) {
+    updateProject({ bioinformatics: { ...bioinformatics, inhouseItems: bioinformatics.inhouseItems.filter((_, i) => i !== idx) } })
+  }
+
   // ── QMS ──────────────────────────────────────────────────────────────────────
   function updateQMS(idx: number, patch: Partial<typeof qms[0]>) {
     updateProject({ qms: qms.map((q, i) => i === idx ? { ...q, ...patch } : q) })
   }
 
+  // ── Computed totals ──────────────────────────────────────────────────────────
+  const facilityMonthlyTotal = facility.reduce((s, f) => s + f.monthlyCostUsd, 0)
+  const facilityAnnualAll = facilityMonthlyTotal * 12
   const facilityTotal = facility.reduce((s, f) => s + f.monthlyCostUsd * 12 * f.pctSequencing / 100, 0)
+  const facilityPerSample = samplesPerYear > 0 ? facilityTotal / samplesPerYear : 0
+
   const transportTotal = transport.reduce((s, t) => s + t.annualCostUsd * (t.pctSequencing ?? 100) / 100, 0)
+  const facilityTransportTotal = facilityTotal + transportTotal
+  const facilityTransportPerSample = samplesPerYear > 0 ? facilityTransportTotal / samplesPerYear : 0
+
   const qmsTotal = qms.filter(q => q.enabled).reduce((s, q) => s + q.costUsd * q.quantity, 0)
+
+  // Cloud bioinformatics annual cost
+  const cloudTotal = (bioinformatics.type === 'cloud' || bioinformatics.type === 'hybrid')
+    ? bioinformatics.cloudItems
+        .filter(item => item.enabled)
+        .reduce((sum, item) => {
+          const totalSamplesAll = Math.max(1, item.totalSamplesAllPathogens || samplesPerYear)
+          return sum + (item.pricePerUnit ?? 0) * (item.quantity ?? 1) * (item.samplesThisScenario ?? samplesPerYear) / totalSamplesAll
+        }, 0)
+    : 0
+
+  // In-house bioinformatics annual cost
+  const inhouseTotal = (bioinformatics.type === 'inhouse' || bioinformatics.type === 'hybrid')
+    ? bioinformatics.inhouseItems
+        .filter(item => item.enabled)
+        .reduce((sum, item) => {
+          const remainingLife = Math.max(1, (item.lifespanYears ?? 1) - (item.ageYears ?? 0))
+          return sum + (item.pricePerUnit ?? 0) * (item.quantity ?? 1) * ((item.pctUse ?? 100) / 100) / remainingLife
+        }, 0)
+    : 0
+
+  const bioTotal = cloudTotal + inhouseTotal
 
   return (
     <div>
@@ -89,9 +150,28 @@ export default function Step6() {
             </tbody>
           </table>
         </div>
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center mb-3">
           <button onClick={addFacilityRow} className="px-3 py-1.5 rounded text-xs font-medium" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>{t('btn_add')}</button>
-          <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_total')}: <strong style={{ color: 'var(--gx-accent)' }}>${fmt(facilityTotal)}</strong></div>
+        </div>
+
+        {/* Facility summary output */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="p-3 rounded" style={{ background: 'var(--gx-bg-alt)', border: '1px solid var(--gx-border)' }}>
+            <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_total_monthly')}</div>
+            <div className="text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>${fmt(facilityMonthlyTotal)}</div>
+          </div>
+          <div className="p-3 rounded" style={{ background: 'var(--gx-bg-alt)', border: '1px solid var(--gx-border)' }}>
+            <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_annual_all')}</div>
+            <div className="text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>${fmt(facilityAnnualAll)}</div>
+          </div>
+          <div className="p-3 rounded" style={{ background: 'var(--gx-bg-alt)', border: '1px solid var(--gx-border)' }}>
+            <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_annual_sequencing')}</div>
+            <div className="text-sm font-semibold" style={{ color: 'var(--gx-accent)' }}>${fmt(facilityTotal)}</div>
+          </div>
+          <div className="p-3 rounded" style={{ background: 'var(--gx-bg-alt)', border: '1px solid var(--gx-border)' }}>
+            <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_per_sample')}</div>
+            <div className="text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>${fmt(facilityPerSample)}</div>
+          </div>
         </div>
       </section>
 
@@ -110,19 +190,19 @@ export default function Step6() {
               </tr>
             </thead>
             <tbody>
-              {transport.map((t, idx) => (
+              {transport.map((tr, idx) => (
                 <tr key={idx} style={{ borderBottom: '1px solid var(--gx-border)' }}>
                   <td className="px-3 py-2">
-                    <input type="text" value={t.label} onChange={e => updateTransportRow(idx, { label: e.target.value })} className={inputClass} style={{ width: '100%' }} />
+                    <input type="text" value={tr.label} onChange={e => updateTransportRow(idx, { label: e.target.value })} className={inputClass} style={{ width: '100%' }} />
                   </td>
                   <td className="px-3 py-2">
-                    <input type="number" value={t.annualCostUsd} min={0} onChange={e => updateTransportRow(idx, { annualCostUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 120, textAlign: 'right' }} />
+                    <input type="number" value={tr.annualCostUsd} min={0} onChange={e => updateTransportRow(idx, { annualCostUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 120, textAlign: 'right' }} />
                   </td>
                   <td className="px-3 py-2">
-                    <input type="number" value={t.pctSequencing ?? 100} min={0} max={100} onChange={e => updateTransportRow(idx, { pctSequencing: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 70, textAlign: 'right' }} />
+                    <input type="number" value={tr.pctSequencing ?? 100} min={0} max={100} onChange={e => updateTransportRow(idx, { pctSequencing: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 70, textAlign: 'right' }} />
                   </td>
                   <td className="px-3 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>
-                    {fmt(t.annualCostUsd * (t.pctSequencing ?? 100) / 100)}
+                    {fmt(tr.annualCostUsd * (tr.pctSequencing ?? 100) / 100)}
                   </td>
                   <td className="px-3 py-2">
                     <button onClick={() => removeTransportRow(idx)} className="text-xs px-2 py-0.5 rounded" style={{ color: 'var(--gx-text-muted)', background: 'none', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>×</button>
@@ -132,9 +212,20 @@ export default function Step6() {
             </tbody>
           </table>
         </div>
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center mb-3">
           <button onClick={addTransportRow} className="px-3 py-1.5 rounded text-xs font-medium" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>{t('btn_add')}</button>
           <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_total')}: <strong style={{ color: 'var(--gx-accent)' }}>${fmt(transportTotal)}</strong></div>
+        </div>
+
+        {/* Combined facility + transport output */}
+        <div className="p-3 rounded" style={{ background: 'var(--gx-bg-alt)', border: '1px solid var(--gx-border)' }}>
+          <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_facility_transport_total')}</div>
+          <div className="text-sm font-semibold" style={{ color: 'var(--gx-accent)' }}>
+            ${fmt(facilityTransportTotal)}
+            <span className="font-normal text-xs ml-2" style={{ color: 'var(--gx-text-muted)' }}>
+              (${fmt(facilityTransportPerSample)}/{t('label_per_sample_unit')})
+            </span>
+          </div>
         </div>
       </section>
 
@@ -142,94 +233,169 @@ export default function Step6() {
       <section className="mb-8">
         <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--gx-text)' }}>{t('field_bioinformatics')}</h3>
         <div className="card p-4 flex flex-col gap-4">
-          {/* Type radio */}
+          {/* Type segmented control */}
           <div>
             <label className={labelClass}>{t('label_approach')}<Tooltip content={t('tooltip_bioinformatics')} /></label>
-            <div className="flex gap-4">
+            <div className="flex rounded overflow-hidden" style={{ border: '1px solid var(--gx-border)', width: 'fit-content' }}>
               {(['cloud', 'inhouse', 'hybrid', 'none'] as const).map(type => (
-                <label key={type} className="flex items-center gap-2 cursor-pointer text-sm">
-                  <input
-                    type="radio"
-                    name="bioType"
-                    value={type}
-                    checked={bioinformatics.type === type}
-                    onChange={() => updateProject({ bioinformatics: { ...bioinformatics, type } })}
-                    style={{ accentColor: 'var(--gx-accent)' }}
-                  />
-                  <span style={{ color: 'var(--gx-text)' }}>
-                    {type === 'cloud' ? t('opt_cloud') : type === 'inhouse' ? t('opt_inhouse') : type === 'hybrid' ? t('opt_hybrid') : t('opt_none')}
-                  </span>
-                </label>
+                <button
+                  key={type}
+                  onClick={() => updateProject({ bioinformatics: { ...bioinformatics, type } })}
+                  className="px-4 py-1.5 text-xs font-medium"
+                  style={{
+                    background: bioinformatics.type === type ? 'var(--gx-accent)' : 'var(--gx-bg-alt)',
+                    color: bioinformatics.type === type ? 'var(--gx-bg)' : 'var(--gx-text-muted)',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {type === 'cloud' ? t('opt_cloud') : type === 'inhouse' ? t('opt_inhouse') : type === 'hybrid' ? t('opt_hybrid') : t('opt_none')}
+                </button>
               ))}
             </div>
           </div>
 
-          {bioinformatics.type === 'cloud' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className={labelClass}>{t('field_cloud_platform')}</label>
-                <select
-                  className={inputClass}
-                  value={bioinformatics.cloudPlatform}
-                  onChange={e => updateProject({ bioinformatics: { ...bioinformatics, cloudPlatform: e.target.value } })}
-                  style={{ width: '100%' }}
-                >
-                  {CLOUD_PLATFORMS.map(p => <option key={p} value={p}>{p}</option>)}
-                </select>
+          {/* Cloud items table */}
+          {(bioinformatics.type === 'cloud' || bioinformatics.type === 'hybrid') && (
+            <div>
+              <label className={labelClass}>{t('label_cloud_items')}</label>
+              <div className="card mb-2" style={{ overflowX: 'auto' }}>
+                <table className="w-full text-sm" style={{ minWidth: 500 }}>
+                  <thead>
+                    <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
+                      <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_item')}</th>
+                      <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_price_per_unit')}</th>
+                      <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_qty')}</th>
+                      <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_samples_scenario')}</th>
+                      <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_samples_total')}</th>
+                      <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual')}</th>
+                      <th className="px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_on')}</th>
+                      <th className="px-3 py-2"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {bioinformatics.cloudItems.map((item, idx) => {
+                      const totalSamplesAll = Math.max(1, item.totalSamplesAllPathogens || samplesPerYear)
+                      const annualCost = item.enabled
+                        ? (item.pricePerUnit ?? 0) * (item.quantity ?? 1) * (item.samplesThisScenario ?? samplesPerYear) / totalSamplesAll
+                        : 0
+                      return (
+                        <tr key={idx} style={{ borderBottom: '1px solid var(--gx-border)', opacity: item.enabled ? 1 : 0.4 }}>
+                          <td className="px-3 py-2">
+                            <input type="text" value={item.name} onChange={e => updateCloudItem(idx, { name: e.target.value })} className={inputClass} style={{ width: '100%', minWidth: 120 }} />
+                          </td>
+                          <td className="px-3 py-2">
+                            <input type="number" value={item.pricePerUnit} min={0} step={0.01} onChange={e => updateCloudItem(idx, { pricePerUnit: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 90, textAlign: 'right' }} />
+                          </td>
+                          <td className="px-3 py-2">
+                            <input type="number" value={item.quantity} min={0} onChange={e => updateCloudItem(idx, { quantity: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 60, textAlign: 'center' }} />
+                          </td>
+                          <td className="px-3 py-2">
+                            <input type="number" value={item.samplesThisScenario} min={0} onChange={e => updateCloudItem(idx, { samplesThisScenario: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 80, textAlign: 'right' }} />
+                          </td>
+                          <td className="px-3 py-2">
+                            <input type="number" value={item.totalSamplesAllPathogens} min={0} onChange={e => updateCloudItem(idx, { totalSamplesAllPathogens: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 80, textAlign: 'right' }} />
+                          </td>
+                          <td className="px-3 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>
+                            ${fmt(annualCost)}
+                          </td>
+                          <td className="px-3 py-2 text-center">
+                            <input type="checkbox" checked={item.enabled} onChange={e => updateCloudItem(idx, { enabled: e.target.checked })} style={{ accentColor: 'var(--gx-accent)', width: 15, height: 15 }} />
+                          </td>
+                          <td className="px-3 py-2">
+                            <button onClick={() => removeCloudItem(idx)} className="text-xs px-2 py-0.5 rounded" style={{ color: 'var(--gx-text-muted)', background: 'none', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>×</button>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
               </div>
-              <div>
-                <label className={labelClass}>{t('field_cost_per_sample')}</label>
-                <input
-                  type="number"
-                  value={bioinformatics.costPerSampleUsd}
-                  min={0}
-                  step={0.1}
-                  onChange={e => updateProject({ bioinformatics: { ...bioinformatics, costPerSampleUsd: parseFloat(e.target.value) || 0 } })}
-                  className={inputClass}
-                  style={{ width: '100%' }}
-                />
+              <div className="flex justify-between items-center">
+                <button onClick={addCloudItem} className="px-3 py-1.5 rounded text-xs font-medium" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>{t('btn_add')}</button>
+                <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_cloud_total')}: <strong style={{ color: 'var(--gx-accent)' }}>${fmt(cloudTotal)}</strong></div>
               </div>
             </div>
           )}
 
+          {/* In-house items table */}
           {(bioinformatics.type === 'inhouse' || bioinformatics.type === 'hybrid') && (
             <div>
-              <label className={labelClass}>{t('field_annual_server')}</label>
-              <input
-                type="number"
-                value={bioinformatics.annualServerCostUsd}
-                min={0}
-                onChange={e => updateProject({ bioinformatics: { ...bioinformatics, annualServerCostUsd: parseFloat(e.target.value) || 0 } })}
-                className={inputClass}
-                style={{ width: 200 }}
-              />
+              <label className={labelClass}>{t('label_inhouse_items')}</label>
+              <div className="card mb-2" style={{ overflowX: 'auto' }}>
+                <table className="w-full text-sm" style={{ minWidth: 550 }}>
+                  <thead>
+                    <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
+                      <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_item')}</th>
+                      <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_price_each')}</th>
+                      <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_qty')}</th>
+                      <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_pct_use')}</th>
+                      <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_life_yr')}</th>
+                      <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_age_yr')}</th>
+                      <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual')}</th>
+                      <th className="px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_on')}</th>
+                      <th className="px-3 py-2"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {bioinformatics.inhouseItems.map((item, idx) => {
+                      const remainingLife = Math.max(1, (item.lifespanYears ?? 1) - (item.ageYears ?? 0))
+                      const annualCost = item.enabled
+                        ? (item.pricePerUnit ?? 0) * (item.quantity ?? 1) * ((item.pctUse ?? 100) / 100) / remainingLife
+                        : 0
+                      return (
+                        <tr key={idx} style={{ borderBottom: '1px solid var(--gx-border)', opacity: item.enabled ? 1 : 0.4 }}>
+                          <td className="px-3 py-2">
+                            <input type="text" value={item.name} onChange={e => updateInhouseItem(idx, { name: e.target.value })} className={inputClass} style={{ width: '100%', minWidth: 120 }} />
+                          </td>
+                          <td className="px-3 py-2">
+                            <input type="number" value={item.pricePerUnit} min={0} step={0.01} onChange={e => updateInhouseItem(idx, { pricePerUnit: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 90, textAlign: 'right' }} />
+                          </td>
+                          <td className="px-3 py-2">
+                            <input type="number" value={item.quantity} min={0} onChange={e => updateInhouseItem(idx, { quantity: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 60, textAlign: 'center' }} />
+                          </td>
+                          <td className="px-3 py-2">
+                            <input type="number" value={item.pctUse} min={0} max={100} onChange={e => updateInhouseItem(idx, { pctUse: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 60, textAlign: 'right' }} />
+                          </td>
+                          <td className="px-3 py-2">
+                            <input type="number" value={item.lifespanYears} min={1} max={30} onChange={e => updateInhouseItem(idx, { lifespanYears: parseInt(e.target.value) || 1 })} className={inputClass} style={{ width: 60, textAlign: 'center' }} />
+                          </td>
+                          <td className="px-3 py-2">
+                            <input type="number" value={item.ageYears} min={0} max={Math.max(0, (item.lifespanYears ?? 1) - 1)} onChange={e => updateInhouseItem(idx, { ageYears: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 60, textAlign: 'center' }} />
+                          </td>
+                          <td className="px-3 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>
+                            ${fmt(annualCost)}
+                          </td>
+                          <td className="px-3 py-2 text-center">
+                            <input type="checkbox" checked={item.enabled} onChange={e => updateInhouseItem(idx, { enabled: e.target.checked })} style={{ accentColor: 'var(--gx-accent)', width: 15, height: 15 }} />
+                          </td>
+                          <td className="px-3 py-2">
+                            <button onClick={() => removeInhouseItem(idx)} className="text-xs px-2 py-0.5 rounded" style={{ color: 'var(--gx-text-muted)', background: 'none', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>×</button>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <div className="flex justify-between items-center">
+                <button onClick={addInhouseItem} className="px-3 py-1.5 rounded text-xs font-medium" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>{t('btn_add')}</button>
+                <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_inhouse_total')}: <strong style={{ color: 'var(--gx-accent)' }}>${fmt(inhouseTotal)}</strong></div>
+              </div>
             </div>
           )}
 
-          {bioinformatics.type === 'hybrid' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className={labelClass}>{t('field_cloud_platform')}</label>
-                <select
-                  className={inputClass}
-                  value={bioinformatics.cloudPlatform}
-                  onChange={e => updateProject({ bioinformatics: { ...bioinformatics, cloudPlatform: e.target.value } })}
-                  style={{ width: '100%' }}
-                >
-                  {CLOUD_PLATFORMS.map(p => <option key={p} value={p}>{p}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className={labelClass}>{t('field_cost_per_sample')}</label>
-                <input
-                  type="number"
-                  value={bioinformatics.costPerSampleUsd}
-                  min={0}
-                  step={0.1}
-                  onChange={e => updateProject({ bioinformatics: { ...bioinformatics, costPerSampleUsd: parseFloat(e.target.value) || 0 } })}
-                  className={inputClass}
-                  style={{ width: '100%' }}
-                />
+          {/* Bioinformatics total */}
+          {bioinformatics.type !== 'none' && (
+            <div className="p-3 rounded" style={{ background: 'var(--gx-bg-alt)', border: '1px solid var(--gx-border)' }}>
+              <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_bio_total')}</div>
+              <div className="text-sm font-semibold" style={{ color: 'var(--gx-accent)' }}>
+                ${fmt(bioTotal)}
+                {samplesPerYear > 0 && (
+                  <span className="font-normal text-xs ml-2" style={{ color: 'var(--gx-text-muted)' }}>
+                    (${fmt(bioTotal / samplesPerYear)}/{t('label_per_sample_unit')})
+                  </span>
+                )}
               </div>
             </div>
           )}

@@ -81,6 +81,18 @@ export default function Step4() {
     .filter(e => e.status === 'buy')
     .reduce((sum, e) => sum + e.unitCostUsd * e.quantity, 0)
 
+  // Potential purchases: additional cost to reach catalogue recommended quantity
+  const potentialPurchases = equipment
+    .filter(e => e.status === 'buy')
+    .reduce((sum, e) => {
+      const catItem = catalogue.equipment.find(c => c.name === e.name)
+      const recommended = catItem?.recommended_quantity ?? 0
+      if (recommended > 0 && e.quantity < recommended) {
+        return sum + (recommended - e.quantity) * e.unitCostUsd
+      }
+      return sum
+    }, 0)
+
   const categoriesPresent = Array.from(new Set(equipment.map(e => e.category)))
   const grouped = categoriesPresent.map(cat => ({
     cat,
@@ -118,9 +130,34 @@ export default function Step4() {
                   className="card p-3 flex flex-wrap gap-3 items-center"
                   style={{ opacity: item.status === 'skip' ? 0.4 : 1 }}
                 >
-                  {/* Name */}
-                  <div className="flex-1 text-sm font-medium min-w-36" style={{ color: 'var(--gx-text)' }}>
-                    {item.name}
+                  {/* Name + recommended quantity badge */}
+                  <div className="flex-1 min-w-36">
+                    <div className="text-sm font-medium" style={{ color: 'var(--gx-text)' }}>
+                      {item.name}
+                    </div>
+                    {(() => {
+                      const catItem = catalogue.equipment.find(c => c.name === item.name)
+                      const recommended = catItem?.recommended_quantity ?? 0
+                      if (recommended > 0 && item.status === 'buy' && item.quantity < recommended) {
+                        return (
+                          <span className="text-xs px-2 py-0.5 rounded-full inline-block mt-0.5" style={{
+                            background: '#fef3c7',
+                            color: '#92400e',
+                            border: '1px solid #fcd34d',
+                          }}>
+                            {t('label_buy_more', { recommended })}
+                          </span>
+                        )
+                      }
+                      if (recommended > 0 && item.status === 'buy') {
+                        return (
+                          <span className="text-xs mt-0.5 block" style={{ color: 'var(--gx-text-muted)' }}>
+                            {t('label_recommended_qty', { count: recommended })}
+                          </span>
+                        )
+                      }
+                      return null
+                    })()}
                   </div>
 
                   {/* Status segmented control */}
@@ -258,6 +295,12 @@ export default function Step4() {
           <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_establishment')}</div>
           <div className="text-lg font-semibold" style={{ color: 'var(--gx-text)' }}>${fmt(establishmentTotal)}</div>
         </div>
+        {potentialPurchases > 0 && (
+          <div>
+            <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_potential_purchases')}</div>
+            <div className="text-lg font-semibold" style={{ color: '#92400e' }}>${fmt(potentialPurchases)}</div>
+          </div>
+        )}
       </div>
     </div>
   )

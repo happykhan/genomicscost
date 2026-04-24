@@ -1,4 +1,4 @@
-import type { Project, SequencerConfig } from '../types'
+import type { Project, SequencerConfig, BioCloudItem, BioInhouseItem } from '../types'
 import { getEffectiveCatalogue } from './catalogue'
 
 function randomId(): string {
@@ -27,6 +27,30 @@ export function createDefaultSequencer(label: string): SequencerConfig {
     minReadsPerSample: 100_000,
     assignments: [],
   }
+}
+
+export function createDefaultCloudItems(): BioCloudItem[] {
+  const catalogue = getEffectiveCatalogue()
+  return catalogue.bioinformatics_cloud.cloud_platforms.map(p => ({
+    name: p.name,
+    description: p.description ?? '',
+    pricePerUnit: 0,
+    quantity: 1,
+    totalSamplesAllPathogens: 0,
+    samplesThisScenario: 0,
+    enabled: false,
+    notes: '',
+  }))
+}
+
+export function createDefaultInhouseItems(): BioInhouseItem[] {
+  // Standard in-house components from the WHO demo workbook
+  return [
+    { name: 'Low/mid processing workstation', description: 'Desktop workstation for bioinformatics', pricePerUnit: 7028, quantity: 1, pctUse: 100, lifespanYears: 5, ageYears: 0, enabled: false },
+    { name: 'NAS (64TB)', description: 'Network-attached storage', pricePerUnit: 3380, quantity: 1, pctUse: 100, lifespanYears: 2, ageYears: 0, enabled: false },
+    { name: 'Monitor', description: 'Display monitor', pricePerUnit: 150, quantity: 1, pctUse: 100, lifespanYears: 2, ageYears: 0, enabled: false },
+    { name: 'External HDD (1TB)', description: 'External hard drive for backup', pricePerUnit: 52, quantity: 1, pctUse: 100, lifespanYears: 2, ageYears: 0, enabled: false },
+  ]
 }
 
 export function createDefaultProject(): Project {
@@ -77,7 +101,6 @@ export function createDefaultProject(): Project {
     role: r.role,
     annualSalaryUsd: 30000,
     pctTime: [20, 30, 50, 50, 60][i] ?? 20,
-    trainingCostUsd: 1000,
   }))
 
   const defaultQMS = catalogue.qms_activities.map(q => ({
@@ -87,6 +110,22 @@ export function createDefaultProject(): Project {
     pctSequencing: 85,  // WHO default: 85% attributed to sequencing
     enabled: true,
   }))
+
+  // WHO GCT: 12 standard facility line items
+  const defaultFacility = [
+    { label: 'Rent', monthlyCostUsd: 0, pctSequencing: 50 },
+    { label: 'Building maintenance', monthlyCostUsd: 200, pctSequencing: 50 },
+    { label: 'Gas and heating', monthlyCostUsd: 200, pctSequencing: 50 },
+    { label: 'Water', monthlyCostUsd: 100, pctSequencing: 50 },
+    { label: 'Electricity', monthlyCostUsd: 500, pctSequencing: 50 },
+    { label: 'Internet', monthlyCostUsd: 200, pctSequencing: 50 },
+    { label: 'Telephone', monthlyCostUsd: 100, pctSequencing: 50 },
+    { label: 'Waste management', monthlyCostUsd: 1000, pctSequencing: 50 },
+    { label: 'Generator maintenance', monthlyCostUsd: 100, pctSequencing: 50 },
+    { label: 'Ventilation system maintenance', monthlyCostUsd: 300, pctSequencing: 50 },
+    { label: 'Generator fuel', monthlyCostUsd: 50, pctSequencing: 50 },
+    { label: 'LIMS', monthlyCostUsd: 100, pctSequencing: 50 },
+  ]
 
   return {
     id: randomId(),
@@ -105,23 +144,20 @@ export function createDefaultProject(): Project {
     consumables: defaultConsumables,
     equipment: defaultEquipment,
     personnel: defaultPersonnel,
-    facility: [
-      { label: 'Rent/lease', monthlyCostUsd: 500, pctSequencing: 30 },
-      { label: 'Utilities', monthlyCostUsd: 200, pctSequencing: 50 },
-      { label: 'Maintenance', monthlyCostUsd: 100, pctSequencing: 100 },
-    ],
+    facility: defaultFacility,
     transport: [
       { label: 'Sample transport', annualCostUsd: 2000, pctSequencing: 100 },
       { label: 'Courier/shipping', annualCostUsd: 1000, pctSequencing: 100 },
     ],
     bioinformatics: {
       type: 'cloud',
-      cloudPlatform: 'BaseSpace',
-      costPerSampleUsd: 2,
-      annualServerCostUsd: 0,
+      cloudItems: createDefaultCloudItems(),
+      inhouseItems: createDefaultInhouseItems(),
     },
     qms: defaultQMS,
     exchangeRate: 1,
     currency: 'USD',
+    trainingGroupCostUsd: 5000,
+    adminCostPct: 0,
   }
 }

@@ -1,4 +1,5 @@
 import type { Project, CostBreakdown, SequencerConfig, PathogenEntry } from '../types'
+import { getEffectiveCatalogue } from './catalogue'
 
 // ── Workflow step constants ───────────────────────────────────────────────────
 
@@ -204,8 +205,11 @@ export function calculateCosts(project: Project): CostBreakdown {
     sequencingReagents: 0, libraryPrep: 0, consumables: 0,
     equipment: 0, incidentals: 0, establishmentCost: 0, personnel: 0,
     facility: 0, transport: 0, bioinformatics: 0, qms: 0, training: 0,
+    adminCost: 0,
     total: 0, costPerSample: 0,
     workflowBreakdown: Object.fromEntries(WORKFLOW_STEPS.map(s => [s, 0])),
+    perSequencerReagents: [],
+    potentialPurchases: 0,
   }
 
   if (!samplesPerYear || samplesPerYear <= 0) return zero
@@ -216,6 +220,8 @@ export function calculateCosts(project: Project): CostBreakdown {
   )
 
   // Sum costs across all enabled sequencers using assignment-based sample counts
+  // Also collect per-sequencer breakdown for Step 7
+  const perSequencerReagents: CostBreakdown['perSequencerReagents'] = []
   const seqCosts = (sequencers ?? []).reduce(
     (acc, seq) => {
       let assignedSamples: number
@@ -229,6 +235,13 @@ export function calculateCosts(project: Project): CostBreakdown {
         assignedSamples = 0
       }
       const c = calcSequencerCosts(seq, assignedSamples)
+      if (seq.enabled) {
+        perSequencerReagents.push({
+          label: seq.label || 'Sequencer',
+          reagents: c.sequencingReagents,
+          libraryPrep: c.libraryPrep,
+        })
+      }
       return {
         sequencingReagents: acc.sequencingReagents + c.sequencingReagents,
         libraryPrep: acc.libraryPrep + c.libraryPrep,
@@ -273,12 +286,28 @@ export function calculateCosts(project: Project): CostBreakdown {
     .filter(e => e.status === 'buy')
     .reduce((sum, e) => sum + (e.unitCostUsd ?? 0) * (e.quantity ?? 1), 0)
 
+  // Potential purchases to reach recommended quantities
+  const catalogue = getEffectiveCatalogue()
+  const potentialPurchases = equipment
+    .filter(e => e.status === 'buy')
+    .reduce((sum, e) => {
+      const catItem = catalogue.equipment.find(c => c.name === e.name)
+      const recommended = catItem?.recommended_quantity ?? 0
+      if (recommended > 0 && (e.quantity ?? 1) < recommended) {
+        return sum + (recommended - (e.quantity ?? 1)) * (e.unitCostUsd ?? 0)
+      }
+      return sum
+    }, 0)
+
   const annualPersonnel = personnel.reduce((sum, p) => {
     return sum + (p.annualSalaryUsd ?? 0) * (p.pctTime ?? 0) / 100
   }, 0)
 
-  // Feature 1: training costs
-  const annualTraining = personnel.reduce((sum, p) => sum + (p.trainingCostUsd ?? 0), 0)
+  // WHO GCT: group-level training cost
+  const annualTraining = project.trainingGroupCostUsd ?? 0
+
+  // WHO GCT: admin overhead % applied to personnel + training subtotal
+  const adminCost = (annualPersonnel + annualTraining) * (project.adminCostPct ?? 0) / 100
 
   const annualFacility = facility.reduce((sum, f) => {
     return sum + (f.monthlyCostUsd ?? 0) * 12 * (f.pctSequencing ?? 0) / 100
@@ -288,13 +317,33 @@ export function calculateCosts(project: Project): CostBreakdown {
     return sum + (t.annualCostUsd ?? 0) * ((t.pctSequencing ?? 100) / 100)
   }, 0)
 
+  // Bioinformatics: use new cloudItems/inhouseItems structure
   let annualBioinformatics = 0
-  if (bioinformatics.type === 'cloud') {
-    annualBioinformatics = effectiveSamplesForScaling * (bioinformatics.costPerSampleUsd ?? 0)
-  } else if (bioinformatics.type === 'inhouse') {
-    annualBioinformatics = bioinformatics.annualServerCostUsd ?? 0
-  } else if (bioinformatics.type === 'hybrid') {
-    annualBioinformatics = effectiveSamplesForScaling * (bioinformatics.costPerSampleUsd ?? 0) + (bioinformatics.annualServerCostUsd ?? 0)
+  if (bioinformatics.type === 'cloud' || bioinformatics.type === 'hybrid') {
+    if (Array.isArray(bioinformatics.cloudItems)) {
+      annualBioinformatics += bioinformatics.cloudItems
+        .filter(item => item.enabled)
+        .reduce((sum, item) => {
+          const totalSamplesAll = Math.max(1, item.totalSamplesAllPathogens || effectiveSamplesForScaling)
+          return sum + (item.pricePerUnit ?? 0) * (item.quantity ?? 1) * (item.samplesThisScenario ?? effectiveSamplesForScaling) / totalSamplesAll
+        }, 0)
+    } else if (bioinformatics.costPerSampleUsd) {
+      // Legacy fallback
+      annualBioinformatics += effectiveSamplesForScaling * (bioinformatics.costPerSampleUsd ?? 0)
+    }
+  }
+  if (bioinformatics.type === 'inhouse' || bioinformatics.type === 'hybrid') {
+    if (Array.isArray(bioinformatics.inhouseItems)) {
+      annualBioinformatics += bioinformatics.inhouseItems
+        .filter(item => item.enabled)
+        .reduce((sum, item) => {
+          const remainingLife = Math.max(1, (item.lifespanYears ?? 1) - (item.ageYears ?? 0))
+          return sum + (item.pricePerUnit ?? 0) * (item.quantity ?? 1) * ((item.pctUse ?? 100) / 100) / remainingLife
+        }, 0)
+    } else if (bioinformatics.annualServerCostUsd) {
+      // Legacy fallback
+      annualBioinformatics += bioinformatics.annualServerCostUsd ?? 0
+    }
   }
 
   // QMS: cost × quantity × pctSequencing (% attributed to this sequencing programme)
@@ -309,13 +358,13 @@ export function calculateCosts(project: Project): CostBreakdown {
   const total =
     seqCosts.sequencingReagents + seqCosts.libraryPrep + annualConsumables +
     annualEquipment + incidentals +
-    annualPersonnel + annualFacility + annualTransport + annualBioinformatics + annualQMS + annualTraining
+    annualPersonnel + annualFacility + annualTransport + annualBioinformatics + annualQMS + annualTraining + adminCost
 
   const costPerSample = effectiveSamplesForScaling > 0 ? total / effectiveSamplesForScaling : 0
 
   // ── Feature 5: Workflow step breakdown ──────────────────────────────────────
-  // Personnel, Facility, Transport, QMS, Training, Equipment, Incidentals are shared evenly across 6 steps
-  const sharedCost = annualPersonnel + annualFacility + annualTransport + annualQMS + annualTraining + annualEquipment + incidentals
+  // Personnel, Facility, Transport, QMS, Training, Admin, Equipment, Incidentals are shared evenly across 6 steps
+  const sharedCost = annualPersonnel + annualFacility + annualTransport + annualQMS + annualTraining + adminCost + annualEquipment + incidentals
   const perStep = sharedCost / WORKFLOW_STEPS.length
 
   const workflowBreakdown: Record<string, number> = Object.fromEntries(WORKFLOW_STEPS.map(s => [s, perStep]))
@@ -355,8 +404,11 @@ export function calculateCosts(project: Project): CostBreakdown {
     bioinformatics: annualBioinformatics,
     qms: annualQMS,
     training: annualTraining,
+    adminCost,
     total,
     costPerSample,
     workflowBreakdown,
+    perSequencerReagents,
+    potentialPurchases,
   }
 }
