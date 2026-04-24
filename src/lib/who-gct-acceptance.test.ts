@@ -770,7 +770,7 @@ describe('WHO GCT — full demo workbook scenario', () => {
         // But we need ceil(800*qps)*unitCost = 42425.02
         // Use unitCost=53.03, qps=1: ceil(800)*53.03 = 42424... close enough
         // Actually: ceil(800 * 1) * 53.03125 = 42425
-        { name: 'General reagents and consumables (aggregate)', unitCostUsd: 53.03125, quantityPerSample: 1, enabled: true, workflow: 'sample_receipt' },
+        { name: 'General reagents and consumables (aggregate)', unitCostUsd: 53.03125, quantityPerSample: 1, enabled: true, workflows: { sample_receipt: true } },
       ],
       equipment: [
         // Sequencing platforms: MiSeq + GridION consolidated

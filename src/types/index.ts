@@ -31,12 +31,20 @@ export interface LibraryPrepKit {
   catalog_ref: string | null
 }
 
+export type ConsumableWorkflowStep =
+  | 'sample_receipt'
+  | 'nucleic_acid_extraction'
+  | 'pcr_testing'
+  | 'ngs_library_preparation'
+  | 'sequencing'
+
 export interface CatalogueReagent {
   name: string
   category: string
   pack_size: number | null
   quantity_per_sample: number
   workflow: string
+  workflows?: string[]
   unit_price_usd?: number | null
 }
 
@@ -175,6 +183,7 @@ export interface QMSItem {
 
 export interface TransportItem {
   label: string
+  shipmentMethod?: string   // e.g. 'Courier', 'Air freight'
   annualCostUsd: number
   // WHO GCT: % of cost attributed to sequencing (0–100; default 100)
   pctSequencing?: number
@@ -188,7 +197,13 @@ export interface Project {
   pathogens: PathogenEntry[]
   // Feature 6: dual sequencer (replaces singular sequencer)
   sequencers: SequencerConfig[]
-  consumables: Array<{ name: string; unitCostUsd: number; quantityPerSample: number; enabled: boolean; workflow?: string }>
+  consumables: Array<{
+    name: string
+    unitCostUsd: number
+    quantityPerSample: number
+    enabled: boolean
+    workflows?: Partial<Record<ConsumableWorkflowStep, boolean>>
+  }>
   equipment: EquipmentItem[]
   personnel: PersonnelItem[]
   facility: FacilityItem[]

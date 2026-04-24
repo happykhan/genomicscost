@@ -1,4 +1,4 @@
-import type { Project, CostBreakdown, SequencerConfig, PathogenEntry } from '../types'
+import type { Project, CostBreakdown, SequencerConfig, PathogenEntry, ConsumableWorkflowStep } from '../types'
 import { getEffectiveCatalogue } from './catalogue'
 
 // ── Workflow step constants ───────────────────────────────────────────────────
@@ -19,19 +19,6 @@ export const WORKFLOW_STEP_LABELS: Record<string, string> = {
   library_prep: 'NGS library preparation',
   sequencing: 'Sequencing',
   bioinformatics: 'Bioinformatics',
-}
-
-// Map catalogue workflow tags → our 6 steps
-const CATALOGUE_WORKFLOW_MAP: Record<string, string> = {
-  sample_receipt: 'sample_receipt',
-  nucleic_acid_extraction: 'nucleic_acid_extraction',
-  pcr_testing: 'pcr_testing',
-  library_prep: 'library_prep',
-  sequencing: 'sequencing',
-  // catalogue uses 'Sequencing' (capitalised) for equipment
-  Sequencing: 'sequencing',
-  bioinformatics: 'bioinformatics',
-  general_lab: 'sample_receipt', // assign general lab reagents to sample receipt
 }
 
 // ── Annex 2: Minimum reads per sample by pathogen type and genome size ────────
@@ -369,16 +356,46 @@ export function calculateCosts(project: Project): CostBreakdown {
 
   const workflowBreakdown: Record<string, number> = Object.fromEntries(WORKFLOW_STEPS.map(s => [s, perStep]))
 
-  // Consumables: assigned by their workflow tag
+  // Consumables: split each item's cost across its checked workflow steps equally
+  // Map consumable workflow steps to the 6-step workflow breakdown keys
+  const CONSUMABLE_WF_TO_STEP: Record<ConsumableWorkflowStep, string> = {
+    sample_receipt: 'sample_receipt',
+    nucleic_acid_extraction: 'nucleic_acid_extraction',
+    pcr_testing: 'pcr_testing',
+    ngs_library_preparation: 'library_prep',
+    sequencing: 'sequencing',
+  }
+
   consumables.filter(c => c.enabled).forEach(c => {
     const qty = Math.ceil(effectiveSamplesForScaling * (c.quantityPerSample ?? 0))
     const cost = qty * (c.unitCostUsd ?? 0)
-    const tag = (c as { workflow?: string }).workflow ?? 'sample_receipt'
-    const step = CATALOGUE_WORKFLOW_MAP[tag] ?? 'sample_receipt'
-    if (step in workflowBreakdown) {
-      workflowBreakdown[step] += cost
+
+    // Collect the checked workflow steps for this consumable
+    const checkedSteps: string[] = []
+    if (c.workflows && typeof c.workflows === 'object') {
+      for (const [wfKey, checked] of Object.entries(c.workflows)) {
+        if (checked) {
+          const mappedStep = CONSUMABLE_WF_TO_STEP[wfKey as ConsumableWorkflowStep]
+          if (mappedStep && mappedStep in workflowBreakdown) {
+            checkedSteps.push(mappedStep)
+          }
+        }
+      }
+    }
+
+    if (checkedSteps.length > 0) {
+      // Split cost equally across checked workflow steps
+      const perStep = cost / checkedSteps.length
+      for (const step of checkedSteps) {
+        workflowBreakdown[step] += perStep
+      }
     } else {
-      workflowBreakdown['sample_receipt'] += cost
+      // Fallback: no workflow steps checked — add to shared pool
+      // Distribute evenly across all workflow steps
+      const fallbackPerStep = cost / WORKFLOW_STEPS.length
+      for (const step of WORKFLOW_STEPS) {
+        workflowBreakdown[step] += fallbackPerStep
+      }
     }
   })
 

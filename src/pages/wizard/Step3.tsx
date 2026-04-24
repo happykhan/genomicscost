@@ -2,15 +2,35 @@ import { useProject } from '../../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
 import { getEffectiveCatalogue } from '../../lib/catalogue'
 import { fmt } from '../../lib/format'
+import type { ConsumableWorkflowStep } from '../../types'
 
 const inputClass = 'border border-[var(--gx-border)] rounded-[var(--gx-radius)] bg-[var(--gx-bg)] text-[var(--gx-text)] p-2 text-sm focus:outline-none focus:border-[var(--gx-accent)]'
 
-const WORKFLOW_KEYS: Record<string, string> = {
-  sample_receipt: 'wf_sample_receipt',
-  nucleic_acid_extraction: 'wf_nucleic_acid_extraction',
-  pcr_testing: 'wf_pcr_testing',
-  general_lab: 'wf_general_lab',
-  null: 'wf_other',
+/** The 5 consumable workflow step keys in display order. */
+const WF_STEPS: ConsumableWorkflowStep[] = [
+  'sample_receipt',
+  'nucleic_acid_extraction',
+  'pcr_testing',
+  'ngs_library_preparation',
+  'sequencing',
+]
+
+/** Abbreviated column headers for the 5 workflow checkboxes. */
+const WF_ABBREV: Record<ConsumableWorkflowStep, string> = {
+  sample_receipt: 'SR',
+  nucleic_acid_extraction: 'NA',
+  pcr_testing: 'PCR',
+  ngs_library_preparation: 'Lib',
+  sequencing: 'Seq',
+}
+
+/** Full names for tooltip on abbreviated headers. */
+const WF_FULL: Record<ConsumableWorkflowStep, string> = {
+  sample_receipt: 'Sample receipt',
+  nucleic_acid_extraction: 'Nucleic acid extraction',
+  pcr_testing: 'PCR testing',
+  ngs_library_preparation: 'NGS library preparation',
+  sequencing: 'Sequencing',
 }
 
 // Keywords that indicate a viral-specific reagent
@@ -22,7 +42,7 @@ function isViralReagent(name: string): boolean {
 }
 
 export default function Step3() {
-  const { project, updateProject } = useProject()
+  const { project, updateProject, costs } = useProject()
   const { t } = useTranslation()
   const catalogue = getEffectiveCatalogue()
   const { consumables } = project
@@ -50,6 +70,14 @@ export default function Step3() {
     updateProject({ consumables: consumables.filter((_, i) => i !== index) })
   }
 
+  // Toggle a single workflow step checkbox for a consumable
+  function toggleWorkflow(index: number, step: ConsumableWorkflowStep) {
+    const c = consumables[index]
+    const current = c.workflows ?? {}
+    const updated = { ...current, [step]: !current[step] }
+    updateConsumable(index, { workflows: updated })
+  }
+
   // Auto-fill from catalogue when a datalist item is selected
   function handleNameChange(index: number, newName: string) {
     const catItem = catalogue.reagents.find(r => r.name === newName)
@@ -58,36 +86,53 @@ export default function Step3() {
       const qtyPerSample = packSize > 1
         ? parseFloat(((catItem.quantity_per_sample ?? 1) / packSize).toFixed(4))
         : (catItem.quantity_per_sample ?? 1)
+
+      // Build workflows from catalogue item
+      const VALID_STEPS: ConsumableWorkflowStep[] = [
+        'sample_receipt', 'nucleic_acid_extraction', 'pcr_testing', 'ngs_library_preparation', 'sequencing',
+      ]
+      let workflows: Partial<Record<ConsumableWorkflowStep, boolean>> | undefined
+      if (Array.isArray(catItem.workflows) && catItem.workflows.length > 0) {
+        workflows = {}
+        for (const w of catItem.workflows) {
+          if (VALID_STEPS.includes(w as ConsumableWorkflowStep)) {
+            workflows[w as ConsumableWorkflowStep] = true
+          }
+        }
+      } else if (catItem.workflow && VALID_STEPS.includes(catItem.workflow as ConsumableWorkflowStep)) {
+        workflows = { [catItem.workflow as ConsumableWorkflowStep]: true }
+      }
+
       updateConsumable(index, {
         name: newName,
         unitCostUsd: 5, // placeholder — user must enter local price
         quantityPerSample: qtyPerSample,
-        workflow: catItem.workflow ?? undefined,
+        workflows,
       })
     } else {
       updateConsumable(index, { name: newName })
     }
   }
 
-  // Group consumables by their catalogue workflow if possible
-  const withWorkflow = consumables.map((c, idx) => {
-    const catalogueItem = catalogue.reagents.find(r => r.name === c.name)
-    return { ...c, workflow: catalogueItem?.workflow ?? null, idx }
-  })
+  // Derive item type from catalogue category
+  function getItemType(name: string): 'Reagent' | 'Consumable' {
+    const catItem = catalogue.reagents.find(r => r.name === name)
+    if (catItem?.category === 'consumable') return 'Consumable'
+    return 'Reagent'
+  }
 
-  const groups = Array.from(new Set(withWorkflow.map(c => c.workflow ?? 'null')))
-  const grouped = groups.map(wf => ({
-    workflow: wf,
-    label: t(WORKFLOW_KEYS[wf] ?? 'wf_other'),
-    items: withWorkflow.filter(c => (c.workflow ?? 'null') === wf),
-  }))
-
-  const total = consumables
+  // Calculate totals
+  const consumableTotal = consumables
     .filter(c => c.enabled)
     .reduce((sum, c) => sum + Math.ceil(samplesPerYear * c.quantityPerSample) * c.unitCostUsd, 0)
 
+  const sequencingReagentsTotal = costs.sequencingReagents + costs.libraryPrep
+
   // Build datalist options from catalogue reagents
   const catalogueReagentNames = catalogue.reagents.map(r => r.name)
+
+  // Enabled sequencers for Section A
+  const enabledSequencers = project.sequencers.filter(s => s.enabled)
 
   return (
     <div>
@@ -101,6 +146,47 @@ export default function Step3() {
         </span>
       </div>
 
+      {/* Section A: Sequencing & Library Prep Reagents (read-only from Step 2) */}
+      {enabledSequencers.length > 0 && (
+        <div className="mb-6">
+          <div className="text-xs uppercase tracking-wider mb-2 font-semibold" style={{ color: 'var(--gx-text-muted)' }}>
+            A. Sequencing &amp; Library Prep Reagents
+          </div>
+          <div className="card" style={{ border: '1px solid var(--gx-border)', borderRadius: 'var(--gx-radius)', background: 'var(--gx-bg-alt)', padding: '12px 16px' }}>
+            {enabledSequencers.map((seq, idx) => {
+              // Calculate runs per year for this sequencer
+              const hasAssignments = Array.isArray(seq.assignments) && seq.assignments.length > 0
+              const assignedSamples = hasAssignments
+                ? seq.assignments.reduce((sum, a) => sum + (a.samples ?? 0), 0)
+                : samplesPerYear
+              const samplesWithRetests = assignedSamples * (1 + (seq.retestPct ?? 0) / 100)
+              const effectiveSPR = Math.max(1, seq.samplesPerRun ?? 1)
+              const runsPerYear = Math.ceil(samplesWithRetests / effectiveSPR)
+              const reagentCostAnnual = runsPerYear * (seq.reagentKitPrice ?? 0)
+              const libPrepCostAnnual = samplesWithRetests * (seq.libPrepCostPerSample ?? 0)
+
+              // Look up platform name
+              const platform = catalogue.platforms.find(p => p.id === seq.platformId)
+              const platformName = platform?.name ?? seq.platformId
+
+              return (
+                <div key={idx} className={idx > 0 ? 'mt-3 pt-3' : ''} style={idx > 0 ? { borderTop: '1px solid var(--gx-border)' } : undefined}>
+                  <div className="text-sm font-medium mb-1" style={{ color: 'var(--gx-text)' }}>
+                    {seq.label} — {platformName}
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs" style={{ color: 'var(--gx-text-muted)' }}>
+                    <div>Reagent kit: {seq.reagentKitName || '—'}</div>
+                    <div className="text-right">{runsPerYear} runs/yr = <span style={{ color: 'var(--gx-accent)' }}>${fmt(reagentCostAnnual)}</span></div>
+                    <div>Library prep: {seq.libPrepKitName || '—'}</div>
+                    <div className="text-right">${fmt(seq.libPrepCostPerSample ?? 0)}/sample = <span style={{ color: 'var(--gx-accent)' }}>${fmt(libPrepCostAnnual)}</span></div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Datalist for catalogue autocomplete */}
       <datalist id="catalogue-reagents">
         {catalogueReagentNames.map(name => (
@@ -108,111 +194,164 @@ export default function Step3() {
         ))}
       </datalist>
 
-      {grouped.map(group => (
-        <div key={group.workflow} className="mb-6">
-          <div className="text-xs uppercase tracking-wider mb-2 font-semibold" style={{ color: 'var(--gx-text-muted)' }}>
-            {group.label}
-          </div>
-          <div className="card" style={{ overflowX: 'auto' }}>
-            <table className="w-full text-sm">
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--gx-border)', background: 'var(--gx-bg-alt)' }}>
-                  <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_item')}</th>
-                  <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_qty_sample')}</th>
-                  <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_unit_cost')}</th>
-                  <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual')}</th>
-                  <th className="px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_on')}</th>
-                  <th className="px-3 py-2"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {group.items.map(item => {
-                  const annualCost = item.enabled
-                    ? Math.ceil(samplesPerYear * item.quantityPerSample) * item.unitCostUsd
-                    : 0
-                  const showViralWarning = allBacterial && item.enabled && isViralReagent(item.name)
-                  return (
-                    <tr
-                      key={item.idx}
-                      style={{
-                        borderBottom: '1px solid var(--gx-border)',
-                        opacity: item.enabled ? 1 : 0.4,
-                      }}
-                    >
-                      <td className="px-3 py-2" style={{ color: 'var(--gx-text)' }}>
-                        <div className="flex flex-col gap-1">
-                          <input
-                            type="text"
-                            list="catalogue-reagents"
-                            value={item.name}
-                            placeholder="Type to search catalogue..."
-                            onChange={e => handleNameChange(item.idx, e.target.value)}
-                            className={inputClass}
-                            style={{ width: '100%', minWidth: 120 }}
-                          />
-                          {showViralWarning && (
-                            <span className="text-xs px-2 py-0.5 rounded-full inline-block" style={{
-                              background: '#fef3c7',
-                              color: '#92400e',
-                              border: '1px solid #fcd34d',
-                              width: 'fit-content',
-                            }}>
-                              Viral reagent — may not apply to bacterial pathogens
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-3 py-2">
-                        <input
-                          type="number"
-                          value={item.quantityPerSample}
-                          min={0}
-                          step={0.001}
-                          onChange={e => updateConsumable(item.idx, { quantityPerSample: parseFloat(e.target.value) || 0 })}
-                          className={inputClass}
-                          style={{ width: 80, textAlign: 'right' }}
-                        />
-                      </td>
-                      <td className="px-3 py-2">
-                        <input
-                          type="number"
-                          value={item.unitCostUsd}
-                          min={0}
-                          step={0.01}
-                          onChange={e => updateConsumable(item.idx, { unitCostUsd: parseFloat(e.target.value) || 0 })}
-                          className={inputClass}
-                          style={{ width: 80, textAlign: 'right' }}
-                        />
-                      </td>
-                      <td className="px-3 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>
-                        {fmt(annualCost)}
-                      </td>
-                      <td className="px-3 py-2 text-center">
+      {/* Section B: Reagents & Consumables Table */}
+      <div className="mb-6">
+        <div className="text-xs uppercase tracking-wider mb-2 font-semibold" style={{ color: 'var(--gx-text-muted)' }}>
+          B. Reagents &amp; Consumables
+        </div>
+        <div className="card" style={{ overflowX: 'auto' }}>
+          <table className="w-full text-sm" style={{ minWidth: 800 }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--gx-border)', background: 'var(--gx-bg-alt)' }}>
+                {WF_STEPS.map(step => (
+                  <th key={step} className="px-2 py-1 text-center text-xs font-medium" style={{ color: 'var(--gx-text-muted)', width: 36 }} title={WF_FULL[step]}>
+                    {WF_ABBREV[step]}
+                  </th>
+                ))}
+                <th className="px-3 py-2 text-left text-xs font-medium" style={{ color: 'var(--gx-text-muted)', width: 60 }}>Type</th>
+                <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_item')}</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_qty_sample')}</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_unit_cost')}</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual')}</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)', whiteSpace: 'nowrap' }}>Dist/wf</th>
+                <th className="px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_on')}</th>
+                <th className="px-3 py-2"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {consumables.map((item, idx) => {
+                const annualCost = item.enabled
+                  ? Math.ceil(samplesPerYear * item.quantityPerSample) * item.unitCostUsd
+                  : 0
+                const checkedCount = WF_STEPS.filter(s => item.workflows?.[s]).length
+                const distPerWf = item.enabled && checkedCount > 0
+                  ? annualCost / checkedCount
+                  : 0
+                const showViralWarning = allBacterial && item.enabled && isViralReagent(item.name)
+                const itemType = getItemType(item.name)
+
+                return (
+                  <tr
+                    key={idx}
+                    style={{
+                      borderBottom: '1px solid var(--gx-border)',
+                      opacity: item.enabled ? 1 : 0.4,
+                    }}
+                  >
+                    {/* 5 workflow step checkboxes */}
+                    {WF_STEPS.map(step => (
+                      <td key={step} className="px-2 py-1 text-center">
                         <input
                           type="checkbox"
-                          checked={item.enabled}
-                          onChange={e => updateConsumable(item.idx, { enabled: e.target.checked })}
-                          style={{ accentColor: 'var(--gx-accent)', width: 15, height: 15 }}
+                          checked={!!item.workflows?.[step]}
+                          onChange={() => toggleWorkflow(idx, step)}
+                          style={{ accentColor: 'var(--gx-accent)', width: 14, height: 14 }}
                         />
                       </td>
-                      <td className="px-3 py-2">
-                        <button
-                          onClick={() => removeConsumable(item.idx)}
-                          className="text-xs px-2 py-0.5 rounded"
-                          style={{ color: 'var(--gx-text-muted)', background: 'none', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
-                        >
-                          ×
-                        </button>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      ))}
+                    ))}
 
+                    {/* Type badge */}
+                    <td className="px-3 py-2">
+                      <span className="text-xs px-1.5 py-0.5 rounded" style={{
+                        background: 'var(--gx-bg-alt)',
+                        color: 'var(--gx-text-muted)',
+                        border: '1px solid var(--gx-border)',
+                        whiteSpace: 'nowrap',
+                      }}>
+                        {itemType === 'Consumable' ? 'Cons.' : 'Reag.'}
+                      </span>
+                    </td>
+
+                    {/* Item name */}
+                    <td className="px-3 py-2" style={{ color: 'var(--gx-text)' }}>
+                      <div className="flex flex-col gap-1">
+                        <input
+                          type="text"
+                          list="catalogue-reagents"
+                          value={item.name}
+                          placeholder="Type to search catalogue..."
+                          onChange={e => handleNameChange(idx, e.target.value)}
+                          className={inputClass}
+                          style={{ width: '100%', minWidth: 120 }}
+                        />
+                        {showViralWarning && (
+                          <span className="text-xs px-2 py-0.5 rounded-full inline-block" style={{
+                            background: '#fef3c7',
+                            color: '#92400e',
+                            border: '1px solid #fcd34d',
+                            width: 'fit-content',
+                          }}>
+                            Viral reagent — may not apply to bacterial pathogens
+                          </span>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* Qty/sample */}
+                    <td className="px-3 py-2">
+                      <input
+                        type="number"
+                        value={item.quantityPerSample}
+                        min={0}
+                        step={0.001}
+                        onChange={e => updateConsumable(idx, { quantityPerSample: parseFloat(e.target.value) || 0 })}
+                        className={inputClass}
+                        style={{ width: 80, textAlign: 'right' }}
+                      />
+                    </td>
+
+                    {/* Unit cost */}
+                    <td className="px-3 py-2">
+                      <input
+                        type="number"
+                        value={item.unitCostUsd}
+                        min={0}
+                        step={0.01}
+                        onChange={e => updateConsumable(idx, { unitCostUsd: parseFloat(e.target.value) || 0 })}
+                        className={inputClass}
+                        style={{ width: 80, textAlign: 'right' }}
+                      />
+                    </td>
+
+                    {/* Annual cost */}
+                    <td className="px-3 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>
+                      {fmt(annualCost)}
+                    </td>
+
+                    {/* Distributed per workflow */}
+                    <td className="px-3 py-2 text-right text-xs" style={{ color: 'var(--gx-text-muted)' }}>
+                      {checkedCount > 0 ? fmt(distPerWf) : '—'}
+                    </td>
+
+                    {/* Enabled toggle */}
+                    <td className="px-3 py-2 text-center">
+                      <input
+                        type="checkbox"
+                        checked={item.enabled}
+                        onChange={e => updateConsumable(idx, { enabled: e.target.checked })}
+                        style={{ accentColor: 'var(--gx-accent)', width: 15, height: 15 }}
+                      />
+                    </td>
+
+                    {/* Remove button */}
+                    <td className="px-3 py-2">
+                      <button
+                        onClick={() => removeConsumable(idx)}
+                        className="text-xs px-2 py-0.5 rounded"
+                        style={{ color: 'var(--gx-text-muted)', background: 'none', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
+                      >
+                        &times;
+                      </button>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Section C: Summary */}
       <div className="flex justify-between items-center mt-4">
         <button
           onClick={addConsumable}
@@ -221,8 +360,16 @@ export default function Step3() {
         >
           {t('btn_add')}
         </button>
-        <div className="text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>
-          {t('label_total_consumables')}: <span style={{ color: 'var(--gx-accent)' }}>${fmt(total)}</span>
+        <div className="text-right text-sm" style={{ color: 'var(--gx-text)' }}>
+          <div className="text-xs mb-1" style={{ color: 'var(--gx-text-muted)' }}>
+            Sequencing reagents (Step 2): <span style={{ color: 'var(--gx-accent)' }}>${fmt(sequencingReagentsTotal)}</span>
+          </div>
+          <div className="text-xs mb-1" style={{ color: 'var(--gx-text-muted)' }}>
+            Consumables (above): <span style={{ color: 'var(--gx-accent)' }}>${fmt(consumableTotal)}</span>
+          </div>
+          <div className="font-semibold">
+            {t('label_total_consumables')}: <span style={{ color: 'var(--gx-accent)' }}>${fmt(sequencingReagentsTotal + consumableTotal)}</span>
+          </div>
         </div>
       </div>
     </div>

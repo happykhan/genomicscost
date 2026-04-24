@@ -61,6 +61,7 @@ export interface BundledReagent {
   catalog_ref: string | null
   quantity_per_sample: number
   workflow: string
+  workflows?: string[]
 }
 
 export interface BundledEquipmentItem {

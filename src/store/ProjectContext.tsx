@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useState, useMemo, useCallback } from 'react'
-import type { Project, SequencerConfig, CostBreakdown } from '../types'
+import React, { createContext, useContext, useState, useMemo, useCallback, useRef } from 'react'
+import type { Project, SequencerConfig, CostBreakdown, ConsumableWorkflowStep } from '../types'
 import { calculateCosts } from '../lib/calculations'
-import { createDefaultProject, createDefaultCloudItems, createDefaultInhouseItems } from '../lib/defaults'
+import { createDefaultProject, createDefaultCloudItems, createDefaultInhouseItems, buildFilteredConsumables, isConsumablesAtDefaults } from '../lib/defaults'
 import LZString from 'lz-string'
 
 const STORAGE_KEY = 'genomicscost-projects'
@@ -152,6 +152,30 @@ function migrateProject(raw: unknown): Project {
     p.facility = createDefaultProject().facility
   }
 
+  // Migrate consumable workflow?: string to workflows?: Record<step, boolean>
+  if (Array.isArray(p.consumables)) {
+    const VALID_STEPS: ConsumableWorkflowStep[] = [
+      'sample_receipt', 'nucleic_acid_extraction', 'pcr_testing', 'ngs_library_preparation', 'sequencing',
+    ]
+    p.consumables = (p.consumables as Array<Record<string, unknown>>).map(c => {
+      // Already migrated — has workflows object and no old workflow string
+      if (c.workflows && typeof c.workflows === 'object' && !Array.isArray(c.workflows)) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { workflow: _old, ...rest } = c
+        return rest
+      }
+      // Has old workflow string — convert it
+      if (typeof c.workflow === 'string' && VALID_STEPS.includes(c.workflow as ConsumableWorkflowStep)) {
+        const { workflow: oldWf, ...rest } = c
+        return { ...rest, workflows: { [oldWf as string]: true } }
+      }
+      // No workflow field at all — leave as-is (no workflows set)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { workflow: _discard, ...rest } = c
+      return rest
+    })
+  }
+
   return p as unknown as Project
 }
 
@@ -195,16 +219,53 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
 
   const costs = useMemo(() => calculateCosts(project), [project])
 
-  const updateProject = useCallback((patch: Partial<Project>) => {
-    setProject(prev => ({ ...prev, ...patch }))
+  // Build a fingerprint of pathogen types and enabled sequencer platforms
+  // to detect when the consumable filter inputs change.
+  const getFilterKey = useCallback((p: Project) => {
+    const ptKey = p.pathogens.map(pat => pat.pathogenType).sort().join(',')
+    const plKey = p.sequencers
+      .filter(s => s.enabled)
+      .map(s => s.platformId)
+      .sort()
+      .join(',')
+    return `${ptKey}|${plKey}`
   }, [])
+
+  const prevFilterKeyRef = useRef(getFilterKey(project))
+
+  const updateProject = useCallback((patch: Partial<Project>) => {
+    setProject(prev => {
+      const next = { ...prev, ...patch }
+
+      // Auto-populate consumables when pathogen types or sequencer platforms change,
+      // but only if the user hasn't manually customised their consumables.
+      const prevKey = prevFilterKeyRef.current
+      const nextKey = getFilterKey(next)
+      if (prevKey !== nextKey && isConsumablesAtDefaults(next.consumables)) {
+        prevFilterKeyRef.current = nextKey
+        return { ...next, consumables: buildFilteredConsumables(next.pathogens, next.sequencers) }
+      }
+      prevFilterKeyRef.current = nextKey
+      return next
+    })
+  }, [getFilterKey])
 
   const updateSequencer = useCallback((index: number, patch: Partial<SequencerConfig>) => {
     setProject(prev => {
-      const next = prev.sequencers.map((s, i) => i === index ? { ...s, ...patch } : s)
-      return { ...prev, sequencers: next }
+      const nextSeqs = prev.sequencers.map((s, i) => i === index ? { ...s, ...patch } : s)
+      const next = { ...prev, sequencers: nextSeqs }
+
+      // Also check for consumable auto-populate on sequencer changes
+      const prevKey = prevFilterKeyRef.current
+      const nextKey = getFilterKey(next)
+      if (prevKey !== nextKey && isConsumablesAtDefaults(next.consumables)) {
+        prevFilterKeyRef.current = nextKey
+        return { ...next, consumables: buildFilteredConsumables(next.pathogens, next.sequencers) }
+      }
+      prevFilterKeyRef.current = nextKey
+      return next
     })
-  }, [])
+  }, [getFilterKey])
 
   const saveProject = useCallback(() => {
     setSavedProjects(prev => {

@@ -1,5 +1,31 @@
-import type { Project, SequencerConfig, BioCloudItem, BioInhouseItem } from '../types'
+import type { Project, SequencerConfig, PathogenEntry, BioCloudItem, BioInhouseItem, ConsumableWorkflowStep } from '../types'
 import { getEffectiveCatalogue } from './catalogue'
+import type { BundledReagent } from './catalogue'
+
+/** Valid workflow steps for consumable items. */
+const VALID_WORKFLOW_STEPS: ConsumableWorkflowStep[] = [
+  'sample_receipt', 'nucleic_acid_extraction', 'pcr_testing', 'ngs_library_preparation', 'sequencing',
+]
+
+/** Build a workflows record from a catalogue item's workflows array or single workflow string. */
+function buildWorkflows(
+  catalogueWorkflows?: string[],
+  catalogueWorkflow?: string | null,
+): Partial<Record<ConsumableWorkflowStep, boolean>> | undefined {
+  if (Array.isArray(catalogueWorkflows) && catalogueWorkflows.length > 0) {
+    const result: Partial<Record<ConsumableWorkflowStep, boolean>> = {}
+    for (const w of catalogueWorkflows) {
+      if (VALID_WORKFLOW_STEPS.includes(w as ConsumableWorkflowStep)) {
+        result[w as ConsumableWorkflowStep] = true
+      }
+    }
+    return Object.keys(result).length > 0 ? result : undefined
+  }
+  if (catalogueWorkflow && VALID_WORKFLOW_STEPS.includes(catalogueWorkflow as ConsumableWorkflowStep)) {
+    return { [catalogueWorkflow as ConsumableWorkflowStep]: true }
+  }
+  return undefined
+}
 
 function randomId(): string {
   return Math.random().toString(36).slice(2, 10)
@@ -53,26 +79,134 @@ export function createDefaultInhouseItems(): BioInhouseItem[] {
   ]
 }
 
+// ── Consumable filtering by pathogen type and sequencer platform ────────────
+
+/** Keywords that flag a reagent as viral-specific. */
+const VIRAL_KEYWORDS = ['viral transport', 'vtm', 'rna extraction', 'rt-pcr', 'rt-qpcr', 'rnase away']
+
+/** Keywords that flag a reagent as ONT-platform-specific. */
+const ONT_KEYWORDS = ['ont flow cell', 'ont wash']
+
+/** Keywords that flag a reagent as Illumina-platform-specific. */
+const ILLUMINA_KEYWORDS: string[] = []  // none in current catalogue; reserved for future
+
+function isViralReagent(r: BundledReagent): boolean {
+  const lower = r.name.toLowerCase()
+  return VIRAL_KEYWORDS.some(kw => lower.includes(kw))
+}
+
+function isOntReagent(r: BundledReagent): boolean {
+  const lower = r.name.toLowerCase()
+  return ONT_KEYWORDS.some(kw => lower.includes(kw))
+}
+
+function isIlluminaReagent(r: BundledReagent): boolean {
+  const lower = r.name.toLowerCase()
+  return ILLUMINA_KEYWORDS.some(kw => lower.includes(kw))
+}
+
+export type ConsumableItem = {
+  name: string
+  unitCostUsd: number
+  quantityPerSample: number
+  enabled: boolean
+  workflows?: Partial<Record<ConsumableWorkflowStep, boolean>>
+}
+
+function reagentToConsumable(r: BundledReagent): ConsumableItem {
+  const packSize = r.pack_size ?? 1
+  const qtyPerSample = packSize > 1
+    ? parseFloat(((r.quantity_per_sample ?? 1) / packSize).toFixed(4))
+    : (r.quantity_per_sample ?? 1)
+  return {
+    name: r.name,
+    unitCostUsd: 5,   // placeholder — user must enter local price per pack
+    quantityPerSample: qtyPerSample,
+    enabled: true,
+    workflows: buildWorkflows(r.workflows, r.workflow),
+  }
+}
+
+/**
+ * Build the default consumable list, filtered by pathogen types and sequencer
+ * platforms. This is the single source of truth for what the auto-populated
+ * consumable list should contain.
+ *
+ * Rules:
+ * - Only include reagents with quantity_per_sample > 0
+ * - Exclude viral-specific reagents when all pathogens are bacterial
+ * - Exclude ONT-specific reagents unless an ONT sequencer is enabled
+ * - Exclude Illumina-specific reagents unless an Illumina sequencer is enabled
+ */
+export function buildFilteredConsumables(
+  pathogens: PathogenEntry[],
+  sequencers: SequencerConfig[],
+): ConsumableItem[] {
+  const catalogue = getEffectiveCatalogue()
+
+  const allBacterial = pathogens.length > 0 &&
+    pathogens.every(p => p.pathogenType === 'bacterial')
+  const hasViral = pathogens.some(p => p.pathogenType === 'viral')
+
+  const enabledPlatformIds = new Set(
+    sequencers.filter(s => s.enabled).map(s => s.platformId)
+  )
+  const hasOnt = enabledPlatformIds.has('ont')
+  const hasIllumina = enabledPlatformIds.has('illumina')
+
+  return catalogue.reagents
+    .filter(r => r.quantity_per_sample != null && r.quantity_per_sample > 0)
+    .filter(r => {
+      // Exclude viral-specific reagents when no viral pathogens
+      if (allBacterial && !hasViral && isViralReagent(r)) return false
+      // Exclude ONT-specific reagents unless an ONT platform is enabled
+      if (isOntReagent(r) && !hasOnt) return false
+      // Exclude Illumina-specific reagents unless an Illumina platform is enabled
+      if (isIlluminaReagent(r) && !hasIllumina) return false
+      return true
+    })
+    .map(reagentToConsumable)
+}
+
+/**
+ * Check whether the current consumable list is still at its auto-populated
+ * defaults (i.e. the user hasn't manually customised it). We compare the
+ * set of item names and their default placeholder costs.
+ *
+ * Returns true if consumables appear to be the untouched default set for
+ * ANY combination of pathogen/sequencer filters, meaning we can safely
+ * re-populate them.
+ */
+export function isConsumablesAtDefaults(
+  consumables: ConsumableItem[],
+): boolean {
+  // If the user has changed any price from the $5 placeholder, they've customised
+  if (consumables.some(c => c.unitCostUsd !== 5)) return false
+
+  // Check whether every item name comes from the catalogue reagent list
+  const catalogue = getEffectiveCatalogue()
+  const catalogueNames = new Set(catalogue.reagents.map(r => r.name))
+  if (consumables.some(c => !catalogueNames.has(c.name))) return false
+
+  return true
+}
+
 export function createDefaultProject(): Project {
   const catalogue = getEffectiveCatalogue()
-  // First 8 consumable-like reagents from catalogue that have quantity_per_sample > 0
-  // quantityPerSample is units-per-sample; if pack_size > 1, normalise to packs-per-sample
-  const defaultConsumables = catalogue.reagents
-    .filter(r => r.quantity_per_sample != null && r.quantity_per_sample > 0)
-    .slice(0, 8)
-    .map(r => {
-      const packSize = r.pack_size ?? 1
-      const qtyPerSample = packSize > 1
-        ? parseFloat(((r.quantity_per_sample ?? 1) / packSize).toFixed(4))
-        : (r.quantity_per_sample ?? 1)
-      return {
-        name: r.name,
-        unitCostUsd: 5,   // placeholder — user must enter local price per pack
-        quantityPerSample: qtyPerSample,
-        enabled: true,
-        workflow: r.workflow ?? undefined,
-      }
-    })
+
+  // Default pathogens for a new project
+  const defaultPathogens: PathogenEntry[] = [
+    {
+      pathogenName: 'SARS-CoV-2',
+      pathogenType: 'viral',
+      genomeSizeMb: 0.03,
+      samplesPerYear: 200,
+    }
+  ]
+  const defaultSequencers = [createDefaultSequencer('Sequencer 1')]
+
+  // Auto-populate consumables filtered by the default pathogen/sequencer combination
+  const defaultConsumables = buildFilteredConsumables(defaultPathogens, defaultSequencers)
 
   // 5 key equipment items
   const equipmentCatalogue = catalogue.equipment
@@ -111,20 +245,20 @@ export function createDefaultProject(): Project {
     enabled: true,
   }))
 
-  // WHO GCT: 12 standard facility line items
+  // WHO GCT: 12 standard facility line items — all $0 by default, user enters local costs
   const defaultFacility = [
     { label: 'Rent', monthlyCostUsd: 0, pctSequencing: 50 },
-    { label: 'Building maintenance', monthlyCostUsd: 200, pctSequencing: 50 },
-    { label: 'Gas and heating', monthlyCostUsd: 200, pctSequencing: 50 },
-    { label: 'Water', monthlyCostUsd: 100, pctSequencing: 50 },
-    { label: 'Electricity', monthlyCostUsd: 500, pctSequencing: 50 },
-    { label: 'Internet', monthlyCostUsd: 200, pctSequencing: 50 },
-    { label: 'Telephone', monthlyCostUsd: 100, pctSequencing: 50 },
-    { label: 'Waste management', monthlyCostUsd: 1000, pctSequencing: 50 },
-    { label: 'Generator maintenance', monthlyCostUsd: 100, pctSequencing: 50 },
-    { label: 'Ventilation system maintenance', monthlyCostUsd: 300, pctSequencing: 50 },
-    { label: 'Generator fuel', monthlyCostUsd: 50, pctSequencing: 50 },
-    { label: 'LIMS', monthlyCostUsd: 100, pctSequencing: 50 },
+    { label: 'Building maintenance', monthlyCostUsd: 0, pctSequencing: 50 },
+    { label: 'Gas and heating', monthlyCostUsd: 0, pctSequencing: 50 },
+    { label: 'Water', monthlyCostUsd: 0, pctSequencing: 50 },
+    { label: 'Electricity', monthlyCostUsd: 0, pctSequencing: 50 },
+    { label: 'Internet', monthlyCostUsd: 0, pctSequencing: 50 },
+    { label: 'Telephone', monthlyCostUsd: 0, pctSequencing: 50 },
+    { label: 'Waste management', monthlyCostUsd: 0, pctSequencing: 50 },
+    { label: 'Generator maintenance', monthlyCostUsd: 0, pctSequencing: 50 },
+    { label: 'Ventilation system maintenance', monthlyCostUsd: 0, pctSequencing: 50 },
+    { label: 'Generator fuel', monthlyCostUsd: 0, pctSequencing: 50 },
+    { label: 'LIMS', monthlyCostUsd: 0, pctSequencing: 50 },
   ]
 
   return {
@@ -132,22 +266,17 @@ export function createDefaultProject(): Project {
     name: '',
     country: '',
     year: 2025,
-    pathogens: [
-      {
-        pathogenName: 'SARS-CoV-2',
-        pathogenType: 'viral',
-        genomeSizeMb: 0.03,
-        samplesPerYear: 200,
-      }
-    ],
-    sequencers: [createDefaultSequencer('Sequencer 1')],
+    pathogens: defaultPathogens,
+    sequencers: defaultSequencers,
     consumables: defaultConsumables,
     equipment: defaultEquipment,
     personnel: defaultPersonnel,
     facility: defaultFacility,
     transport: [
-      { label: 'Sample transport', annualCostUsd: 2000, pctSequencing: 100 },
-      { label: 'Courier/shipping', annualCostUsd: 1000, pctSequencing: 100 },
+      { label: 'Regional to national reference laboratory', shipmentMethod: 'Courier', annualCostUsd: 0, pctSequencing: 100 },
+      { label: 'Insurance (if applicable)', shipmentMethod: '', annualCostUsd: 0, pctSequencing: 100 },
+      { label: 'Exportation fees (if applicable)', shipmentMethod: '', annualCostUsd: 0, pctSequencing: 100 },
+      { label: 'Customs clearance fees', shipmentMethod: '', annualCostUsd: 0, pctSequencing: 100 },
     ],
     bioinformatics: {
       type: 'cloud',

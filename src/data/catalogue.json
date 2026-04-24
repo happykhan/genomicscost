@@ -1136,7 +1136,8 @@
       "pack_size": 10,
       "catalog_ref": null,
       "quantity_per_sample": null,
-      "workflow": "pcr_testing"
+      "workflow": "pcr_testing",
+      "workflows": ["nucleic_acid_extraction", "pcr_testing"]
     },
     {
       "name": "PCR plate covers adhesive film (1 cover per plate)",
@@ -1144,7 +1145,8 @@
       "pack_size": 100,
       "catalog_ref": null,
       "quantity_per_sample": null,
-      "workflow": "pcr_testing"
+      "workflow": "pcr_testing",
+      "workflows": ["nucleic_acid_extraction", "pcr_testing"]
     },
     {
       "name": "Pipette filter tips 10uL (96 tips x 10 racks)",
@@ -1152,7 +1154,8 @@
       "pack_size": 960,
       "catalog_ref": null,
       "quantity_per_sample": 8,
-      "workflow": null
+      "workflow": null,
+      "workflows": ["nucleic_acid_extraction", "pcr_testing", "ngs_library_preparation", "sequencing"]
     },
     {
       "name": "Pipette filter tips 100µL, sterile (pack of 960)",
@@ -1168,7 +1171,8 @@
       "pack_size": 960,
       "catalog_ref": null,
       "quantity_per_sample": 8,
-      "workflow": null
+      "workflow": null,
+      "workflows": ["nucleic_acid_extraction", "pcr_testing", "ngs_library_preparation", "sequencing"]
     },
     {
       "name": "Pipette filter tips 1000uL  (96 tips x 10 racks)",
@@ -1176,7 +1180,8 @@
       "pack_size": 960,
       "catalog_ref": null,
       "quantity_per_sample": 5,
-      "workflow": null
+      "workflow": null,
+      "workflows": ["nucleic_acid_extraction", "pcr_testing", "ngs_library_preparation", "sequencing"]
     },
     {
       "name": "0.2mL PCR tubes, thin-walled (1000; strips)",
@@ -1184,7 +1189,8 @@
       "pack_size": 1000,
       "catalog_ref": null,
       "quantity_per_sample": 6,
-      "workflow": "pcr_testing"
+      "workflow": "pcr_testing",
+      "workflows": ["nucleic_acid_extraction", "pcr_testing"]
     },
     {
       "name": "1.5mL PCR tubes, LoBind (250)",
@@ -1192,7 +1198,8 @@
       "pack_size": 250,
       "catalog_ref": null,
       "quantity_per_sample": 2,
-      "workflow": "pcr_testing"
+      "workflow": "pcr_testing",
+      "workflows": ["nucleic_acid_extraction", "pcr_testing", "ngs_library_preparation", "sequencing"]
     },
     {
       "name": "50mL conical tubes (100)",
@@ -1200,7 +1207,8 @@
       "pack_size": 100,
       "catalog_ref": null,
       "quantity_per_sample": 0.5,
-      "workflow": null
+      "workflow": null,
+      "workflows": ["nucleic_acid_extraction", "ngs_library_preparation"]
     },
     {
       "name": "Conical centrifuge tubes 15mL (packs of 500)",
@@ -1328,7 +1336,8 @@
       "pack_size": 1,
       "catalog_ref": null,
       "quantity_per_sample": 0.0009,
-      "workflow": null
+      "workflow": null,
+      "workflows": ["nucleic_acid_extraction", "ngs_library_preparation"]
     },
     {
       "name": "(Molecular grade) nuclease free H2O",
@@ -1336,7 +1345,8 @@
       "pack_size": 1,
       "catalog_ref": null,
       "quantity_per_sample": 0.005,
-      "workflow": null
+      "workflow": null,
+      "workflows": ["nucleic_acid_extraction", "pcr_testing", "ngs_library_preparation", "sequencing"]
     },
     {
       "name": "Universal One-Step RT-qPCR Kit (200 rxns)",
