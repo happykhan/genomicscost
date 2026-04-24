@@ -221,6 +221,19 @@ export interface Project {
   facilityPctSequencing: number
 }
 
+export interface PathogenCostBreakdown {
+  pathogenName: string
+  pathogenType: 'bacterial' | 'viral'
+  samples: number
+  sequencingReagents: number
+  libraryPrep: number
+  consumables: number
+  sharedCosts: number     // equipment + personnel + facility + transport + bio + qms + training + admin, proportional
+  incidentals: number
+  total: number
+  costPerSample: number
+}
+
 export interface CostBreakdown {
   sequencingReagents: number
   libraryPrep: number
@@ -243,4 +256,6 @@ export interface CostBreakdown {
   perSequencerReagents: Array<{ label: string; reagents: number; libraryPrep: number }>
   // Potential purchases to reach recommended equipment quantities
   potentialPurchases: number
+  // Per-pathogen cost attribution
+  perPathogenBreakdown: PathogenCostBreakdown[]
 }

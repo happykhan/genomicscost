@@ -26,12 +26,19 @@ export default function ThroughputCurve({ project, costPerSample }: Props) {
     if (samplesPerYear <= 0) return []
     return MULTIPLIERS.map(m => {
       const v = Math.max(1, Math.round(samplesPerYear * m))
-      // Scale each pathogen's samples proportionally
       const scaledPathogens = project.pathogens.map(p => ({
         ...p,
         samplesPerYear: Math.max(1, Math.round(p.samplesPerYear * m)),
       }))
-      return { x: v, y: calculateCosts({ ...project, pathogens: scaledPathogens }).costPerSample }
+      // Scale sequencer assignments so fixed-cost amortisation works correctly
+      const scaledSequencers = project.sequencers.map(seq => ({
+        ...seq,
+        assignments: (seq.assignments ?? []).map(a => ({
+          ...a,
+          samples: Math.max(1, Math.round(a.samples * m)),
+        })),
+      }))
+      return { x: v, y: calculateCosts({ ...project, pathogens: scaledPathogens, sequencers: scaledSequencers }).costPerSample }
     })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [samplesPerYear, project.sequencers, project.equipment, project.personnel,

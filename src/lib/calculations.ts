@@ -1,4 +1,4 @@
-import type { Project, CostBreakdown, SequencerConfig, PathogenEntry, ConsumableWorkflowStep } from '../types'
+import type { Project, CostBreakdown, PathogenCostBreakdown, SequencerConfig, PathogenEntry, ConsumableWorkflowStep } from '../types'
 import { getEffectiveCatalogue } from './catalogue'
 
 // ── Workflow step constants ───────────────────────────────────────────────────
@@ -197,6 +197,7 @@ export function calculateCosts(project: Project): CostBreakdown {
     workflowBreakdown: Object.fromEntries(WORKFLOW_STEPS.map(s => [s, 0])),
     perSequencerReagents: [],
     potentialPurchases: 0,
+    perPathogenBreakdown: [],
   }
 
   if (!samplesPerYear || samplesPerYear <= 0) return zero
@@ -410,6 +411,54 @@ export function calculateCosts(project: Project): CostBreakdown {
   // Bioinformatics → bioinformatics step only
   workflowBreakdown['bioinformatics'] = (workflowBreakdown['bioinformatics'] ?? 0) + annualBioinformatics
 
+  // ── Per-pathogen cost breakdown ─────────────────────────────────────────────
+  // Fixed/shared costs are split proportionally by sample volume.
+  const fixedTotal = annualEquipment + annualPersonnel + annualFacility + annualTransport +
+    annualBioinformatics + annualQMS + annualTraining + adminCost
+
+  const perPathogenBreakdown: PathogenCostBreakdown[] = pathogens.map((pathogen, idx) => {
+    const proportion = effectiveSamplesForScaling > 0
+      ? pathogen.samplesPerYear / effectiveSamplesForScaling
+      : 1 / pathogens.length
+
+    // Sequencing reagents + library prep from explicit assignments
+    let pathReagents = 0
+    let pathLibPrep = 0
+    if (hasAnyAssignments) {
+      for (const seq of sequencers ?? []) {
+        if (!seq.enabled || !Array.isArray(seq.assignments)) continue
+        const asgn = seq.assignments.find(a => a.pathogenIndex === idx)
+        if (asgn && asgn.samples > 0) {
+          const c = calcSequencerCosts(seq, asgn.samples)
+          pathReagents += c.sequencingReagents
+          pathLibPrep += c.libraryPrep
+        }
+      }
+    } else {
+      // No assignments: all costs proportional
+      pathReagents = seqCosts.sequencingReagents * proportion
+      pathLibPrep = seqCosts.libraryPrep * proportion
+    }
+
+    const pathConsumables = annualConsumables * proportion
+    const pathIncidentals = (pathReagents + pathLibPrep + pathConsumables) * 0.07
+    const pathShared = fixedTotal * proportion
+    const pathTotal = pathReagents + pathLibPrep + pathConsumables + pathIncidentals + pathShared
+
+    return {
+      pathogenName: pathogen.pathogenName,
+      pathogenType: pathogen.pathogenType,
+      samples: pathogen.samplesPerYear,
+      sequencingReagents: pathReagents,
+      libraryPrep: pathLibPrep,
+      consumables: pathConsumables,
+      incidentals: pathIncidentals,
+      sharedCosts: pathShared,
+      total: pathTotal,
+      costPerSample: pathogen.samplesPerYear > 0 ? pathTotal / pathogen.samplesPerYear : 0,
+    }
+  })
+
   return {
     sequencingReagents: seqCosts.sequencingReagents,
     libraryPrep: seqCosts.libraryPrep,
@@ -429,5 +478,6 @@ export function calculateCosts(project: Project): CostBreakdown {
     workflowBreakdown,
     perSequencerReagents,
     potentialPurchases,
+    perPathogenBreakdown,
   }
 }

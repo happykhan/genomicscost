@@ -998,7 +998,86 @@ function PathogensTab({ onRefresh }: { onRefresh: () => void }) {
           </tbody>
         </table>
       </div>
-      {showAdd && <AddRowModal tab="pathogens" onClose={() => setShowAdd(false)} onAdd={handleAdd} />}
+      {showAdd && <PathogenAddModal onClose={() => setShowAdd(false)} onAdd={handleAdd} />}
+    </div>
+  )
+}
+
+function PathogenAddModal({ onClose, onAdd }: {
+  onClose: () => void
+  onAdd: (name: string, data: Record<string, unknown>) => void
+}) {
+  const [name, setName] = useState('')
+  const [type, setType] = useState('Virus')
+  const [genomeType, setGenomeType] = useState('DNA')
+  const [genomeSizeMb, setGenomeSizeMb] = useState('')
+  const [coverageX, setCoverageX] = useState('30')
+
+  function handleSubmit() {
+    if (!name.trim()) return
+    onAdd(name.trim(), {
+      type,
+      genome_type: genomeType,
+      genome_size_mb: parseFloat(genomeSizeMb) || 0,
+      required_coverage_x: parseInt(coverageX) || 30,
+    })
+    onClose()
+  }
+
+  const selectClass = 'border border-[var(--gx-border)] rounded-[var(--gx-radius)] bg-[var(--gx-bg)] text-[var(--gx-text)] p-2 text-sm focus:outline-none focus:border-[var(--gx-accent)] w-full'
+
+  return (
+    <div
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      onClick={onClose}
+    >
+      <div className="card p-6" style={{ maxWidth: 440, width: '90%' }} onClick={e => e.stopPropagation()}>
+        <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--gx-text)' }}>Add custom pathogen</h3>
+
+        <div className="mb-3">
+          <label className="text-xs block mb-1" style={{ color: 'var(--gx-text-muted)' }}>Name</label>
+          <input type="text" value={name} onChange={e => setName(e.target.value)} className={inputClass} style={{ width: '100%' }} autoFocus />
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          <div>
+            <label className="text-xs block mb-1" style={{ color: 'var(--gx-text-muted)' }}>Type</label>
+            <select value={type} onChange={e => setType(e.target.value)} className={selectClass}>
+              <option value="Virus">Virus</option>
+              <option value="Bacteria">Bacteria</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-xs block mb-1" style={{ color: 'var(--gx-text-muted)' }}>Genome type</label>
+            <select value={genomeType} onChange={e => setGenomeType(e.target.value)} className={selectClass}>
+              <option value="DNA">DNA</option>
+              <option value="RNA">RNA</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div>
+            <label className="text-xs block mb-1" style={{ color: 'var(--gx-text-muted)' }}>Genome size (Mb)</label>
+            <input type="number" value={genomeSizeMb} min={0} step={0.001} onChange={e => setGenomeSizeMb(e.target.value)} className={inputClass} style={{ width: '100%' }} />
+          </div>
+          <div>
+            <label className="text-xs block mb-1" style={{ color: 'var(--gx-text-muted)' }}>Default coverage (x)</label>
+            <input type="number" value={coverageX} min={1} step={1} onChange={e => setCoverageX(e.target.value)} className={inputClass} style={{ width: '100%' }} />
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          <button onClick={handleSubmit} disabled={!name.trim()} className="px-4 py-1.5 rounded text-sm font-medium"
+            style={{ background: name.trim() ? 'var(--gx-accent)' : 'var(--gx-bg-alt)', color: name.trim() ? 'var(--gx-bg)' : 'var(--gx-text-muted)', border: 'none', cursor: name.trim() ? 'pointer' : 'default' }}>
+            Add pathogen
+          </button>
+          <button onClick={onClose} className="px-4 py-1.5 rounded text-sm font-medium"
+            style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>
+            Cancel
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
