@@ -7,6 +7,15 @@ import { fmt } from '../../lib/format'
 
 const inputClass = 'border border-[var(--gx-border)] rounded-[var(--gx-radius)] bg-[var(--gx-bg)] text-[var(--gx-text)] p-2 text-sm focus:outline-none focus:border-[var(--gx-accent)]'
 
+/** Abbreviated labels for workflow step badges. */
+const WORKFLOW_STEP_LABELS: Record<string, string> = {
+  sample_receipt: 'SR',
+  nucleic_acid_extraction: 'NA',
+  pcr_testing: 'PCR',
+  ngs_library_preparation: 'Lib',
+  sequencing: 'Seq',
+}
+
 const CAT_LABEL_KEYS: Record<string, string> = {
   sequencing_platform: 'cat_sequencing_platform',
   lab_equipment: 'cat_lab_equipment',
@@ -130,11 +139,37 @@ export default function Step4() {
                   className="card p-3 flex flex-wrap gap-3 items-center"
                   style={{ opacity: item.status === 'skip' ? 0.4 : 1 }}
                 >
-                  {/* Name + recommended quantity badge */}
+                  {/* Name + workflow step badges + recommended quantity badge */}
                   <div className="flex-1 min-w-36">
                     <div className="text-sm font-medium" style={{ color: 'var(--gx-text)' }}>
                       {item.name}
                     </div>
+                    {(() => {
+                      const catItem = catalogue.equipment.find(c => c.name === item.name)
+                      const steps = catItem?.workflow_steps as string[] | undefined
+                      if (steps && steps.length > 0) {
+                        return (
+                          <div className="inline-flex gap-1 mt-0.5 flex-wrap">
+                            {steps.map(s => (
+                              <span
+                                key={s}
+                                style={{
+                                  background: 'var(--gx-bg-alt)',
+                                  color: 'var(--gx-text-muted)',
+                                  borderRadius: 'var(--gx-radius)',
+                                  fontSize: '0.65rem',
+                                  padding: '0.1rem 0.35rem',
+                                  lineHeight: 1.3,
+                                }}
+                              >
+                                {WORKFLOW_STEP_LABELS[s] ?? s}
+                              </span>
+                            ))}
+                          </div>
+                        )
+                      }
+                      return null
+                    })()}
                     {(() => {
                       const catItem = catalogue.equipment.find(c => c.name === item.name)
                       const recommended = catItem?.recommended_quantity ?? 0

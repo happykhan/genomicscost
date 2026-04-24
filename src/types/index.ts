@@ -52,6 +52,7 @@ export interface CatalogueEquipment {
   name: string
   category: string
   workflow_step: string
+  workflow_steps?: string[]
   unit_cost_usd: number | null
   recommended_quantity: number | null
 }

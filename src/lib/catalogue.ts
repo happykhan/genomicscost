@@ -68,6 +68,7 @@ export interface BundledEquipmentItem {
   name: string
   category: string
   workflow_step: string
+  workflow_steps?: string[]
   unit_cost_usd: number | null
   catalog_ref: string | null
   recommended_quantity: number | null

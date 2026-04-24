@@ -1,6 +1,6 @@
-import type { Project, SequencerConfig, PathogenEntry, BioCloudItem, BioInhouseItem, ConsumableWorkflowStep } from '../types'
+import type { Project, SequencerConfig, PathogenEntry, BioCloudItem, BioInhouseItem, ConsumableWorkflowStep, EquipmentItem } from '../types'
 import { getEffectiveCatalogue } from './catalogue'
-import type { BundledReagent } from './catalogue'
+import type { BundledCatalogue, BundledReagent } from './catalogue'
 
 /** Valid workflow steps for consumable items. */
 const VALID_WORKFLOW_STEPS: ConsumableWorkflowStep[] = [
@@ -193,6 +193,26 @@ export function isConsumablesAtDefaults(
   return true
 }
 
+/**
+ * Build the default lab equipment list from the catalogue.
+ * Returns all lab_equipment, facility, and bioinformatics category items
+ * pre-loaded as EquipmentItem[] matching the WHO Excel defaults.
+ */
+export function createDefaultEquipment(catalogue: BundledCatalogue): EquipmentItem[] {
+  return catalogue.equipment
+    .filter(e => e.category !== 'sequencing_platform')
+    .map(e => ({
+      name: e.name,
+      category: e.category,
+      status: (e.recommended_quantity != null && e.recommended_quantity > 0 ? 'buy' : 'skip') as EquipmentItem['status'],
+      quantity: (e.recommended_quantity != null && e.recommended_quantity > 0) ? e.recommended_quantity : 0,
+      unitCostUsd: e.unit_cost_usd ?? 0,
+      lifespanYears: 10,
+      ageYears: 0,
+      pctSequencing: 100,
+    }))
+}
+
 export function createDefaultProject(): Project {
   const catalogue = getEffectiveCatalogue()
 
@@ -210,28 +230,8 @@ export function createDefaultProject(): Project {
   // Auto-populate consumables filtered by the default pathogen/sequencer combination
   const defaultConsumables = buildFilteredConsumables(defaultPathogens, defaultSequencers)
 
-  // 5 key equipment items
-  const equipmentCatalogue = catalogue.equipment
-  const iseq = equipmentCatalogue.find(e => e.name === 'Illumina iSeq 100')
-  const pcr = equipmentCatalogue.find(e => e.name === 'Thermal cycler (conventional)')
-  const centrifuge = equipmentCatalogue.find(e => e.name === 'Centrifuge (plate)')
-  const microcentrifuge = equipmentCatalogue.find(e => e.name === 'Microcentrifuge (can hold  24 tubes of 1.5/2.0 mL)')
-  const freezer = equipmentCatalogue.find(e => e.name === '(-)20  freezer')
-
-  const defaultEquipment = [iseq, pcr, centrifuge, microcentrifuge, freezer]
-    .filter((e): e is NonNullable<typeof e> => e != null)
-    .map(e => ({
-      name: e.name,
-      category: e.category,
-      status: 'have' as const,
-      quantity: 1,
-      unitCostUsd: e.unit_cost_usd ?? 0,
-      // Feature 2: sequencers get 10-year lifespan, everything else 5
-      lifespanYears: e.category === 'sequencing_platform' ? 10 : 5,
-      // WHO GCT: defaults for new fields
-      ageYears: 0,
-      pctSequencing: 100,
-    }))
+  // All lab/facility/bioinformatics equipment from catalogue, pre-populated per WHO Excel
+  const defaultEquipment = createDefaultEquipment(catalogue)
 
   const defaultPersonnel = catalogue.personnel_roles.map((r, i) => ({
     role: r.role,

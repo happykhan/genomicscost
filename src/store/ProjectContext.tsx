@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useMemo, useCallback, useRef } from 'react'
 import type { Project, SequencerConfig, CostBreakdown, ConsumableWorkflowStep } from '../types'
 import { calculateCosts } from '../lib/calculations'
-import { createDefaultProject, createDefaultCloudItems, createDefaultInhouseItems, buildFilteredConsumables, isConsumablesAtDefaults } from '../lib/defaults'
+import { createDefaultProject, createDefaultCloudItems, createDefaultInhouseItems, createDefaultEquipment, buildFilteredConsumables, isConsumablesAtDefaults } from '../lib/defaults'
+import { getEffectiveCatalogue } from '../lib/catalogue'
 import LZString from 'lz-string'
 
 const STORAGE_KEY = 'genomicscost-projects'
@@ -116,6 +117,17 @@ function migrateProject(raw: unknown): Project {
       lifespanYears: (eq.category as string) === 'sequencing_platform' ? 10 : 5,
       ...eq,
     }))
+  }
+
+  // Ensure all lab equipment items are present (pre-populate from catalogue if missing)
+  if (Array.isArray(p.equipment)) {
+    const equipArr = p.equipment as Array<Record<string, unknown>>
+    const hasLabEquipment = equipArr.some(e => e.category === 'lab_equipment')
+    if (!hasLabEquipment) {
+      const catalogue = getEffectiveCatalogue()
+      const defaultLabEquip = createDefaultEquipment(catalogue)
+      p.equipment = [...equipArr, ...defaultLabEquip]
+    }
   }
 
   // Migrate old BioinformaticsConfig (flat fields) to new structure with cloudItems/inhouseItems
