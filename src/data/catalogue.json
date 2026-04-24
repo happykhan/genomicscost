@@ -2,7 +2,7 @@
   "_meta": {
     "source": "WHO Genomics Costing Tool, second edition",
     "extracted": "2026-04-05",
-    "notes": "Costs in USD. Some prices not publicly listed (None) — user must enter."
+    "notes": "Costs in USD. Some prices not publicly listed (None) \u2014 user must enter."
   },
   "platforms": [
     {
@@ -470,7 +470,7 @@
       "name": "ThermoFisher",
       "reagent_kits": [
         {
-          "name": "Ion 510 & Ion 520 & Ion 530 Kit – Chef (2 seq runs; 8 rxns) and Ion 510 Chip Kit (8 chips)",
+          "name": "Ion 510 & Ion 520 & Ion 530 Kit \u2013 Chef (2 seq runs; 8 rxns) and Ion 510 Chip Kit (8 chips)",
           "unit_price_usd": null,
           "read_length_bp": 200,
           "max_reads_per_flowcell": 2500000,
@@ -478,7 +478,7 @@
           "max_output_mb": 500.0
         },
         {
-          "name": "Ion 510 & Ion 520 & Ion 530 Kit – Chef (2 seq runs; 8 rxns) and Ion 520 Chip Kit (8 chips)",
+          "name": "Ion 510 & Ion 520 & Ion 530 Kit \u2013 Chef (2 seq runs; 8 rxns) and Ion 520 Chip Kit (8 chips)",
           "unit_price_usd": null,
           "read_length_bp": 400,
           "max_reads_per_flowcell": 5000000,
@@ -486,7 +486,7 @@
           "max_output_mb": 2000.0
         },
         {
-          "name": "Ion 510 & Ion 520 & Ion 530 Kit – Chef (2 seq runs; 8 rxns) and Ion 530 Chip Kit (8 chips)",
+          "name": "Ion 510 & Ion 520 & Ion 530 Kit \u2013 Chef (2 seq runs; 8 rxns) and Ion 530 Chip Kit (8 chips)",
           "unit_price_usd": null,
           "read_length_bp": 400,
           "max_reads_per_flowcell": 20000000,
@@ -719,7 +719,7 @@
       "catalog_ref": "20043675"
     },
     {
-      "name": "Illumina Microbial Amplicon Prep—Influenza A/B",
+      "name": "Illumina Microbial Amplicon Prep\u2014Influenza A/B",
       "pathogen_type": "Influenza A and Influenza B",
       "compatible_platforms": [
         "All Illumina (up to 48 samples)"
@@ -1080,7 +1080,7 @@
         "Thermofisher S5",
         "PGM",
         "Oxford Nanopore MinIon",
-        "Gridion…"
+        "Gridion\u2026"
       ],
       "pack_size": 24,
       "barcoding_limit": 384,
@@ -1107,7 +1107,7 @@
       "workflow": "sample_receipt"
     },
     {
-      "name": "Specimen transport packaging (2–8C) (150-pck)",
+      "name": "Specimen transport packaging (2\u20138C) (150-pck)",
       "category": "consumable",
       "pack_size": 150,
       "catalog_ref": null,
@@ -1137,7 +1137,10 @@
       "catalog_ref": null,
       "quantity_per_sample": null,
       "workflow": "pcr_testing",
-      "workflows": ["nucleic_acid_extraction", "pcr_testing"]
+      "workflows": [
+        "nucleic_acid_extraction",
+        "pcr_testing"
+      ]
     },
     {
       "name": "PCR plate covers adhesive film (1 cover per plate)",
@@ -1146,7 +1149,10 @@
       "catalog_ref": null,
       "quantity_per_sample": null,
       "workflow": "pcr_testing",
-      "workflows": ["nucleic_acid_extraction", "pcr_testing"]
+      "workflows": [
+        "nucleic_acid_extraction",
+        "pcr_testing"
+      ]
     },
     {
       "name": "Pipette filter tips 10uL (96 tips x 10 racks)",
@@ -1155,10 +1161,15 @@
       "catalog_ref": null,
       "quantity_per_sample": 8,
       "workflow": null,
-      "workflows": ["nucleic_acid_extraction", "pcr_testing", "ngs_library_preparation", "sequencing"]
+      "workflows": [
+        "nucleic_acid_extraction",
+        "pcr_testing",
+        "ngs_library_preparation",
+        "sequencing"
+      ]
     },
     {
-      "name": "Pipette filter tips 100µL, sterile (pack of 960)",
+      "name": "Pipette filter tips 100\u00b5L, sterile (pack of 960)",
       "category": "consumable",
       "pack_size": 960,
       "catalog_ref": null,
@@ -1172,7 +1183,12 @@
       "catalog_ref": null,
       "quantity_per_sample": 8,
       "workflow": null,
-      "workflows": ["nucleic_acid_extraction", "pcr_testing", "ngs_library_preparation", "sequencing"]
+      "workflows": [
+        "nucleic_acid_extraction",
+        "pcr_testing",
+        "ngs_library_preparation",
+        "sequencing"
+      ]
     },
     {
       "name": "Pipette filter tips 1000uL  (96 tips x 10 racks)",
@@ -1181,7 +1197,12 @@
       "catalog_ref": null,
       "quantity_per_sample": 5,
       "workflow": null,
-      "workflows": ["nucleic_acid_extraction", "pcr_testing", "ngs_library_preparation", "sequencing"]
+      "workflows": [
+        "nucleic_acid_extraction",
+        "pcr_testing",
+        "ngs_library_preparation",
+        "sequencing"
+      ]
     },
     {
       "name": "0.2mL PCR tubes, thin-walled (1000; strips)",
@@ -1190,7 +1211,10 @@
       "catalog_ref": null,
       "quantity_per_sample": 6,
       "workflow": "pcr_testing",
-      "workflows": ["nucleic_acid_extraction", "pcr_testing"]
+      "workflows": [
+        "nucleic_acid_extraction",
+        "pcr_testing"
+      ]
     },
     {
       "name": "1.5mL PCR tubes, LoBind (250)",
@@ -1199,7 +1223,12 @@
       "catalog_ref": null,
       "quantity_per_sample": 2,
       "workflow": "pcr_testing",
-      "workflows": ["nucleic_acid_extraction", "pcr_testing", "ngs_library_preparation", "sequencing"]
+      "workflows": [
+        "nucleic_acid_extraction",
+        "pcr_testing",
+        "ngs_library_preparation",
+        "sequencing"
+      ]
     },
     {
       "name": "50mL conical tubes (100)",
@@ -1208,7 +1237,10 @@
       "catalog_ref": null,
       "quantity_per_sample": 0.5,
       "workflow": null,
-      "workflows": ["nucleic_acid_extraction", "ngs_library_preparation"]
+      "workflows": [
+        "nucleic_acid_extraction",
+        "ngs_library_preparation"
+      ]
     },
     {
       "name": "Conical centrifuge tubes 15mL (packs of 500)",
@@ -1337,7 +1369,10 @@
       "catalog_ref": null,
       "quantity_per_sample": 0.0009,
       "workflow": null,
-      "workflows": ["nucleic_acid_extraction", "ngs_library_preparation"]
+      "workflows": [
+        "nucleic_acid_extraction",
+        "ngs_library_preparation"
+      ]
     },
     {
       "name": "(Molecular grade) nuclease free H2O",
@@ -1346,7 +1381,12 @@
       "catalog_ref": null,
       "quantity_per_sample": 0.005,
       "workflow": null,
-      "workflows": ["nucleic_acid_extraction", "pcr_testing", "ngs_library_preparation", "sequencing"]
+      "workflows": [
+        "nucleic_acid_extraction",
+        "pcr_testing",
+        "ngs_library_preparation",
+        "sequencing"
+      ]
     },
     {
       "name": "Universal One-Step RT-qPCR Kit (200 rxns)",
@@ -1694,7 +1734,10 @@
       "name": "PCR workstation",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["pcr_testing", "ngs_library_preparation"],
+      "workflow_steps": [
+        "pcr_testing",
+        "ngs_library_preparation"
+      ],
       "unit_cost_usd": 3837.57,
       "catalog_ref": null,
       "recommended_quantity": 2,
@@ -1704,17 +1747,21 @@
       "name": "Plate magnet (for 96 well plate)",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["ngs_library_preparation"],
+      "workflow_steps": [
+        "ngs_library_preparation"
+      ],
       "unit_cost_usd": 1323.3,
       "catalog_ref": null,
       "recommended_quantity": 2,
       "comment": "quantities are based on based on annual throughput ranges from GCT v1"
     },
     {
-      "name": "Magnetic rack (for 12 1.5–2.0 mL tubes)",
+      "name": "Magnetic rack (for 12 1.5\u20132.0 mL tubes)",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["ngs_library_preparation"],
+      "workflow_steps": [
+        "ngs_library_preparation"
+      ],
       "unit_cost_usd": 374.133,
       "catalog_ref": null,
       "recommended_quantity": 4,
@@ -1724,7 +1771,10 @@
       "name": "PCR cooling plates/strip holders",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["pcr_testing", "ngs_library_preparation"],
+      "workflow_steps": [
+        "pcr_testing",
+        "ngs_library_preparation"
+      ],
       "unit_cost_usd": 84.21,
       "catalog_ref": null,
       "recommended_quantity": 4,
@@ -1734,7 +1784,9 @@
       "name": "Dry bath (heat block)",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["sequencing"],
+      "workflow_steps": [
+        "sequencing"
+      ],
       "unit_cost_usd": 324.81,
       "catalog_ref": null,
       "recommended_quantity": 1,
@@ -1744,7 +1796,9 @@
       "name": "Biosafety cabinet, class II, type A2",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["nucleic_acid_extraction"],
+      "workflow_steps": [
+        "nucleic_acid_extraction"
+      ],
       "unit_cost_usd": 12030,
       "catalog_ref": null,
       "recommended_quantity": 1,
@@ -1754,7 +1808,9 @@
       "name": "Water bath 5L",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["nucleic_acid_extraction"],
+      "workflow_steps": [
+        "nucleic_acid_extraction"
+      ],
       "unit_cost_usd": 668.868,
       "catalog_ref": null,
       "recommended_quantity": 1,
@@ -1764,7 +1820,9 @@
       "name": "Autoclave benchtop",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["nucleic_acid_extraction"],
+      "workflow_steps": [
+        "nucleic_acid_extraction"
+      ],
       "unit_cost_usd": 4210.5,
       "catalog_ref": null,
       "recommended_quantity": 1,
@@ -1774,7 +1832,11 @@
       "name": "Vortex",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["nucleic_acid_extraction", "pcr_testing", "ngs_library_preparation"],
+      "workflow_steps": [
+        "nucleic_acid_extraction",
+        "pcr_testing",
+        "ngs_library_preparation"
+      ],
       "unit_cost_usd": 351.276,
       "catalog_ref": null,
       "recommended_quantity": 2,
@@ -1784,7 +1846,9 @@
       "name": "Analytical balance",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["nucleic_acid_extraction"],
+      "workflow_steps": [
+        "nucleic_acid_extraction"
+      ],
       "unit_cost_usd": 994.881,
       "catalog_ref": null,
       "recommended_quantity": 1,
@@ -1794,7 +1858,13 @@
       "name": "(-)20  freezer",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["sample_receipt", "nucleic_acid_extraction", "pcr_testing", "ngs_library_preparation", "sequencing"],
+      "workflow_steps": [
+        "sample_receipt",
+        "nucleic_acid_extraction",
+        "pcr_testing",
+        "ngs_library_preparation",
+        "sequencing"
+      ],
       "unit_cost_usd": 1039.392,
       "catalog_ref": null,
       "recommended_quantity": 1,
@@ -1804,7 +1874,13 @@
       "name": "(-)80  freezer",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["sample_receipt", "nucleic_acid_extraction", "pcr_testing", "ngs_library_preparation", "sequencing"],
+      "workflow_steps": [
+        "sample_receipt",
+        "nucleic_acid_extraction",
+        "pcr_testing",
+        "ngs_library_preparation",
+        "sequencing"
+      ],
       "unit_cost_usd": 13719.012,
       "catalog_ref": null,
       "recommended_quantity": 1,
@@ -1814,18 +1890,14 @@
       "name": "Refrigerator (4C)",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["sample_receipt", "nucleic_acid_extraction", "pcr_testing", "ngs_library_preparation", "sequencing"],
+      "workflow_steps": [
+        "sample_receipt",
+        "nucleic_acid_extraction",
+        "pcr_testing",
+        "ngs_library_preparation",
+        "sequencing"
+      ],
       "unit_cost_usd": 1200,
-      "catalog_ref": null,
-      "recommended_quantity": 1,
-      "comment": "quantities are based on based on annual throughput ranges from GCT v1"
-    },
-    {
-      "name": "Gel electrophoresis apparatus",
-      "category": "lab_equipment",
-      "workflow_step": null,
-      "workflow_steps": ["nucleic_acid_extraction"],
-      "unit_cost_usd": 2977.425,
       "catalog_ref": null,
       "recommended_quantity": 1,
       "comment": "quantities are based on based on annual throughput ranges from GCT v1"
@@ -1834,7 +1906,9 @@
       "name": "Uninterrupted power supply (1500V)",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["sequencing"],
+      "workflow_steps": [
+        "sequencing"
+      ],
       "unit_cost_usd": 1000,
       "catalog_ref": null,
       "recommended_quantity": 1,
@@ -1844,7 +1918,9 @@
       "name": "Uninterrupted power supply (600V);",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["pcr_testing"],
+      "workflow_steps": [
+        "pcr_testing"
+      ],
       "unit_cost_usd": 600,
       "catalog_ref": null,
       "recommended_quantity": 1,
@@ -1854,7 +1930,9 @@
       "name": "Thermal cycler (conventional)",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["ngs_library_preparation"],
+      "workflow_steps": [
+        "ngs_library_preparation"
+      ],
       "unit_cost_usd": 9000,
       "catalog_ref": null,
       "recommended_quantity": 1,
@@ -1864,7 +1942,9 @@
       "name": "Thermal cycler (realtime)",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["pcr_testing"],
+      "workflow_steps": [
+        "pcr_testing"
+      ],
       "unit_cost_usd": 18000,
       "catalog_ref": null,
       "recommended_quantity": 1,
@@ -1874,67 +1954,89 @@
       "name": "Water purification system",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["nucleic_acid_extraction"],
+      "workflow_steps": [
+        "nucleic_acid_extraction"
+      ],
       "unit_cost_usd": 8408.97,
       "catalog_ref": null,
       "recommended_quantity": 1,
       "comment": "quantities are based on based on annual throughput ranges from GCT v1"
     },
     {
-      "name": "Single channel pipette 100–1000μL",
+      "name": "Single channel pipette 100\u20131000\u03bcL",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["nucleic_acid_extraction", "pcr_testing", "ngs_library_preparation"],
+      "workflow_steps": [
+        "nucleic_acid_extraction",
+        "pcr_testing",
+        "ngs_library_preparation"
+      ],
       "unit_cost_usd": 234.585,
       "catalog_ref": null,
       "recommended_quantity": 3,
       "comment": "quantities are based on based on annual throughput ranges from GCT v1"
     },
     {
-      "name": "Single channel pipette 20–200μL",
+      "name": "Single channel pipette 20\u2013200\u03bcL",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["nucleic_acid_extraction", "pcr_testing", "ngs_library_preparation"],
+      "workflow_steps": [
+        "nucleic_acid_extraction",
+        "pcr_testing",
+        "ngs_library_preparation"
+      ],
       "unit_cost_usd": 269.472,
       "catalog_ref": null,
       "recommended_quantity": 3,
       "comment": "quantities are based on based on annual throughput ranges from GCT v1"
     },
     {
-      "name": "Single channel pipette 2–20μL",
+      "name": "Single channel pipette 2\u201320\u03bcL",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["nucleic_acid_extraction", "pcr_testing", "ngs_library_preparation"],
+      "workflow_steps": [
+        "nucleic_acid_extraction",
+        "pcr_testing",
+        "ngs_library_preparation"
+      ],
       "unit_cost_usd": 257.442,
       "catalog_ref": null,
       "recommended_quantity": 3,
       "comment": "quantities are based on based on annual throughput ranges from GCT v1"
     },
     {
-      "name": "Single channel pipette 1–10μL",
+      "name": "Single channel pipette 1\u201310\u03bcL",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["nucleic_acid_extraction", "pcr_testing", "ngs_library_preparation"],
+      "workflow_steps": [
+        "nucleic_acid_extraction",
+        "pcr_testing",
+        "ngs_library_preparation"
+      ],
       "unit_cost_usd": 269.472,
       "catalog_ref": null,
       "recommended_quantity": 3,
       "comment": "quantities are based on based on annual throughput ranges from GCT v1"
     },
     {
-      "name": "Single channel pipette 0.2–2μL",
+      "name": "Single channel pipette 0.2\u20132\u03bcL",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["pcr_testing"],
+      "workflow_steps": [
+        "pcr_testing"
+      ],
       "unit_cost_usd": 234.585,
       "catalog_ref": null,
       "recommended_quantity": 3,
       "comment": "quantities are based on based on annual throughput ranges from GCT v1"
     },
     {
-      "name": "8-channel multichannel pipettes 10–100μL",
+      "name": "8-channel multichannel pipettes 10\u2013100\u03bcL",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["ngs_library_preparation"],
+      "workflow_steps": [
+        "ngs_library_preparation"
+      ],
       "unit_cost_usd": 678.492,
       "catalog_ref": null,
       "recommended_quantity": 3,
@@ -1944,7 +2046,11 @@
       "name": "Tube racks",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["nucleic_acid_extraction", "pcr_testing", "ngs_library_preparation"],
+      "workflow_steps": [
+        "nucleic_acid_extraction",
+        "pcr_testing",
+        "ngs_library_preparation"
+      ],
       "unit_cost_usd": 39.699,
       "catalog_ref": null,
       "recommended_quantity": 5,
@@ -1954,7 +2060,11 @@
       "name": "Cooling block (tube strips)",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["nucleic_acid_extraction", "pcr_testing", "ngs_library_preparation"],
+      "workflow_steps": [
+        "nucleic_acid_extraction",
+        "pcr_testing",
+        "ngs_library_preparation"
+      ],
       "unit_cost_usd": 291.126,
       "catalog_ref": null,
       "recommended_quantity": 2,
@@ -1964,7 +2074,9 @@
       "name": "Cooling block (96 well plate)",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["pcr_testing"],
+      "workflow_steps": [
+        "pcr_testing"
+      ],
       "unit_cost_usd": 175.74,
       "catalog_ref": null,
       "recommended_quantity": 1,
@@ -1974,7 +2086,10 @@
       "name": "Ice bucket",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["pcr_testing", "ngs_library_preparation"],
+      "workflow_steps": [
+        "pcr_testing",
+        "ngs_library_preparation"
+      ],
       "unit_cost_usd": 173.9,
       "catalog_ref": null,
       "recommended_quantity": 1,
@@ -1984,7 +2099,9 @@
       "name": "Fluorometer, single assay",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["ngs_library_preparation"],
+      "workflow_steps": [
+        "ngs_library_preparation"
+      ],
       "unit_cost_usd": 3035,
       "catalog_ref": null,
       "recommended_quantity": 1,
@@ -1994,7 +2111,9 @@
       "name": "Fluorometer, strip tube capable",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["ngs_library_preparation"],
+      "workflow_steps": [
+        "ngs_library_preparation"
+      ],
       "unit_cost_usd": 6600,
       "catalog_ref": null,
       "recommended_quantity": 0,
@@ -2004,7 +2123,9 @@
       "name": "Air conditioners",
       "category": "facility",
       "workflow_step": null,
-      "workflow_steps": ["sequencing"],
+      "workflow_steps": [
+        "sequencing"
+      ],
       "unit_cost_usd": 500,
       "catalog_ref": null,
       "recommended_quantity": 3,
@@ -2014,7 +2135,10 @@
       "name": "Temperature logger",
       "category": "facility",
       "workflow_step": null,
-      "workflow_steps": ["nucleic_acid_extraction", "sequencing"],
+      "workflow_steps": [
+        "nucleic_acid_extraction",
+        "sequencing"
+      ],
       "unit_cost_usd": 170.4,
       "catalog_ref": null,
       "recommended_quantity": 3,
@@ -2024,7 +2148,9 @@
       "name": "Centrifuge (plate)",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["ngs_library_preparation"],
+      "workflow_steps": [
+        "ngs_library_preparation"
+      ],
       "unit_cost_usd": 670.5,
       "catalog_ref": null,
       "recommended_quantity": 2,
@@ -2034,7 +2160,10 @@
       "name": "Microcentrifuge (can hold  24 tubes of 1.5/2.0 mL)",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["nucleic_acid_extraction", "pcr_testing"],
+      "workflow_steps": [
+        "nucleic_acid_extraction",
+        "pcr_testing"
+      ],
       "unit_cost_usd": 5760,
       "catalog_ref": null,
       "recommended_quantity": 2,
@@ -2044,27 +2173,33 @@
       "name": "Centrifuge, refrigerated",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["nucleic_acid_extraction"],
+      "workflow_steps": [
+        "nucleic_acid_extraction"
+      ],
       "unit_cost_usd": 5554.8,
       "catalog_ref": null,
       "recommended_quantity": 2,
       "comment": "quantities are based on based on annual throughput ranges from GCT v1"
     },
     {
-      "name": "Liquid handler – extraction",
+      "name": "Liquid handler \u2013 extraction",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["nucleic_acid_extraction"],
+      "workflow_steps": [
+        "nucleic_acid_extraction"
+      ],
       "unit_cost_usd": 120000,
       "catalog_ref": null,
       "recommended_quantity": 0,
       "comment": "quantities are based on based on annual throughput ranges from GCT v1"
     },
     {
-      "name": "Liquid handler – PCR",
+      "name": "Liquid handler \u2013 PCR",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["pcr_testing"],
+      "workflow_steps": [
+        "pcr_testing"
+      ],
       "unit_cost_usd": 48000,
       "catalog_ref": null,
       "recommended_quantity": 0,
@@ -2074,17 +2209,21 @@
       "name": "Bioanalyzer/TapeStation",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["ngs_library_preparation"],
+      "workflow_steps": [
+        "ngs_library_preparation"
+      ],
       "unit_cost_usd": 42000,
       "catalog_ref": null,
       "recommended_quantity": 1,
       "comment": "quantities are based on based on annual throughput ranges from GCT v1"
     },
     {
-      "name": "Liquid handler – library preparation",
+      "name": "Liquid handler \u2013 library preparation",
       "category": "lab_equipment",
       "workflow_step": null,
-      "workflow_steps": ["ngs_library_preparation"],
+      "workflow_steps": [
+        "ngs_library_preparation"
+      ],
       "unit_cost_usd": 96000,
       "catalog_ref": null,
       "recommended_quantity": 0,
@@ -2094,7 +2233,9 @@
       "name": "Desktop computer",
       "category": "bioinformatics",
       "workflow_step": null,
-      "workflow_steps": ["sequencing"],
+      "workflow_steps": [
+        "sequencing"
+      ],
       "unit_cost_usd": 478.8,
       "catalog_ref": null,
       "recommended_quantity": 1,
@@ -2147,7 +2288,7 @@
       },
       {
         "name": "External HDD for storage",
-        "description": "External HDD – 1TB for storage",
+        "description": "External HDD \u2013 1TB for storage",
         "pricing_model": "variable"
       },
       {
@@ -2194,7 +2335,7 @@
         "description": null
       },
       {
-        "name": "HPE NS204i-p x2 Lanes NVMe PCIe3 x8 OS Boot Device (boot drives – solid state storage)",
+        "name": "HPE NS204i-p x2 Lanes NVMe PCIe3 x8 OS Boot Device (boot drives \u2013 solid state storage)",
         "description": null
       },
       {
@@ -2259,13 +2400,13 @@
       "comment": null
     },
     {
-      "activity": "External quality assessment – PCR",
+      "activity": "External quality assessment \u2013 PCR",
       "default_cost_usd": 900,
       "default_quantity": 1,
       "comment": null
     },
     {
-      "activity": "External quality assessment – NGS",
+      "activity": "External quality assessment \u2013 NGS",
       "default_cost_usd": 2300,
       "default_quantity": 1,
       "comment": "Quarterly distribution, including logistics"
