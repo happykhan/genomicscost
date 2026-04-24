@@ -254,10 +254,14 @@ export default function Step6() {
             {showCloud && (
               <div>
                 <div className="text-xs font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>Cloud-based</div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   <div>
                     <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total purchase cost</div>
                     <div className="text-sm font-medium" style={{ color: 'var(--gx-text)' }}>${fmt(cloudPurchaseCost)}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total annual cost</div>
+                    <div className="text-sm font-medium" style={{ color: 'var(--gx-text)' }}>${fmt(cloudTotal)}</div>
                   </div>
                   <div>
                     <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total cost per sample</div>
