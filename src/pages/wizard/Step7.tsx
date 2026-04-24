@@ -252,14 +252,22 @@ export default function Step7() {
         {qmsOpen && (
           <>
             <div className="card mb-2" style={{ overflowX: 'auto' }}>
-              <table className="w-full text-sm" style={{ minWidth: 360 }}>
+              <table className="w-full text-sm" style={{ minWidth: 520, tableLayout: 'fixed' }}>
+                <colgroup>
+                  <col style={{ width: 'auto' }} />
+                  <col style={{ width: 120 }} />
+                  <col style={{ width: 90 }} />
+                  <col style={{ width: 110 }} />
+                  <col style={{ width: 44 }} />
+                  <col style={{ width: 40 }} />
+                </colgroup>
                 <thead>
                   <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
                     <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_activity')}</th>
                     <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_cost')}</th>
                     <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_quantity')}</th>
                     <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual')}</th>
-                    <th className="px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_on')}</th>
+                    <th className="text-center px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_on')}</th>
                     <th className="px-3 py-2"></th>
                   </tr>
                 </thead>
@@ -267,13 +275,13 @@ export default function Step7() {
                   {qms.map((q, idx) => (
                     <tr key={idx} style={{ borderBottom: '1px solid var(--gx-border)', opacity: q.enabled ? 1 : 0.4 }}>
                       <td className="px-3 py-2">
-                        <input type="text" value={q.activity} onChange={e => updateQMS(idx, { activity: e.target.value })} className={inputClass} style={{ width: '100%', minWidth: 180 }} />
+                        <input type="text" value={q.activity} onChange={e => updateQMS(idx, { activity: e.target.value })} className={inputClass} style={{ width: '100%' }} />
                       </td>
                       <td className="px-3 py-2">
-                        <input type="number" value={q.costUsd} min={0} onChange={e => updateQMS(idx, { costUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 90, textAlign: 'right' }} />
+                        <input type="number" value={q.costUsd} min={0} onChange={e => updateQMS(idx, { costUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: '100%', textAlign: 'right' }} />
                       </td>
                       <td className="px-3 py-2">
-                        <input type="number" value={q.quantity} min={0} onChange={e => updateQMS(idx, { quantity: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 60, textAlign: 'center' }} />
+                        <input type="number" value={q.quantity} min={0} onChange={e => updateQMS(idx, { quantity: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: '100%', textAlign: 'center' }} />
                       </td>
                       <td className="px-3 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>
                         {q.enabled ? fmt(q.costUsd * q.quantity * (q.pctSequencing ?? 100) / 100) : '—'}
@@ -281,7 +289,7 @@ export default function Step7() {
                       <td className="px-3 py-2 text-center">
                         <input type="checkbox" checked={q.enabled} onChange={e => updateQMS(idx, { enabled: e.target.checked })} style={{ accentColor: 'var(--gx-accent)', width: 15, height: 15 }} />
                       </td>
-                      <td className="px-3 py-2">
+                      <td className="px-3 py-2 text-center">
                         <button onClick={() => removeQMS(idx)} className="text-xs px-2 py-0.5 rounded" style={{ color: 'var(--gx-text-muted)', background: 'none', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>×</button>
                       </td>
                     </tr>
