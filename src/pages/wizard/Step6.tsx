@@ -71,6 +71,12 @@ export default function Step6() {
   function updateQMS(idx: number, patch: Partial<typeof qms[0]>) {
     updateProject({ qms: qms.map((q, i) => i === idx ? { ...q, ...patch } : q) })
   }
+  function addQMS() {
+    updateProject({ qms: [...qms, { activity: 'New QMS activity', costUsd: 0, quantity: 1, pctSequencing: 100, enabled: true }] })
+  }
+  function removeQMS(idx: number) {
+    updateProject({ qms: qms.filter((_, i) => i !== idx) })
+  }
 
   // ── Computed totals ──────────────────────────────────────────────────────────
   const facilityMonthlyTotal = facility.reduce((s, f) => s + f.monthlyCostUsd, 0)
@@ -436,12 +442,15 @@ export default function Step6() {
                 <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_quantity')}</th>
                 <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual')}</th>
                 <th className="px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_on')}</th>
+                <th className="px-3 py-2"></th>
               </tr>
             </thead>
             <tbody>
               {qms.map((q, idx) => (
                 <tr key={idx} style={{ borderBottom: '1px solid var(--gx-border)', opacity: q.enabled ? 1 : 0.4 }}>
-                  <td className="px-3 py-2" style={{ color: 'var(--gx-text)' }}>{q.activity}</td>
+                  <td className="px-3 py-2">
+                    <input type="text" value={q.activity} onChange={e => updateQMS(idx, { activity: e.target.value })} className={inputClass} style={{ width: '100%', minWidth: 180 }} />
+                  </td>
                   <td className="px-3 py-2">
                     <input type="number" value={q.costUsd} min={0} onChange={e => updateQMS(idx, { costUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 90, textAlign: 'right' }} />
                   </td>
@@ -454,13 +463,17 @@ export default function Step6() {
                   <td className="px-3 py-2 text-center">
                     <input type="checkbox" checked={q.enabled} onChange={e => updateQMS(idx, { enabled: e.target.checked })} style={{ accentColor: 'var(--gx-accent)', width: 15, height: 15 }} />
                   </td>
+                  <td className="px-3 py-2">
+                    <button onClick={() => removeQMS(idx)} className="text-xs px-2 py-0.5 rounded" style={{ color: 'var(--gx-text-muted)', background: 'none', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>×</button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        <div className="text-xs text-right" style={{ color: 'var(--gx-text-muted)' }}>
-          {t('label_total')} QMS: <strong style={{ color: 'var(--gx-accent)' }}>${fmt(qmsTotal)}</strong>
+        <div className="flex justify-between items-center">
+          <button onClick={addQMS} className="px-3 py-1.5 rounded text-xs font-medium" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>{t('btn_add')}</button>
+          <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_total')} QMS: <strong style={{ color: 'var(--gx-accent)' }}>${fmt(qmsTotal)}</strong></div>
         </div>
       </section>
     </div>

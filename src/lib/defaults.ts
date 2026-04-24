@@ -61,21 +61,23 @@ export function createDefaultCloudItems(): BioCloudItem[] {
     name: p.name,
     description: p.description ?? '',
     pricePerUnit: 0,
-    quantity: 1,
+    quantity: 0,
     totalSamplesAllPathogens: 0,
     samplesThisScenario: 0,
-    enabled: false,
+    enabled: true,   // visible by default, all $0 — user fills in what they use
     notes: '',
   }))
 }
 
 export function createDefaultInhouseItems(): BioInhouseItem[] {
-  // Standard in-house components from the WHO demo workbook
+  // Standard in-house components from the WHO demo workbook — all $0, user fills in local costs
   return [
-    { name: 'Low/mid processing workstation', description: 'Desktop workstation for bioinformatics', pricePerUnit: 7028, quantity: 1, pctUse: 100, lifespanYears: 5, ageYears: 0, enabled: false },
-    { name: 'NAS (64TB)', description: 'Network-attached storage', pricePerUnit: 3380, quantity: 1, pctUse: 100, lifespanYears: 2, ageYears: 0, enabled: false },
-    { name: 'Monitor', description: 'Display monitor', pricePerUnit: 150, quantity: 1, pctUse: 100, lifespanYears: 2, ageYears: 0, enabled: false },
-    { name: 'External HDD (1TB)', description: 'External hard drive for backup', pricePerUnit: 52, quantity: 1, pctUse: 100, lifespanYears: 2, ageYears: 0, enabled: false },
+    { name: 'High-processing server', description: 'Server for bioinformatic storage and processing', pricePerUnit: 0, quantity: 0, pctUse: 100, lifespanYears: 5, ageYears: 1, enabled: true },
+    { name: 'Low/mid processing workstation', description: 'Computer workstation for bioinformatic analysis processing and storage', pricePerUnit: 0, quantity: 0, pctUse: 100, lifespanYears: 5, ageYears: 0, enabled: true },
+    { name: 'NAS (64TB)', description: 'NAS drive – 64TB for storage', pricePerUnit: 0, quantity: 0, pctUse: 100, lifespanYears: 2, ageYears: 0, enabled: true },
+    { name: 'Monitor', description: 'Monitor for bioinformatic analysis', pricePerUnit: 0, quantity: 0, pctUse: 100, lifespanYears: 2, ageYears: 0, enabled: true },
+    { name: 'External HDD (1TB)', description: 'External HDD – 1TB for storage', pricePerUnit: 0, quantity: 0, pctUse: 50, lifespanYears: 2, ageYears: 0, enabled: true },
+    { name: 'Server maintenance', description: 'Server including maintenance fees', pricePerUnit: 0, quantity: 0, pctUse: 100, lifespanYears: 2, ageYears: 1, enabled: true },
   ]
 }
 
@@ -279,7 +281,7 @@ export function createDefaultProject(): Project {
       { label: 'Customs clearance fees', shipmentMethod: '', annualCostUsd: 0, pctSequencing: 100 },
     ],
     bioinformatics: {
-      type: 'cloud',
+      type: 'hybrid',
       cloudItems: createDefaultCloudItems(),
       inhouseItems: createDefaultInhouseItems(),
     },
