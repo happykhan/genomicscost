@@ -4,35 +4,35 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import i18n from '../../i18n/config'
 import { ProjectProvider } from '../../store/ProjectContext'
-import Step7 from './Step7'
+import Step8 from './Step8'
 
 // Import config.ts first so the global i18n instance is initialized before components render
 void i18n
 
-function renderStep7() {
+function renderStep8() {
   return render(
     <MemoryRouter>
       <ProjectProvider>
-        <Step7 />
+        <Step8 />
       </ProjectProvider>
     </MemoryRouter>
   )
 }
 
-describe('Step7 PDF export', () => {
+describe('Step8 PDF export', () => {
   beforeEach(async () => {
     vi.stubGlobal('print', vi.fn())
     await i18n.changeLanguage('en')
   })
 
   it('renders the export PDF button', () => {
-    renderStep7()
+    renderStep8()
     expect(screen.getByTestId('print-btn')).toBeTruthy()
   })
 
   it('calls window.print() when export button is clicked', async () => {
     const user = userEvent.setup()
-    renderStep7()
+    renderStep8()
     await user.click(screen.getByTestId('print-btn'))
     expect(window.print).toHaveBeenCalledOnce()
   })

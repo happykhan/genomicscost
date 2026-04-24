@@ -17,7 +17,7 @@ export default function WizardShell({ step, children }: WizardShellProps) {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const canBack = step > 1
-  const canNext = step < 7
+  const canNext = step < 8
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6 pb-20 lg:pb-6">

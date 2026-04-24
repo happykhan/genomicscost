@@ -16,6 +16,7 @@ import Step4 from './pages/wizard/Step4'
 import Step5 from './pages/wizard/Step5'
 import Step6 from './pages/wizard/Step6'
 import Step7 from './pages/wizard/Step7'
+import Step8 from './pages/wizard/Step8'
 
 const AppIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="28" height="28">
@@ -159,6 +160,7 @@ function WizardTabBar() {
     { n: 5, label: t('step5_label') },
     { n: 6, label: t('step6_label') },
     { n: 7, label: t('step7_label') },
+    { n: 8, label: t('step8_label') },
   ]
 
   return (
@@ -307,7 +309,7 @@ function AppInner() {
 
   useEffect(() => {
     if (shareProjectLoaded) {
-      navigate('/wizard/7', { replace: true })
+      navigate('/wizard/8', { replace: true })
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -333,6 +335,7 @@ function AppInner() {
           <Route path="/wizard/5" element={<WizardShell step={5}><Step5 /></WizardShell>} />
           <Route path="/wizard/6" element={<WizardShell step={6}><Step6 /></WizardShell>} />
           <Route path="/wizard/7" element={<WizardShell step={7}><Step7 /></WizardShell>} />
+          <Route path="/wizard/8" element={<WizardShell step={8}><Step8 /></WizardShell>} />
           <Route path="/catalogue" element={<Catalogue />} />
           <Route path="/about" element={<About />} />
           {Object.keys(LANGUAGES).map(code => (

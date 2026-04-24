@@ -15,6 +15,7 @@ export default function Home() {
     { n: 5, label: t('step5_label'), desc: t('step5_desc') },
     { n: 6, label: t('step6_label'), desc: t('step6_desc') },
     { n: 7, label: t('step7_label'), desc: t('step7_desc') },
+    { n: 8, label: t('step8_label'), desc: t('step8_desc') },
   ]
 
   function handleNewProject() {
