@@ -17,11 +17,11 @@ const WF_STEPS: ConsumableWorkflowStep[] = [
 
 /** Abbreviated column headers for the 5 workflow checkboxes. */
 const WF_ABBREV: Record<ConsumableWorkflowStep, string> = {
-  sample_receipt: 'SR',
-  nucleic_acid_extraction: 'NA',
-  pcr_testing: 'PCR',
-  ngs_library_preparation: 'Lib',
-  sequencing: 'Seq',
+  sample_receipt: 'R',
+  nucleic_acid_extraction: 'N',
+  pcr_testing: 'P',
+  ngs_library_preparation: 'L',
+  sequencing: 'S',
 }
 
 /** Full names for tooltip on abbreviated headers. */
@@ -200,11 +200,11 @@ export default function Step3() {
           B. Reagents &amp; Consumables
         </div>
         <div className="card" style={{ overflowX: 'auto' }}>
-          <table className="w-full text-sm" style={{ minWidth: 800 }}>
+          <table className="w-full text-sm" style={{ minWidth: 700 }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--gx-border)', background: 'var(--gx-bg-alt)' }}>
                 {WF_STEPS.map(step => (
-                  <th key={step} className="px-2 py-1 text-center text-xs font-medium" style={{ color: 'var(--gx-text-muted)', width: 36 }} title={WF_FULL[step]}>
+                  <th key={step} className="px-2 py-1 text-center text-xs font-medium" style={{ color: 'var(--gx-text-muted)', width: 24 }} title={WF_FULL[step]}>
                     {WF_ABBREV[step]}
                   </th>
                 ))}

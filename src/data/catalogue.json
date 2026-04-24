@@ -2193,7 +2193,7 @@
     },
     {
       "name": "Desktop computer",
-      "category": "bioinformatics",
+      "category": "lab_equipment",
       "workflow_step": null,
       "workflow_steps": [
         "sequencing"

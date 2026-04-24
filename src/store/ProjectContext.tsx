@@ -115,7 +115,7 @@ function migrateProject(raw: unknown): Project {
   if ((p as Record<string, unknown>).facilityPctSequencing === undefined) {
     const facilityArr = p.facility as Array<{ pctSequencing?: number }> | undefined
     const firstPct = facilityArr?.[0]?.pctSequencing
-    ;(p as Record<string, unknown>).facilityPctSequencing = firstPct ?? 50
+    ;(p as Record<string, unknown>).facilityPctSequencing = firstPct ?? 100
   }
 
   // Ensure equipment has lifespanYears

@@ -362,49 +362,6 @@ export default function Step8() {
         </table>
       </div>
 
-      {/* Per-pathogen cost breakdown — shown whenever there are pathogens */}
-      {costs.perPathogenBreakdown.length > 0 && (
-        <div className="card mb-6" style={{ overflowX: 'auto' }}>
-          <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--gx-border)', background: 'var(--gx-bg-alt)' }}>
-            <h3 className="text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>Cost per sample by pathogen</h3>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)' }}>
-              Sequencing + library prep attributed from assignments; consumables and overheads split proportionally by sample volume.
-            </p>
-          </div>
-          <table className="w-full text-sm">
-            <thead>
-              <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
-                <th className="text-left px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Pathogen</th>
-                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Samples/yr</th>
-                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Seq. reagents</th>
-                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Library prep</th>
-                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Consumables</th>
-                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Overheads</th>
-                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Total annual</th>
-                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text)' }}>Cost/sample</th>
-              </tr>
-            </thead>
-            <tbody>
-              {costs.perPathogenBreakdown.map(pb => (
-                <tr key={pb.pathogenName} style={{ borderBottom: '1px solid var(--gx-border)' }}>
-                  <td className="px-4 py-2">
-                    <div className="text-xs font-medium" style={{ color: 'var(--gx-text)' }}>{pb.pathogenName}</div>
-                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)', textTransform: 'capitalize' }}>{pb.pathogenType}</div>
-                  </td>
-                  <td className="px-4 py-2 text-right text-xs" style={{ color: 'var(--gx-text-muted)' }}>{pb.samples.toLocaleString()}</td>
-                  <td className="px-4 py-2 text-right text-xs" style={{ color: 'var(--gx-text)' }}>${fmt(pb.sequencingReagents)}</td>
-                  <td className="px-4 py-2 text-right text-xs" style={{ color: 'var(--gx-text)' }}>${fmt(pb.libraryPrep)}</td>
-                  <td className="px-4 py-2 text-right text-xs" style={{ color: 'var(--gx-text)' }}>${fmt(pb.consumables)}</td>
-                  <td className="px-4 py-2 text-right text-xs" style={{ color: 'var(--gx-text-muted)' }}>${fmt(pb.sharedCosts + pb.incidentals)}</td>
-                  <td className="px-4 py-2 text-right text-xs font-medium" style={{ color: 'var(--gx-text)' }}>${fmt(pb.total)}</td>
-                  <td className="px-4 py-2 text-right font-bold" style={{ color: 'var(--gx-accent)' }}>${fmtCurrency(pb.costPerSample, 2)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
       {/* Charts — 4 donut charts matching WHO Excel Results tab */}
       {costs.total > 0 && (() => {
         const catData = [
@@ -476,6 +433,49 @@ export default function Step8() {
               <SequencerCompare project={project} />
             </div>
           )}
+        </div>
+      )}
+
+      {/* Per-pathogen cost breakdown */}
+      {costs.perPathogenBreakdown.length > 0 && (
+        <div className="card mb-6" style={{ overflowX: 'auto' }}>
+          <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--gx-border)', background: 'var(--gx-bg-alt)' }}>
+            <h3 className="text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>Cost per sample by pathogen</h3>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)' }}>
+              Sequencing + library prep attributed from assignments; consumables and overheads split proportionally by sample volume.
+            </p>
+          </div>
+          <table className="w-full text-sm">
+            <thead>
+              <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
+                <th className="text-left px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Pathogen</th>
+                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Samples/yr</th>
+                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Seq. reagents</th>
+                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Library prep</th>
+                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Consumables</th>
+                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Overheads</th>
+                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Total annual</th>
+                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text)' }}>Cost/sample</th>
+              </tr>
+            </thead>
+            <tbody>
+              {costs.perPathogenBreakdown.map(pb => (
+                <tr key={pb.pathogenName} style={{ borderBottom: '1px solid var(--gx-border)' }}>
+                  <td className="px-4 py-2">
+                    <div className="text-xs font-medium" style={{ color: 'var(--gx-text)' }}>{pb.pathogenName}</div>
+                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)', textTransform: 'capitalize' }}>{pb.pathogenType}</div>
+                  </td>
+                  <td className="px-4 py-2 text-right text-xs" style={{ color: 'var(--gx-text-muted)' }}>{pb.samples.toLocaleString()}</td>
+                  <td className="px-4 py-2 text-right text-xs" style={{ color: 'var(--gx-text)' }}>${fmt(pb.sequencingReagents)}</td>
+                  <td className="px-4 py-2 text-right text-xs" style={{ color: 'var(--gx-text)' }}>${fmt(pb.libraryPrep)}</td>
+                  <td className="px-4 py-2 text-right text-xs" style={{ color: 'var(--gx-text)' }}>${fmt(pb.consumables)}</td>
+                  <td className="px-4 py-2 text-right text-xs" style={{ color: 'var(--gx-text-muted)' }}>${fmt(pb.sharedCosts + pb.incidentals)}</td>
+                  <td className="px-4 py-2 text-right text-xs font-medium" style={{ color: 'var(--gx-text)' }}>${fmt(pb.total)}</td>
+                  <td className="px-4 py-2 text-right font-bold" style={{ color: 'var(--gx-accent)' }}>${fmtCurrency(pb.costPerSample, 2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 

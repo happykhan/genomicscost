@@ -11,7 +11,7 @@ export default function Step7() {
   const { t } = useTranslation()
   const { facility, transport, qms } = project
   const samplesPerYear = project.pathogens.reduce((sum, p) => sum + p.samplesPerYear, 0)
-  const facilityPct = (project.facilityPctSequencing ?? 50) / 100
+  const facilityPct = (project.facilityPctSequencing ?? 100) / 100
   const [qmsOpen, setQmsOpen] = useState(true)
 
   // ── Facility ─────────────────────────────────────────────────────────────────
@@ -78,7 +78,7 @@ export default function Step7() {
           </label>
           <input
             type="number"
-            value={project.facilityPctSequencing ?? 50}
+            value={project.facilityPctSequencing ?? 100}
             min={0}
             max={100}
             onChange={e => updateProject({ facilityPctSequencing: parseInt(e.target.value) || 0 })}
@@ -143,7 +143,7 @@ export default function Step7() {
             <div className="text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>${fmt(facilityAnnualAll)}</div>
           </div>
           <div className="p-3 rounded" style={{ background: 'var(--gx-bg-alt)', border: '1px solid var(--gx-border)' }}>
-            <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_annual_sequencing')} ({project.facilityPctSequencing ?? 50}%)</div>
+            <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_annual_sequencing')} ({project.facilityPctSequencing ?? 100}%)</div>
             <div className="text-sm font-semibold" style={{ color: 'var(--gx-accent)' }}>${fmt(facilityTotal)}</div>
           </div>
           <div className="p-3 rounded" style={{ background: 'var(--gx-bg-alt)', border: '1px solid var(--gx-border)' }}>

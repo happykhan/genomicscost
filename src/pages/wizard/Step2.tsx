@@ -480,7 +480,14 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
           <select
             className={inputClass}
             value={sequencer.libPrepKitName}
-            onChange={e => updateSequencer(index, { libPrepKitName: e.target.value })}
+            onChange={e => {
+              const kit = catalogue.library_prep_kits.find(k => k.name === e.target.value)
+              const updates: Partial<typeof sequencer> = { libPrepKitName: e.target.value }
+              if (kit?.unit_price_usd && kit?.pack_size) {
+                updates.libPrepCostPerSample = parseFloat((kit.unit_price_usd / kit.pack_size).toFixed(2))
+              }
+              updateSequencer(index, updates)
+            }}
           >
             <option value="">Custom / other kit</option>
             {libPrepKits.map(k => (
@@ -499,9 +506,9 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
         <div>
           <label className={labelClass}>
             {t('field_lib_prep_cost')}
-            {selectedLibPrepKit?.pack_size && (
+            {selectedLibPrepKit?.unit_price_usd && selectedLibPrepKit?.pack_size && (
               <span className="ml-2 normal-case font-normal" style={{ color: 'var(--gx-text-muted)' }}>
-                — enter local kit price ÷ {selectedLibPrepKit.pack_size} reactions
+                — catalogue ${selectedLibPrepKit.unit_price_usd} ÷ {selectedLibPrepKit.pack_size} rxn. Override with local price.
               </span>
             )}
           </label>
