@@ -255,6 +255,7 @@ export function calculateCosts(project: Project): CostBreakdown {
     }, 0)
 
   // WHO GCT: depreciation (age-adjusted) + 15% maintenance, both scaled by pctSequencing
+  // Only 'buy' items contribute — 'have' are sunk costs excluded from programme budget
   const annualEquipment = equipment
     .filter(e => e.status === 'buy')
     .reduce((sum, e) => {

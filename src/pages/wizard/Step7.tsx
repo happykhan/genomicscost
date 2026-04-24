@@ -54,7 +54,7 @@ export default function Step7() {
   const facilityTransportTotal = facilityTotal + transportTotal
   const facilityTransportPerSample = samplesPerYear > 0 ? facilityTransportTotal / samplesPerYear : 0
 
-  const qmsTotal = qms.filter(q => q.enabled).reduce((s, q) => s + q.costUsd * q.quantity, 0)
+  const qmsTotal = qms.filter(q => q.enabled).reduce((s, q) => s + q.costUsd * q.quantity * (q.pctSequencing ?? 100) / 100, 0)
 
   return (
     <div>
