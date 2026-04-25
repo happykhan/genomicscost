@@ -216,7 +216,7 @@ export default function Step3() {
                 <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Qty/sample · samples/unit</th>
                 <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_unit_cost')}</th>
                 <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual')}</th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)', whiteSpace: 'nowrap' }}>Dist/wf</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)', whiteSpace: 'nowrap' }}>Cost/workflow step</th>
                 <th className="px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_on')}</th>
                 <th className="px-3 py-2"></th>
               </tr>
