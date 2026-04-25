@@ -105,6 +105,20 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
     sequencer.customLibPrepMaxBarcodes,
   ])
 
+  // Auto-fill coverageX from highest required coverage among assigned pathogens
+  useEffect(() => {
+    if (sequencer.coverageXUserSet) return
+    const active = assignedPathogens.length > 0 ? assignedPathogens : pathogens
+    if (active.length === 0) return
+    const maxCoverage = active.reduce((max, p) => {
+      const cat = catalogue.pathogens.find(cp => cp.name === p.pathogenName)
+      return cat ? Math.max(max, cat.required_coverage_x) : max
+    }, 0)
+    if (maxCoverage > 0 && maxCoverage !== sequencer.coverageX) {
+      updateSequencer(index, { coverageX: maxCoverage })
+    }
+  }, [sequencer.assignments, pathogens, sequencer.coverageXUserSet]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const PLATFORM_PREFIX: Record<string, string> = {
     illumina: 'Illumina',
     ont: 'ONT',
@@ -427,15 +441,31 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className={labelClass}>{t('field_coverage')}<Tooltip content={t('tooltip_coverage')} /></label>
+              <label className={labelClass} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                {t('field_coverage')}<Tooltip content={t('tooltip_coverage')} />
+                {!sequencer.coverageXUserSet && (
+                  <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text-muted)', border: '1px solid var(--gx-border)', fontWeight: 400 }}>auto</span>
+                )}
+              </label>
               <input
                 type="number"
                 className={inputClass}
                 value={sequencer.coverageX}
                 min={1}
-                onChange={e => updateSequencer(index, { coverageX: (v => isNaN(v) ? 1 : v)(parseInt(e.target.value)) })}
+                onChange={e => { const v = parseInt(e.target.value); updateSequencer(index, { coverageX: isNaN(v) ? 1 : v, coverageXUserSet: true }) }}
               />
-              <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>{t('note_coverage_help')}</div>
+              {sequencer.coverageXUserSet && (
+                <button
+                  className="text-xs mt-1"
+                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--gx-text-muted)', textDecoration: 'underline' }}
+                  onClick={() => updateSequencer(index, { coverageXUserSet: false })}
+                >
+                  reset to auto
+                </button>
+              )}
+              {!sequencer.coverageXUserSet && (
+                <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>{t('note_coverage_help')}</div>
+              )}
             </div>
             <div>
               <label className={labelClass}>{t('field_samples_per_run')}</label>

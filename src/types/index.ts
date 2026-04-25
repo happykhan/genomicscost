@@ -117,6 +117,8 @@ export interface SequencerConfig {
   // Custom lib prep specs (used when libPrepKitName === 'Other library preparation kit')
   customLibPrepMaxBarcodes?: number
   customLibPrepBarcodesPerPack?: number
+  // True when user has manually overridden coverageX; false/absent = auto from assignments
+  coverageXUserSet?: boolean
 }
 
 export type EquipmentStatus = 'buy' | 'have' | 'skip'
