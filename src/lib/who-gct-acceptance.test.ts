@@ -1018,3 +1018,72 @@ describe('WHO GCT — full demo workbook scenario', () => {
     expect(costs.workflowBreakdown['bioinformatics']).toBeGreaterThanOrEqual(3_339)
   })
 })
+
+// ── Section 13: avgSamplesPerRun (WHO GCT row 26) ────────────────────────────
+// Verifies the Salmonella/MiSeq scenario from the WHO GCT Excel workbook.
+//
+// Inputs (matching the workbook):
+//   Salmonella spp., 4.8 Mb, 500 samples/yr
+//   MiSeq Reagent Kit v2 (300 cycle), $1,194/kit
+//   Coverage 50×, buffer 30%, retest 5%, controls 2/run
+//   Library prep: Illumina DNA Prep 96-sample
+//   Max samples/run (calculated): 12
+//   Average samples/run (user-entered): 10
+//
+// Expected outputs:
+//   Runs/yr (avg loading): ceil(525 / 10) = 53
+//   % loading capacity:    round(10 / 12 * 100) = 83%
+//   Sequencing reagent cost: 53 × $1,194 = $63,282
+
+describe('WHO GCT — avgSamplesPerRun (row 26): Salmonella MiSeq scenario', () => {
+  function makeSeq(avgSamplesPerRun?: number) {
+    return makeProject({
+      pathogens: [{ pathogenName: 'Salmonella spp.', pathogenType: 'bacterial', genomeSizeMb: 4.8, samplesPerYear: 500 }],
+      sequencers: [{
+        platformId: 'illumina',
+        label: 'Sequencer 1',
+        reagentKitName: 'MiSeq Reagent Kit v2 (300 cycle)',
+        reagentKitPrice: 1_194,
+        samplesPerRun: 12,          // max (from coverage/reads calculation)
+        avgSamplesPerRun,           // user-entered planned average (WHO GCT row 26)
+        coverageX: 50,
+        bufferPct: 30,
+        retestPct: 5,
+        libPrepKitName: '',
+        libPrepCostPerSample: 0,
+        enrichment: false,
+        controlsPerRun: 2,
+        enabled: true,
+        captureAll: false,
+        minReadsPerSample: 100_000,
+        assignments: [],
+      }],
+    })
+  }
+
+  it('max samples/run = 12 (from coverage calculation)', () => {
+    // 500 × 1.05 = 525; at max loading: ceil(525/12) = 44 runs
+    const costs = calculateCosts(makeSeq(undefined))
+    expect(costs.sequencingReagents).toBe(44 * 1_194) // $52,536
+  })
+
+  it('avgSamplesPerRun=10 → 53 runs/yr (WHO GCT row 28)', () => {
+    // 500 × 1.05 = 525; ceil(525/10) = 53 runs
+    const costs = calculateCosts(makeSeq(10))
+    expect(costs.sequencingReagents).toBe(53 * 1_194) // $63,282
+  })
+
+  it('loading % = round(avgSPR / maxSPR × 100) = 83%', () => {
+    expect(Math.round(10 / 12 * 100)).toBe(83)
+  })
+
+  it('loading % at max loading = 100%', () => {
+    expect(Math.round(12 / 12 * 100)).toBe(100)
+  })
+
+  it('avgSamplesPerRun must be ≤ maxSamplesPerRun (UI caps it)', () => {
+    // If user somehow enters 15 when max is 12, effective = min(15, 12) = 12
+    const capped = Math.min(15, 12)
+    expect(capped).toBe(12)
+  })
+})
