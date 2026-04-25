@@ -102,6 +102,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
     sequencer.controlsPerRun, isCaptureAll, sequencer.minReadsPerSample,
     sequencer.libPrepKitName, sequencer.assignments,
     sequencer.customKitMaxOutputMb, sequencer.customKitReadLengthBp,
+    sequencer.customLibPrepMaxBarcodes,
   ])
 
   const PLATFORM_PREFIX: Record<string, string> = {
