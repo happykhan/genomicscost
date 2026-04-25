@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useProject } from '../../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
 import { getEffectiveCatalogue } from '../../lib/catalogue'
@@ -44,6 +45,7 @@ function isViralReagent(name: string): boolean {
 export default function Step3() {
   const { project, updateProject, costs } = useProject()
   const { t } = useTranslation()
+  const [confirmClear, setConfirmClear] = useState(false)
   const catalogue = getEffectiveCatalogue()
   const { consumables } = project
   const samplesPerYear = project.pathogens.reduce((sum, p) => sum + p.samplesPerYear, 0)
@@ -396,13 +398,42 @@ export default function Step3() {
 
       {/* Section C: Summary */}
       <div className="flex justify-between items-center mt-4">
-        <button
-          onClick={addConsumable}
-          className="px-4 py-2 rounded text-sm font-medium"
-          style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
-        >
-          {t('btn_add')}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={addConsumable}
+            className="px-4 py-2 rounded text-sm font-medium"
+            style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
+          >
+            {t('btn_add')}
+          </button>
+          {!confirmClear ? (
+            <button
+              onClick={() => setConfirmClear(true)}
+              className="px-4 py-2 rounded text-sm font-medium"
+              style={{ background: 'none', color: 'var(--gx-text-muted)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
+            >
+              Clear all
+            </button>
+          ) : (
+            <span className="flex items-center gap-2 text-sm">
+              <span style={{ color: '#92400e' }}>Remove all {consumables.length} items?</span>
+              <button
+                onClick={() => { updateProject({ consumables: [] }); setConfirmClear(false) }}
+                className="px-3 py-1 rounded text-xs font-medium"
+                style={{ background: '#dc2626', color: '#fff', border: 'none', cursor: 'pointer' }}
+              >
+                Yes, clear
+              </button>
+              <button
+                onClick={() => setConfirmClear(false)}
+                className="px-3 py-1 rounded text-xs font-medium"
+                style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
+              >
+                Cancel
+              </button>
+            </span>
+          )}
+        </div>
         <div className="text-right text-sm" style={{ color: 'var(--gx-text)' }}>
           <div className="text-xs mb-1" style={{ color: 'var(--gx-text-muted)' }}>
             Sequencing reagents (Step 2): <span style={{ color: 'var(--gx-accent)' }}>${fmt(sequencingReagentsTotal)}</span>
