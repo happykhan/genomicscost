@@ -514,8 +514,9 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
             : pathogens.reduce((s, p) => s + p.samplesPerYear, 0)
           const samplesWithRetests = assignedSamples * (1 + (sequencer.retestPct ?? 0) / 100)
           const maxSPR = Math.max(1, sequencer.samplesPerRun)
-          const avgSPR = Math.max(1, sequencer.avgSamplesPerRun ?? maxSPR)
           const runsMax = Math.ceil(samplesWithRetests / maxSPR)
+          const trueAvgSPR = runsMax > 0 ? samplesWithRetests / runsMax : maxSPR
+          const avgSPR = Math.max(1, sequencer.avgSamplesPerRun ?? trueAvgSPR)
           const runsAvg = Math.ceil(samplesWithRetests / avgSPR)
           const loadingPct = Math.round(avgSPR / maxSPR * 100)
           return (
