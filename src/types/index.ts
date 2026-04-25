@@ -114,6 +114,9 @@ export interface SequencerConfig {
   customKitMaxOutputMb?: number
   customKitReadLengthBp?: number
   customKitPacksPerRun?: number
+  // Custom lib prep specs (used when libPrepKitName === 'Other library preparation kit')
+  customLibPrepMaxBarcodes?: number
+  customLibPrepBarcodesPerPack?: number
 }
 
 export type EquipmentStatus = 'buy' | 'have' | 'skip'

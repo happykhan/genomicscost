@@ -64,7 +64,10 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
 
   // Barcoding limit from selected lib prep kit
   const selectedLibPrepKit = catalogue.library_prep_kits.find(k => k.name === sequencer.libPrepKitName)
-  const barcodingLimit = selectedLibPrepKit?.barcoding_limit ?? Infinity
+  const isCustomLibPrep = sequencer.libPrepKitName === 'Other library preparation kit'
+  const barcodingLimit = isCustomLibPrep
+    ? (sequencer.customLibPrepMaxBarcodes ?? Infinity)
+    : (selectedLibPrepKit?.barcoding_limit ?? Infinity)
 
   // Auto-calc samplesPerRun using weighted multi-pathogen formula (Annex 2)
   // Build assigned pathogen subset for run sizing
@@ -437,6 +440,36 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
                   {t('label_effective')}
                 </span>
               </div>
+              {(() => {
+                const p = (assignedPathogens.length > 0 ? assignedPathogens : pathogens)[0]
+                if (!p || !selectedKit) return null
+                const buffer = 1 + (sequencer.bufferPct ?? 0) / 100
+                if (selectedKit.max_reads_per_flowcell && selectedKit.read_length_bp) {
+                  const readsFromCoverage = (p.genomeSizeMb * 1e6 * sequencer.coverageX) / selectedKit.read_length_bp
+                  const minReads = p.pathogenType === 'bacterial'
+                    ? (p.genomeSizeMb <= 5 ? 750_000 : 1_250_000)
+                    : (p.genomeSizeMb <= 0.03 ? 100_000 : 150_000)
+                  const binding = readsFromCoverage >= minReads ? 'coverage' : 'min-reads'
+                  return (
+                    <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>
+                      Binding constraint: {binding === 'coverage'
+                        ? `coverage (${Math.round(readsFromCoverage).toLocaleString()} reads/sample)`
+                        : `minimum reads floor (${minReads.toLocaleString()} reads; coverage only needs ${Math.round(readsFromCoverage).toLocaleString()})`
+                      }
+                      {barcodingLimit < Infinity && sequencer.samplesPerRun >= barcodingLimit && ' · barcoding limit'}
+                    </div>
+                  )
+                }
+                if (selectedKit.max_output_mb) {
+                  return (
+                    <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>
+                      Binding constraint: coverage ({(p.genomeSizeMb * sequencer.coverageX * buffer).toFixed(1)} Mb/sample)
+                      {barcodingLimit < Infinity && sequencer.samplesPerRun >= barcodingLimit && ' · barcoding limit'}
+                    </div>
+                  )
+                }
+                return null
+              })()}
             </div>
           </div>
         )}
@@ -573,11 +606,34 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
             {libPrepKits.map(k => (
               <option key={k.name} value={k.name}>{k.name}</option>
             ))}
+            <option value="Other library preparation kit">Other library preparation kit</option>
           </select>
           {selectedLibPrepKit && (
             <div className="text-xs mt-1 flex gap-4" style={{ color: 'var(--gx-text-muted)' }}>
               {selectedLibPrepKit.pack_size && <span>Pack size: {selectedLibPrepKit.pack_size} reactions</span>}
               {selectedLibPrepKit.barcoding_limit && <span>Barcoding limit: {selectedLibPrepKit.barcoding_limit}</span>}
+            </div>
+          )}
+          {isCustomLibPrep && (
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className={labelClass}>Max barcodes available (total)</label>
+                <input type="number" min={1} className={inputClass}
+                  value={sequencer.customLibPrepMaxBarcodes ?? ''}
+                  placeholder="e.g. 96, 384, 768"
+                  onChange={e => { const v = parseInt(e.target.value); updateSequencer(index, { customLibPrepMaxBarcodes: isNaN(v) ? undefined : v }) }}
+                />
+                <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>Limits samples per run</div>
+              </div>
+              <div>
+                <label className={labelClass}>Barcodes per pack</label>
+                <input type="number" min={1} className={inputClass}
+                  value={sequencer.customLibPrepBarcodesPerPack ?? ''}
+                  placeholder="e.g. 96"
+                  onChange={e => { const v = parseInt(e.target.value); updateSequencer(index, { customLibPrepBarcodesPerPack: isNaN(v) ? undefined : v }) }}
+                />
+                <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>Used to calculate kits needed/yr</div>
+              </div>
             </div>
           )}
         </div>
@@ -894,6 +950,32 @@ export default function Step2() {
       >
         {t('btn_add_sequencer')}
       </button>
+
+      {/* Totals across all sequencers */}
+      {(() => {
+        const totalSamples = project.pathogens.reduce((s, p) => s + p.samplesPerYear, 0)
+        const totalReactions = sequencers
+          .filter(s => s.enabled)
+          .reduce((sum, seq) => {
+            const hasAssignments = Array.isArray(seq.assignments) && seq.assignments.length > 0
+            const assigned = hasAssignments
+              ? seq.assignments.reduce((s, a) => s + (a.samples ?? 0), 0)
+              : totalSamples
+            return sum + Math.ceil(assigned * (1 + (seq.retestPct ?? 0) / 100))
+          }, 0)
+        return (
+          <div className="card p-4 mt-2 grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total reactions across all sequencers (incl. retests)</div>
+              <div className="text-lg font-bold mt-0.5" style={{ color: 'var(--gx-text)' }}>{totalReactions.toLocaleString()}</div>
+            </div>
+            <div>
+              <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total samples sequenced across all sequencers</div>
+              <div className="text-lg font-bold mt-0.5" style={{ color: 'var(--gx-accent)' }}>{totalSamples.toLocaleString()}</div>
+            </div>
+          </div>
+        )
+      })()}
     </div>
   )
 }
