@@ -384,16 +384,27 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
           )}
         </div>
 
-        {/* Kit price override */}
-        <div>
-          <label className={labelClass}>{t('field_kit_price')}</label>
-          <input
-            type="number"
-            className={inputClass}
-            value={sequencer.reagentKitPrice}
-            min={0}
-            onChange={e => updateSequencer(index, { reagentKitPrice: parseFloat(e.target.value) || 0 })}
-          />
+        {/* Kit price + derived per-sample */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className={labelClass}>{t('field_kit_price')}</label>
+            <input
+              type="number"
+              className={inputClass}
+              value={sequencer.reagentKitPrice}
+              min={0}
+              onChange={e => updateSequencer(index, { reagentKitPrice: parseFloat(e.target.value) || 0 })}
+            />
+          </div>
+          <div>
+            <label className={labelClass}>Per sample (at max loading)</label>
+            <div className="p-2 text-sm rounded" style={{ border: '1px solid var(--gx-border)', background: 'var(--gx-bg-alt)', color: 'var(--gx-text)' }}>
+              {sequencer.samplesPerRun > 0
+                ? `$${(sequencer.reagentKitPrice / sequencer.samplesPerRun).toFixed(2)}`
+                : '—'}
+              <span className="text-xs ml-2" style={{ color: 'var(--gx-text-muted)' }}>= kit ÷ {sequencer.samplesPerRun} samples</span>
+            </div>
+          </div>
         </div>
 
         {/* Feature 7: capture-all mode — show min reads instead of coverage */}
@@ -637,25 +648,46 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
           )}
         </div>
 
-        {/* Library prep cost per sample — always shown so user can set local price */}
-        <div>
-          <label className={labelClass}>
-            {t('field_lib_prep_cost')}
-            {selectedLibPrepKit?.unit_price_usd && selectedLibPrepKit?.pack_size && (
-              <span className="ml-2 normal-case font-normal" style={{ color: 'var(--gx-text-muted)' }}>
-                — catalogue ${selectedLibPrepKit.unit_price_usd} ÷ {selectedLibPrepKit.pack_size} rxn. Override with local price.
-              </span>
-            )}
-          </label>
-          <input
-            type="number"
-            className={inputClass}
-            value={sequencer.libPrepCostPerSample}
-            min={0}
-            step={0.5}
-            onChange={e => updateSequencer(index, { libPrepCostPerSample: parseFloat(e.target.value) || 0 })}
-          />
-        </div>
+        {/* Library prep cost — synced kit price ↔ per-sample via pack size */}
+        {(() => {
+          const packSize = isCustomLibPrep
+            ? (sequencer.customLibPrepBarcodesPerPack ?? 0)
+            : (selectedLibPrepKit?.pack_size ?? 0)
+          const kitPrice = packSize > 0 ? sequencer.libPrepCostPerSample * packSize : 0
+          return (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass}>Library prep kit price (USD)</label>
+                <input
+                  type="number"
+                  className={inputClass}
+                  value={packSize > 0 ? parseFloat(kitPrice.toFixed(2)) : ''}
+                  min={0}
+                  step={1}
+                  placeholder={packSize === 0 ? 'Enter pack size first' : undefined}
+                  disabled={packSize === 0}
+                  onChange={e => {
+                    const v = parseFloat(e.target.value)
+                    if (!isNaN(v) && packSize > 0) updateSequencer(index, { libPrepCostPerSample: parseFloat((v / packSize).toFixed(4)) })
+                  }}
+                />
+                {packSize > 0 && <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>÷ {packSize} reactions</div>}
+              </div>
+              <div>
+                <label className={labelClass}>{t('field_lib_prep_cost')}</label>
+                <input
+                  type="number"
+                  className={inputClass}
+                  value={sequencer.libPrepCostPerSample}
+                  min={0}
+                  step={0.01}
+                  onChange={e => updateSequencer(index, { libPrepCostPerSample: parseFloat(e.target.value) || 0 })}
+                />
+                {packSize > 0 && <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>× {packSize} reactions = kit price</div>}
+              </div>
+            </div>
+          )
+        })()}
 
         {/* Enrichment toggle */}
         <div>
