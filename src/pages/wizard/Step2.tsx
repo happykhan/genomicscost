@@ -561,8 +561,9 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
                     type="number"
                     min={1}
                     max={maxSPR}
-                    value={sequencer.avgSamplesPerRun ?? maxSPR}
-                    onChange={e => { const v = parseInt(e.target.value); updateSequencer(index, { avgSamplesPerRun: isNaN(v) ? maxSPR : Math.min(v, maxSPR) }) }}
+                    value={sequencer.avgSamplesPerRun ?? ''}
+                    placeholder={String(Math.round(trueAvgSPR))}
+                    onChange={e => { const v = parseInt(e.target.value); updateSequencer(index, { avgSamplesPerRun: isNaN(v) ? undefined : Math.min(v, maxSPR) }) }}
                     style={{ width: 60, textAlign: 'right', border: '1px solid var(--gx-border)', borderRadius: 'var(--gx-radius)', background: 'var(--gx-bg)', color: 'var(--gx-text)', padding: '1px 4px', fontSize: '0.75rem' }}
                   />
                   <span className="ml-1" style={{ color: 'var(--gx-text-muted)' }}>/ {maxSPR} max</span>
