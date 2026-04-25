@@ -602,7 +602,6 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
               updateSequencer(index, updates)
             }}
           >
-            <option value="">Custom / other kit</option>
             {libPrepKits.map(k => (
               <option key={k.name} value={k.name}>{k.name}</option>
             ))}
