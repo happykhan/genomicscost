@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 import {
@@ -1186,6 +1187,7 @@ function BioinformaticsTab({ onRefresh }: { onRefresh: () => void }) {
 
 export default function Catalogue() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<TabId>('reagent_kits')
   const [refreshKey, setRefreshKey] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -1266,6 +1268,13 @@ export default function Catalogue() {
     <div className="max-w-6xl mx-auto px-4 py-8" key={refreshKey}>
       <div className="flex items-start justify-between mb-6 flex-wrap gap-3">
         <div>
+          <button
+            onClick={() => navigate('/')}
+            className="text-xs mb-2 flex items-center gap-1"
+            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--gx-text-muted)' }}
+          >
+            ← Back to costing tool
+          </button>
           <h1 className="text-xl font-bold" style={{ color: 'var(--gx-text)' }}>{t('catalogue_title')}</h1>
           <p className="text-sm mt-1" style={{ color: 'var(--gx-text-muted)' }}>
             {t('catalogue_desc')}

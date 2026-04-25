@@ -283,7 +283,6 @@ function NavLinks() {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
       <button onClick={() => navigate('/catalogue')} style={linkStyle('/catalogue')}>{t('nav_catalogue')}</button>
-      <button onClick={() => navigate('/about')} style={linkStyle('/about')}>{t('nav_about')}</button>
       <GlobePicker />
     </div>
   )
@@ -299,12 +298,6 @@ function MobileNavLinks() {
         style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: '4px 0', color: 'var(--gx-text)', fontSize: '0.85rem' }}
       >
         {t('nav_catalogue')}
-      </button>
-      <button
-        onClick={() => navigate('/about')}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: '4px 0', color: 'var(--gx-text)', fontSize: '0.85rem' }}
-      >
-        {t('nav_about')}
       </button>
       <MobileLangPicker />
     </div>
