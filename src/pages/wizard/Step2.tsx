@@ -546,7 +546,9 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
           const maxSPR = Math.max(1, sequencer.samplesPerRun)
           const runsMax = Math.ceil(samplesWithRetests / maxSPR)
           const trueAvgSPR = runsMax > 0 ? samplesWithRetests / runsMax : maxSPR
-          const avgSPR = Math.max(1, sequencer.avgSamplesPerRun ?? trueAvgSPR)
+          // treat stored value equal to maxSPR as unset (legacy default from old bug)
+          const storedAvg = sequencer.avgSamplesPerRun === maxSPR ? undefined : sequencer.avgSamplesPerRun
+          const avgSPR = Math.max(1, storedAvg ?? trueAvgSPR)
           const runsAvg = Math.ceil(samplesWithRetests / avgSPR)
           const loadingPct = Math.round(avgSPR / maxSPR * 100)
           return (
@@ -561,7 +563,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
                     type="number"
                     min={1}
                     max={maxSPR}
-                    value={sequencer.avgSamplesPerRun ?? ''}
+                    value={storedAvg ?? ''}
                     placeholder={String(Math.round(trueAvgSPR))}
                     onChange={e => { const v = parseInt(e.target.value); updateSequencer(index, { avgSamplesPerRun: isNaN(v) ? undefined : Math.min(v, maxSPR) }) }}
                     style={{ width: 60, textAlign: 'right', border: '1px solid var(--gx-border)', borderRadius: 'var(--gx-radius)', background: 'var(--gx-bg)', color: 'var(--gx-text)', padding: '1px 4px', fontSize: '0.75rem' }}
