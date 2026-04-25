@@ -156,7 +156,6 @@ export default function Step3() {
           </div>
           <div className="card" style={{ border: '1px solid var(--gx-border)', borderRadius: 'var(--gx-radius)', background: 'var(--gx-bg-alt)', padding: '12px 16px' }}>
             {enabledSequencers.map((seq, idx) => {
-              // Calculate runs per year for this sequencer
               const hasAssignments = Array.isArray(seq.assignments) && seq.assignments.length > 0
               const assignedSamples = hasAssignments
                 ? seq.assignments.reduce((sum, a) => sum + (a.samples ?? 0), 0)
@@ -165,12 +164,21 @@ export default function Step3() {
               const maxSPR = Math.max(1, seq.samplesPerRun ?? 1)
               const effectiveSPR = Math.max(1, seq.avgSamplesPerRun ?? maxSPR)
               const runsPerYear = Math.ceil(samplesWithRetests / effectiveSPR)
+              const packsPerRun = seq.customKitPacksPerRun ?? 1
+              const kitsPerYear = Math.ceil(runsPerYear * packsPerRun)
               const reagentCostAnnual = runsPerYear * (seq.reagentKitPrice ?? 0)
               const libPrepCostAnnual = samplesWithRetests * (seq.libPrepCostPerSample ?? 0)
+              const isCustomKit = seq.reagentKitName === 'Other sequencing kit'
 
-              // Look up platform name
               const platform = catalogue.platforms.find(p => p.id === seq.platformId)
               const platformName = platform?.name ?? seq.platformId
+
+              // Library prep kits per year
+              const selectedLibKit = catalogue.library_prep_kits.find(k => k.name === seq.libPrepKitName)
+              const libPackSize = seq.libPrepKitName === 'Other library preparation kit'
+                ? (seq.customLibPrepBarcodesPerPack ?? 0)
+                : (selectedLibKit?.pack_size ?? 0)
+              const libKitsPerYear = libPackSize > 0 ? Math.ceil(samplesWithRetests / libPackSize) : null
 
               return (
                 <div key={idx} className={idx > 0 ? 'mt-3 pt-3' : ''} style={idx > 0 ? { borderTop: '1px solid var(--gx-border)' } : undefined}>
@@ -179,9 +187,17 @@ export default function Step3() {
                   </div>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs" style={{ color: 'var(--gx-text-muted)' }}>
                     <div>Reagent kit: {seq.reagentKitName || '—'}</div>
-                    <div className="text-right">{runsPerYear} runs/yr = <span style={{ color: 'var(--gx-accent)' }}>${fmt(reagentCostAnnual)}</span></div>
+                    <div className="text-right">
+                      {runsPerYear} runs/yr
+                      {isCustomKit && kitsPerYear !== runsPerYear && <span> · {kitsPerYear} kits/yr</span>}
+                      {!isCustomKit && <span> · {kitsPerYear} kits/yr</span>}
+                      {' '}= <span style={{ color: 'var(--gx-accent)' }}>${fmt(reagentCostAnnual)}</span>
+                    </div>
                     <div>Library prep: {seq.libPrepKitName || '—'}</div>
-                    <div className="text-right">${fmt(seq.libPrepCostPerSample ?? 0)}/sample = <span style={{ color: 'var(--gx-accent)' }}>${fmt(libPrepCostAnnual)}</span></div>
+                    <div className="text-right">
+                      {libKitsPerYear !== null && <span>{libKitsPerYear} kits/yr · </span>}
+                      ${fmt(seq.libPrepCostPerSample ?? 0)}/sample = <span style={{ color: 'var(--gx-accent)' }}>${fmt(libPrepCostAnnual)}</span>
+                    </div>
                   </div>
                 </div>
               )
