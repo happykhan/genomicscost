@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useId } from 'react'
 import { useProject } from '../../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
 import { getEffectiveCatalogue } from '../../lib/catalogue'
@@ -40,6 +40,40 @@ const VIRAL_KEYWORDS = ['viral transport', 'vtm', 'rna extraction', 'rt-pcr']
 function isViralReagent(name: string): boolean {
   const lower = name.toLowerCase()
   return VIRAL_KEYWORDS.some(kw => lower.includes(kw))
+}
+
+function ConsumableNameInput({ value, allNames, onChange, placeholder }: {
+  value: string
+  allNames: string[]
+  onChange: (name: string) => void
+  placeholder?: string
+}) {
+  const [query, setQuery] = useState(value)
+  const id = useId()
+
+  const filtered = query.length >= 2
+    ? allNames.filter(n => n.toLowerCase().includes(query.toLowerCase())).slice(0, 50)
+    : []
+
+  return (
+    <>
+      <input
+        type="text"
+        list={id}
+        value={query}
+        placeholder={placeholder ?? 'Type to search catalogue…'}
+        onChange={e => {
+          setQuery(e.target.value)
+          onChange(e.target.value)
+        }}
+        className={inputClass}
+        style={{ width: '100%', minWidth: 120 }}
+      />
+      <datalist id={id}>
+        {filtered.map(n => <option key={n} value={n} />)}
+      </datalist>
+    </>
+  )
 }
 
 export default function Step3() {
@@ -206,12 +240,7 @@ export default function Step3() {
         </div>
       )}
 
-      {/* Datalist for catalogue autocomplete */}
-      <datalist id="catalogue-reagents">
-        {catalogueReagentNames.map(name => (
-          <option key={name} value={name} />
-        ))}
-      </datalist>
+
 
       {/* Section B: Reagents & Consumables Table */}
       <div className="mb-6">
@@ -304,14 +333,10 @@ export default function Step3() {
                     {/* Item name */}
                     <td className="px-3 py-2" style={{ color: 'var(--gx-text)' }}>
                       <div className="flex flex-col gap-1">
-                        <input
-                          type="text"
-                          list="catalogue-reagents"
+                        <ConsumableNameInput
                           value={item.name}
-                          placeholder="Type to search catalogue..."
-                          onChange={e => handleNameChange(idx, e.target.value)}
-                          className={inputClass}
-                          style={{ width: '100%', minWidth: 120 }}
+                          allNames={catalogueReagentNames}
+                          onChange={name => handleNameChange(idx, name)}
                         />
                         {showViralWarning && (
                           <span className="text-xs px-2 py-0.5 rounded-full inline-block" style={{
