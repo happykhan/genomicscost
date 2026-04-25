@@ -451,7 +451,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
                     : (p.genomeSizeMb <= 0.03 ? 100_000 : 150_000)
                   const binding = readsFromCoverage >= minReads ? 'coverage' : 'min-reads'
                   return (
-                    <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>
+                    <div className="text-xs mt-1" style={{ color: binding === 'min-reads' ? '#b45309' : 'var(--gx-text-muted)' }}>
                       Binding constraint: {binding === 'coverage'
                         ? `coverage (${Math.round(readsFromCoverage).toLocaleString()} reads/sample)`
                         : `minimum reads floor (${minReads.toLocaleString()} reads; coverage only needs ${Math.round(readsFromCoverage).toLocaleString()})`
