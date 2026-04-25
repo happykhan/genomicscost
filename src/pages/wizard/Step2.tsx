@@ -557,14 +557,17 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
               <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
                 <div style={{ color: 'var(--gx-text-muted)' }}>Runs/yr (max loading)</div>
                 <div className="text-right font-medium" style={{ color: 'var(--gx-text)' }}>{runsMax}</div>
-                <div style={{ color: 'var(--gx-text-muted)' }}>Avg samples/run</div>
+                <div style={{ color: 'var(--gx-text-muted)' }}>
+                  Avg samples/run
+                  <div className="font-normal" style={{ fontSize: '0.6rem', color: 'var(--gx-text-muted)', opacity: 0.7 }}>enter planned avg</div>
+                </div>
                 <div className="text-right">
                   <input
                     type="number"
                     min={1}
                     max={maxSPR}
                     value={storedAvg ?? ''}
-                    placeholder={String(Math.round(trueAvgSPR))}
+                    placeholder="—"
                     onChange={e => { const v = parseInt(e.target.value); updateSequencer(index, { avgSamplesPerRun: isNaN(v) ? undefined : Math.min(v, maxSPR) }) }}
                     style={{ width: 60, textAlign: 'right', border: '1px solid var(--gx-border)', borderRadius: 'var(--gx-radius)', background: 'var(--gx-bg)', color: 'var(--gx-text)', padding: '1px 4px', fontSize: '0.75rem' }}
                   />
