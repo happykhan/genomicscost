@@ -108,6 +108,12 @@ export interface SequencerConfig {
   minReadsPerSample: number
   // Feature 8: pathogen→sequencer assignment matrix
   assignments: SequencerAssignment[]
+  // WHO GCT row 26: user-entered average samples per run (may be less than max capacity)
+  avgSamplesPerRun?: number
+  // Custom kit specs (used when reagentKitName === 'Other sequencing kit')
+  customKitMaxOutputMb?: number
+  customKitReadLengthBp?: number
+  customKitPacksPerRun?: number
 }
 
 export type EquipmentStatus = 'buy' | 'have' | 'skip'

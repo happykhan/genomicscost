@@ -160,7 +160,8 @@ export default function Step3() {
                 ? seq.assignments.reduce((sum, a) => sum + (a.samples ?? 0), 0)
                 : samplesPerYear
               const samplesWithRetests = assignedSamples * (1 + (seq.retestPct ?? 0) / 100)
-              const effectiveSPR = Math.max(1, seq.samplesPerRun ?? 1)
+              const maxSPR = Math.max(1, seq.samplesPerRun ?? 1)
+              const effectiveSPR = Math.max(1, seq.avgSamplesPerRun ?? maxSPR)
               const runsPerYear = Math.ceil(samplesWithRetests / effectiveSPR)
               const reagentCostAnnual = runsPerYear * (seq.reagentKitPrice ?? 0)
               const libPrepCostAnnual = samplesWithRetests * (seq.libPrepCostPerSample ?? 0)

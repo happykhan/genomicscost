@@ -101,7 +101,7 @@ export default function Step1() {
               value={project.year}
               min={2020}
               max={2035}
-              onChange={e => updateProject({ year: parseInt(e.target.value) || 2025 })}
+              onChange={e => updateProject({ year: (v => isNaN(v) ? 2025 : v)(parseInt(e.target.value)) })}
             />
           </div>
         </div>
@@ -179,7 +179,7 @@ export default function Step1() {
                         className={inputClass}
                         value={entry.samplesPerYear}
                         min={1}
-                        onChange={e => updatePathogenEntry(index, { samplesPerYear: parseInt(e.target.value) || 1 })}
+                        onChange={e => updatePathogenEntry(index, { samplesPerYear: (v => isNaN(v) ? 1 : v)(parseInt(e.target.value)) })}
                         style={{ textAlign: 'right' }}
                       />
                     </td>
@@ -242,7 +242,7 @@ export default function Step1() {
                 value={project.exchangeRate}
                 min={0}
                 step={0.01}
-                onChange={e => updateProject({ exchangeRate: parseFloat(e.target.value) || 1 })}
+                onChange={e => { const v = parseFloat(e.target.value); updateProject({ exchangeRate: isNaN(v) ? 1 : v }) }}
               />
               <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>
                 {t('note_usd_default')}

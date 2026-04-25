@@ -221,7 +221,7 @@ export default function Step4() {
                           type="number"
                           value={item.quantity}
                           min={1}
-                          onChange={e => updateItem(item.idx, { quantity: parseInt(e.target.value) || 1 })}
+                          onChange={e => updateItem(item.idx, { quantity: (v => isNaN(v) ? 1 : v)(parseInt(e.target.value)) })}
                           className={inputClass}
                           style={{ width: 60, textAlign: 'center' }}
                         />
@@ -245,7 +245,7 @@ export default function Step4() {
                           value={item.lifespanYears ?? 5}
                           min={1}
                           max={30}
-                          onChange={e => updateItem(item.idx, { lifespanYears: parseInt(e.target.value) || 5 })}
+                          onChange={e => updateItem(item.idx, { lifespanYears: (v => isNaN(v) ? 5 : v)(parseInt(e.target.value)) })}
                           className={inputClass}
                           style={{ width: 60, textAlign: 'center' }}
                         />

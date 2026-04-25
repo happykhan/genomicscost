@@ -216,7 +216,7 @@ export default function Step6() {
                           <input type="number" value={item.pctUse} min={0} max={100} onChange={e => updateInhouseItem(idx, { pctUse: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 60, textAlign: 'right' }} />
                         </td>
                         <td className="px-3 py-2">
-                          <input type="number" value={item.lifespanYears} min={1} max={30} onChange={e => updateInhouseItem(idx, { lifespanYears: parseInt(e.target.value) || 1 })} className={inputClass} style={{ width: 60, textAlign: 'center' }} />
+                          <input type="number" value={item.lifespanYears} min={1} max={30} onChange={e => updateInhouseItem(idx, { lifespanYears: (v => isNaN(v) ? 1 : v)(parseInt(e.target.value)) })} className={inputClass} style={{ width: 60, textAlign: 'center' }} />
                         </td>
                         <td className="px-3 py-2">
                           <input type="number" value={item.ageYears} min={0} max={Math.max(0, (item.lifespanYears ?? 1) - 1)} onChange={e => updateInhouseItem(idx, { ageYears: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 60, textAlign: 'center' }} />

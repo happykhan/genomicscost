@@ -171,8 +171,9 @@ function calcSequencerCosts(
   if (!seq.enabled || assignedSamples <= 0) return { sequencingReagents: 0, libraryPrep: 0 }
 
   const samplesIncludingRetests = assignedSamples * (1 + (seq.retestPct ?? 0) / 100)
-  // samplesPerRun is already the effective count after controls (set by calculateSamplesPerRun)
-  const effectiveSamplesPerRun = Math.max(1, seq.samplesPerRun ?? 1)
+  // Use avgSamplesPerRun if set (WHO GCT row 26), otherwise fall back to max capacity
+  const maxSamplesPerRun = Math.max(1, seq.samplesPerRun ?? 1)
+  const effectiveSamplesPerRun = Math.max(1, seq.avgSamplesPerRun ?? maxSamplesPerRun)
   const runsNeeded = Math.ceil(samplesIncludingRetests / effectiveSamplesPerRun)
 
   return {

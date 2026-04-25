@@ -76,24 +76,29 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
   })()
 
   useEffect(() => {
-    if (!selectedKit) return
+    const isCustomKit = sequencer.reagentKitName === 'Other sequencing kit'
+    if (!selectedKit && !isCustomKit) return
+    const readLengthBp = isCustomKit ? (sequencer.customKitReadLengthBp ?? 0) : (selectedKit?.read_length_bp ?? 0)
+    const maxReadsPfc = isCustomKit ? 0 : (selectedKit?.max_reads_per_flowcell ?? 0)
+    const maxOutputMb = isCustomKit ? (sequencer.customKitMaxOutputMb ?? 0) : (selectedKit?.max_output_mb ?? 0)
     const calculated = calculateSamplesPerRunMulti(
       assignedPathogens.length > 0 ? assignedPathogens : pathogens,
       sequencer.coverageX,
-      selectedKit.read_length_bp ?? 0,
-      selectedKit.max_reads_per_flowcell ?? 0,
+      readLengthBp,
+      maxReadsPfc,
       sequencer.bufferPct,
       barcodingLimit,
       isCaptureAll,
       sequencer.minReadsPerSample ?? 100_000,
       sequencer.controlsPerRun ?? 0,
-      selectedKit.max_output_mb ?? 0,
+      maxOutputMb,
     )
     updateSequencer(index, { samplesPerRun: calculated })
   }, [ // eslint-disable-line react-hooks/exhaustive-deps
     sequencer.reagentKitName, pathogens, sequencer.coverageX, sequencer.bufferPct,
     sequencer.controlsPerRun, isCaptureAll, sequencer.minReadsPerSample,
     sequencer.libPrepKitName, sequencer.assignments,
+    sequencer.customKitMaxOutputMb, sequencer.customKitReadLengthBp,
   ])
 
   const PLATFORM_PREFIX: Record<string, string> = {
@@ -333,6 +338,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
             {kits.map(k => (
               <option key={k.name} value={k.name}>{k.name}</option>
             ))}
+            <option value="Other sequencing kit">Other sequencing kit</option>
           </select>
           {selectedKit && (
             <div className="text-xs mt-1 flex gap-4" style={{ color: 'var(--gx-text-muted)' }}>
@@ -342,6 +348,35 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
               }
               {selectedKit.read_length_bp && <span>{t('label_read_length')}: {selectedKit.read_length_bp} bp</span>}
               {selectedKit.unit_price_usd && <span>{t('label_list_price')}: ${selectedKit.unit_price_usd.toLocaleString()}</span>}
+            </div>
+          )}
+          {sequencer.reagentKitName === 'Other sequencing kit' && (
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className={labelClass}>Max flow cell output (Mb)</label>
+                <input type="number" min={0} className={inputClass}
+                  value={sequencer.customKitMaxOutputMb ?? ''}
+                  placeholder="e.g. 1200"
+                  onChange={e => { const v = parseFloat(e.target.value); updateSequencer(index, { customKitMaxOutputMb: isNaN(v) ? undefined : v }) }}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Read length (bp)</label>
+                <input type="number" min={0} className={inputClass}
+                  value={sequencer.customKitReadLengthBp ?? ''}
+                  placeholder="e.g. 150"
+                  onChange={e => { const v = parseInt(e.target.value); updateSequencer(index, { customKitReadLengthBp: isNaN(v) ? undefined : v }) }}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Kit packs per run</label>
+                <input type="number" min={0} step={0.1} className={inputClass}
+                  value={sequencer.customKitPacksPerRun ?? ''}
+                  placeholder="e.g. 1"
+                  onChange={e => { const v = parseFloat(e.target.value); updateSequencer(index, { customKitPacksPerRun: isNaN(v) ? undefined : v }) }}
+                />
+                <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>e.g. 0.2 if kit has 5 flow cells</div>
+              </div>
             </div>
           )}
         </div>
@@ -368,7 +403,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
               value={sequencer.minReadsPerSample ?? 100_000}
               min={1000}
               step={10000}
-              onChange={e => updateSequencer(index, { minReadsPerSample: parseInt(e.target.value) || 100_000 })}
+              onChange={e => updateSequencer(index, { minReadsPerSample: (v => isNaN(v) ? 100_000 : v)(parseInt(e.target.value)) })}
             />
             <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>
               {t('note_min_reads_usage')}
@@ -383,7 +418,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
                 className={inputClass}
                 value={sequencer.coverageX}
                 min={1}
-                onChange={e => updateSequencer(index, { coverageX: parseInt(e.target.value) || 1 })}
+                onChange={e => updateSequencer(index, { coverageX: (v => isNaN(v) ? 1 : v)(parseInt(e.target.value)) })}
               />
               <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>{t('note_coverage_help')}</div>
             </div>
@@ -425,6 +460,51 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
             </div>
           </div>
         )}
+
+        {/* WHO GCT rows 25–29: run capacity stats */}
+        {sequencer.samplesPerRun > 0 && (() => {
+          const hasAssignments = Array.isArray(sequencer.assignments) && sequencer.assignments.length > 0
+          const assignedSamples = hasAssignments
+            ? sequencer.assignments.reduce((s, a) => s + (a.samples ?? 0), 0)
+            : pathogens.reduce((s, p) => s + p.samplesPerYear, 0)
+          const samplesWithRetests = assignedSamples * (1 + (sequencer.retestPct ?? 0) / 100)
+          const maxSPR = Math.max(1, sequencer.samplesPerRun)
+          const avgSPR = Math.max(1, sequencer.avgSamplesPerRun ?? maxSPR)
+          const runsMax = Math.ceil(samplesWithRetests / maxSPR)
+          const runsAvg = Math.ceil(samplesWithRetests / avgSPR)
+          const loadingPct = Math.round(avgSPR / maxSPR * 100)
+          return (
+            <div className="card p-3" style={{ background: 'var(--gx-bg-alt)' }}>
+              <div className="text-xs font-semibold mb-2" style={{ color: 'var(--gx-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Run capacity</div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                <div style={{ color: 'var(--gx-text-muted)' }}>Runs/yr (max loading)</div>
+                <div className="text-right font-medium" style={{ color: 'var(--gx-text)' }}>{runsMax}</div>
+                <div style={{ color: 'var(--gx-text-muted)' }}>Avg samples/run</div>
+                <div className="text-right">
+                  <input
+                    type="number"
+                    min={1}
+                    max={maxSPR}
+                    value={sequencer.avgSamplesPerRun ?? maxSPR}
+                    onChange={e => { const v = parseInt(e.target.value); updateSequencer(index, { avgSamplesPerRun: isNaN(v) ? maxSPR : Math.min(v, maxSPR) }) }}
+                    style={{ width: 60, textAlign: 'right', border: '1px solid var(--gx-border)', borderRadius: 'var(--gx-radius)', background: 'var(--gx-bg)', color: 'var(--gx-text)', padding: '1px 4px', fontSize: '0.75rem' }}
+                  />
+                  <span className="ml-1" style={{ color: 'var(--gx-text-muted)' }}>/ {maxSPR} max</span>
+                </div>
+                <div style={{ color: 'var(--gx-text-muted)' }}>Runs/yr (avg loading)</div>
+                <div className="text-right font-medium" style={{ color: 'var(--gx-text)' }}>{runsAvg}</div>
+                <div style={{ color: 'var(--gx-text-muted)' }}>% loading capacity/run</div>
+                <div className="text-right font-medium" style={{ color: loadingPct < 50 ? '#f59e0b' : 'var(--gx-accent)' }}>{loadingPct}%</div>
+              </div>
+              {loadingPct < 50 && (
+                <div className="text-xs mt-2" style={{ color: '#b45309' }}>High reagent cost wastage — consider more samples per run.</div>
+              )}
+              {runsAvg > 52 && (
+                <div className="text-xs mt-2" style={{ color: '#b45309' }}>Consider higher-throughput sequencing items (&gt;52 runs/yr).</div>
+              )}
+            </div>
+          )
+        })()}
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* Buffer % slider */}
