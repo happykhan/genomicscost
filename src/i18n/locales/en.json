@@ -63,7 +63,7 @@
   "label_total_consumables": "Total consumables",
   "note_placeholder_costs": "Unit costs are placeholders ($5) — enter your actual local prices. Qty/sample is the number of units consumed per sample processed.",
   "step4_title": "Step 4: Equipment",
-  "step4_desc": "For each item, indicate if you need to buy it, already have it, or will skip it. Costs are amortised over the item's lifespan.",
+  "step4_desc": "For each item, indicate if you need to buy it, already have it, or will skip it. Annual running cost uses depreciation over lifespan + 15% maintenance. Full purchase price is shown separately as establishment cost on the results page.",
   "opt_buy": "Buy",
   "opt_have": "Have",
   "opt_skip": "Skip",

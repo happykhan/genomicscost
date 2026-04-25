@@ -299,19 +299,27 @@ export default function Step8() {
         <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--gx-border)', background: 'var(--gx-bg-alt)' }}>
           <h3 className="text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>{t('label_workflow_breakdown')}</h3>
         </div>
-        <table className="w-full text-sm">
+        <table className="w-full text-sm" style={{ tableLayout: 'fixed', minWidth: 320 }}>
+          <colgroup>
+            <col />
+            <col style={{ width: 90 }} />
+            {showLocalCurrency && <col style={{ width: 90 }} />}
+            <col style={{ width: 80 }} />
+            {showLocalCurrency && <col style={{ width: 80 }} />}
+            <col style={{ width: 44 }} />
+          </colgroup>
           <thead>
             <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
-              <th className="text-left px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_workflow_step')}</th>
-              <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual_usd')}</th>
+              <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_workflow_step')}</th>
+              <th className="text-right px-2 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Annual</th>
               {showLocalCurrency && (
-                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual_currency', { currency })}</th>
+                <th className="text-right px-2 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{currency}</th>
               )}
-              <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_cost_per_sample_usd')}</th>
+              <th className="text-right px-2 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>/sample</th>
               {showLocalCurrency && (
-                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_cost_per_sample_currency', { currency })}</th>
+                <th className="text-right px-2 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{currency}/sample</th>
               )}
-              <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>%</th>
+              <th className="text-right px-2 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>%</th>
             </tr>
           </thead>
           <tbody>
@@ -319,44 +327,44 @@ export default function Step8() {
               const perSample = samplesPerYear > 0 ? row.value / samplesPerYear : 0
               return (
                 <tr key={row.step} style={{ borderBottom: '1px solid var(--gx-border)' }}>
-                  <td className="px-4 py-2" style={{ color: 'var(--gx-text)' }}>{row.label}</td>
-                  <td className="px-4 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>${fmt(row.value)}</td>
+                  <td className="px-3 py-2 text-xs" style={{ color: 'var(--gx-text)' }}>{row.label}</td>
+                  <td className="px-2 py-2 text-right text-xs font-medium" style={{ color: 'var(--gx-text)' }}>${fmt(row.value)}</td>
                   {showLocalCurrency && (
-                    <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-text-muted)' }}>
+                    <td className="px-2 py-2 text-right text-xs" style={{ color: 'var(--gx-text-muted)' }}>
                       {fmtCurrency(row.value * exchangeRate)}
                     </td>
                   )}
-                  <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-text)' }}>
+                  <td className="px-2 py-2 text-right text-xs" style={{ color: 'var(--gx-text)' }}>
                     ${fmtCurrency(perSample, 2)}
                   </td>
                   {showLocalCurrency && (
-                    <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-text-muted)' }}>
+                    <td className="px-2 py-2 text-right text-xs" style={{ color: 'var(--gx-text-muted)' }}>
                       {fmtCurrency(perSample * exchangeRate, 2)}
                     </td>
                   )}
-                  <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-text-muted)' }}>
+                  <td className="px-2 py-2 text-right text-xs" style={{ color: 'var(--gx-text-muted)' }}>
                     {pct(row.value, workflowTotal)}%
                   </td>
                 </tr>
               )
             })}
             <tr style={{ borderTop: '2px solid var(--gx-border)', fontWeight: 700 }}>
-              <td className="px-4 py-2" style={{ color: 'var(--gx-text)' }}>{t('label_total')}</td>
-              <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-accent)' }}>${fmt(workflowTotal)}</td>
+              <td className="px-3 py-2 text-xs" style={{ color: 'var(--gx-text)' }}>{t('label_total')}</td>
+              <td className="px-2 py-2 text-right text-xs" style={{ color: 'var(--gx-accent)' }}>${fmt(workflowTotal)}</td>
               {showLocalCurrency && (
-                <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-accent)' }}>
+                <td className="px-2 py-2 text-right text-xs" style={{ color: 'var(--gx-accent)' }}>
                   {fmtCurrency(workflowTotal * exchangeRate)}
                 </td>
               )}
-              <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-accent)' }}>
+              <td className="px-2 py-2 text-right text-xs" style={{ color: 'var(--gx-accent)' }}>
                 ${fmtCurrency(samplesPerYear > 0 ? workflowTotal / samplesPerYear : 0, 2)}
               </td>
               {showLocalCurrency && (
-                <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-accent)' }}>
+                <td className="px-2 py-2 text-right text-xs" style={{ color: 'var(--gx-accent)' }}>
                   {fmtCurrency(samplesPerYear > 0 ? workflowTotal * exchangeRate / samplesPerYear : 0, 2)}
                 </td>
               )}
-              <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-text-muted)' }}>100%</td>
+              <td className="px-2 py-2 text-right text-xs" style={{ color: 'var(--gx-text-muted)' }}>100%</td>
             </tr>
           </tbody>
         </table>

@@ -123,9 +123,6 @@ export default function Step4() {
 
       {grouped.map(group => (
         <div key={group.cat} className="mb-6">
-          <div className="text-xs uppercase tracking-wider mb-2 font-semibold" style={{ color: 'var(--gx-text-muted)' }}>
-            {group.label}
-          </div>
           <div className="flex flex-col gap-2">
             {group.items.map(item => {
               const lifespan = Math.max(1, item.lifespanYears ?? 5)
