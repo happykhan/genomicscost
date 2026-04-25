@@ -394,7 +394,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
               className={inputClass}
               value={sequencer.reagentKitPrice}
               min={0}
-              onChange={e => updateSequencer(index, { reagentKitPrice: parseFloat(e.target.value) || 0 })}
+              onChange={e => { const v = parseFloat(e.target.value); updateSequencer(index, { reagentKitPrice: isNaN(v) ? 0 : v }) }}
             />
           </div>
           <div>

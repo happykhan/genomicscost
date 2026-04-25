@@ -32,19 +32,16 @@ function randomId(): string {
 }
 
 export function createDefaultSequencer(label: string): SequencerConfig {
-  const catalogue = getEffectiveCatalogue()
-  const illuminaPlatform = catalogue.platforms.find(p => p.id === 'illumina')!
-  const firstKit = illuminaPlatform.reagent_kits[0]
   return {
     platformId: 'illumina',
-    reagentKitName: firstKit.name,
-    reagentKitPrice: firstKit.unit_price_usd ?? 0,
-    samplesPerRun: 96,
+    reagentKitName: 'Other sequencing kit',
+    reagentKitPrice: 0,
+    samplesPerRun: 0,
     coverageX: 10,
     bufferPct: 10,
     retestPct: 5,
-    libPrepKitName: '',
-    libPrepCostPerSample: 25,
+    libPrepKitName: 'Other library preparation kit',
+    libPrepCostPerSample: 0,
     enrichment: false,
     controlsPerRun: 2,
     enabled: true,
