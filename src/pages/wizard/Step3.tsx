@@ -202,8 +202,6 @@ export default function Step3() {
               const kitsPerYear = Math.ceil(runsPerYear * packsPerRun)
               const reagentCostAnnual = runsPerYear * (seq.reagentKitPrice ?? 0)
               const libPrepCostAnnual = samplesWithRetests * (seq.libPrepCostPerSample ?? 0)
-              const isCustomKit = seq.reagentKitName === 'Other sequencing kit'
-
               const platform = catalogue.platforms.find(p => p.id === seq.platformId)
               const platformName = platform?.name ?? seq.platformId
 
@@ -212,7 +210,10 @@ export default function Step3() {
               const libPackSize = seq.libPrepKitName === 'Other library preparation kit'
                 ? (seq.customLibPrepBarcodesPerPack ?? 0)
                 : (selectedLibKit?.pack_size ?? 0)
-              const libKitsPerYear = libPackSize > 0 ? Math.ceil(samplesWithRetests / libPackSize) : null
+              // Controls are also library-prepped each run — include them in kit count (matches Excel)
+              const libKitsPerYear = libPackSize > 0
+                ? Math.ceil((samplesWithRetests + runsPerYear * (seq.controlsPerRun ?? 0)) / libPackSize)
+                : null
 
               return (
                 <div key={idx} className={idx > 0 ? 'mt-3 pt-3' : ''} style={idx > 0 ? { borderTop: '1px solid var(--gx-border)' } : undefined}>
@@ -222,10 +223,7 @@ export default function Step3() {
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs" style={{ color: 'var(--gx-text-muted)' }}>
                     <div>Reagent kit: {seq.reagentKitName || '—'}</div>
                     <div className="text-right">
-                      {runsPerYear} runs/yr
-                      {isCustomKit && kitsPerYear !== runsPerYear && <span> · {kitsPerYear} kits/yr</span>}
-                      {!isCustomKit && <span> · {kitsPerYear} kits/yr</span>}
-                      {' '}= <span style={{ color: 'var(--gx-accent)' }}>${fmt(reagentCostAnnual)}</span>
+                      {runsPerYear} runs/yr · {kitsPerYear} kits/yr = <span style={{ color: 'var(--gx-accent)' }}>${fmt(reagentCostAnnual)}</span>
                     </div>
                     <div>Library prep: {seq.libPrepKitName || '—'}</div>
                     <div className="text-right">
