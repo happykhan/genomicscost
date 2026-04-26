@@ -46,6 +46,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
   const { t } = useTranslation()
   const catalogue = getEffectiveCatalogue()
   const [kitSearch, setKitSearch] = useState('')
+  const [coverageXText, setCoverageXText] = useState(String(sequencer.coverageX))
 
   const isCaptureAll = sequencer.captureAll || pathogens.some(p => p.pathogenName === 'Multiple pathogens (capture-all)')
 
@@ -113,6 +114,13 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
       updateSequencer(index, { bufferPct: buffer })
     }
   }, [sequencer.assignments, pathogens, sequencer.bufferPctUserSet, isCaptureAll]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Keep coverageXText in sync when auto-fill changes coverageX externally
+  useEffect(() => {
+    if (!sequencer.coverageXUserSet) {
+      setCoverageXText(String(sequencer.coverageX))
+    }
+  }, [sequencer.coverageX, sequencer.coverageXUserSet]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-fill coverageX from highest required coverage among assigned pathogens
   useEffect(() => {
@@ -459,9 +467,17 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
               <input
                 type="number"
                 className={inputClass}
-                value={sequencer.coverageX}
+                value={coverageXText}
                 min={1}
-                onChange={e => { const v = parseInt(e.target.value); updateSequencer(index, { coverageX: isNaN(v) ? 1 : v, coverageXUserSet: true }) }}
+                onChange={e => {
+                  setCoverageXText(e.target.value)
+                  const v = parseInt(e.target.value)
+                  if (!isNaN(v) && v >= 1) updateSequencer(index, { coverageX: v, coverageXUserSet: true })
+                }}
+                onBlur={() => {
+                  const v = parseInt(coverageXText)
+                  if (isNaN(v) || v < 1) setCoverageXText(String(sequencer.coverageX))
+                }}
               />
               {sequencer.coverageXUserSet && (
                 <button
