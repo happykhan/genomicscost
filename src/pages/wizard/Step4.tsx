@@ -48,11 +48,6 @@ const WORKFLOW_STEP_LABELS: Record<string, string> = {
   sequencing: 'Seq',
 }
 
-const CAT_LABEL_KEYS: Record<string, string> = {
-  lab_equipment: 'cat_lab_equipment',
-  facility: 'cat_facility',
-  bioinformatics: 'cat_bioinformatics',
-}
 
 export default function Step4() {
   const { project, updateProject } = useProject()
@@ -207,13 +202,6 @@ export default function Step4() {
     }
   }, [project.sequencers]) // eslint-disable-line react-hooks/exhaustive-deps
   const otherItems = equipment.map((e, idx) => ({ ...e, idx })).filter(e => e.category !== 'sequencing_platform')
-
-  const categoriesPresent = Array.from(new Set(otherItems.map(e => e.category)))
-  const grouped = categoriesPresent.map(cat => ({
-    cat,
-    label: t(CAT_LABEL_KEYS[cat] ?? cat),
-    items: otherItems.filter(e => e.category === cat),
-  }))
 
   const catalogueInstrumentNames = catalogue.equipment
     .filter(e => e.category === 'sequencing_platform' && e.name !== 'Other sequencing platform')
@@ -394,13 +382,9 @@ export default function Step4() {
         B. Other Equipment
       </div>
 
-      {grouped.map(group => (
-        <div key={group.cat} className="mb-6">
-          <div className="flex flex-col gap-2">
-            {group.items.map(item => renderItemCard(item))}
-          </div>
-        </div>
-      ))}
+      <div className="flex flex-col gap-2 mb-4">
+        {otherItems.map(item => renderItemCard(item))}
+      </div>
 
       {/* Add from catalogue (non-instrument) */}
       <div className="flex flex-wrap gap-2 mt-4 mb-4">

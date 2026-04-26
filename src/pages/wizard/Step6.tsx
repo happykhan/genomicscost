@@ -281,9 +281,10 @@ export default function Step6() {
                   <div>
                     <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total purchase cost</div>
                     <div className="text-sm font-medium" style={{ color: 'var(--gx-text)' }}>${fmt(inhousePurchaseCost)}</div>
+                    <div className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)', fontStyle: 'italic' }}>included in establishment cost</div>
                   </div>
                   <div>
-                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total depreciation cost</div>
+                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Annual depreciation cost</div>
                     <div className="text-sm font-medium" style={{ color: 'var(--gx-text)' }}>${fmt(inhouseTotal)}</div>
                   </div>
                   <div>

@@ -907,15 +907,13 @@ describe('WHO GCT — full demo workbook scenario', () => {
     expect(costs.equipment).toBeCloseTo(82_898.71, 0)
   })
 
-  it('establishment cost = total equipment purchase price', () => {
+  it('establishment cost = equipment purchase + in-house bioinformatics purchase', () => {
     const project = buildDemoProject()
     const costs = calculateCosts(project)
-    // Our model: sum of unitCostUsd * qty for status=buy items
-    // = 166000 + 148994.84 = 314994.84
-    expect(costs.establishmentCost).toBeCloseTo(314_994.84, 0)
-    // NOTE: workbook establishment = $338,444.06 which includes equipment +
-    // bioinformatics purchase ($10,740.25) + potential additional items ($10,790.17).
-    // Our model only counts equipment. This is a known structural gap.
+    // Equipment: 166000 + 148994.84 = 314994.84
+    // In-house bio: 3183.60 × 1 × 100% = 3183.60
+    // Total: 318178.44
+    expect(costs.establishmentCost).toBeCloseTo(314_994.84 + 3_183.60, 0)
   })
 
   it('bioinformatics: hybrid = cloud per-sample + in-house server cost ($3,339.85)', () => {

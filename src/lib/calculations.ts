@@ -292,10 +292,16 @@ export function calculateCosts(project: Project): CostBreakdown {
       return sum + depreciation + maintenance
     }, 0)
 
-  // Establishment cost: full purchase price of equipment to buy
-  const establishmentCost = equipment
+  // Establishment cost: full purchase price of equipment to buy + in-house bioinformatics hardware
+  const equipmentEstablishment = equipment
     .filter(e => e.status === 'buy')
     .reduce((sum, e) => sum + (e.unitCostUsd ?? 0) * (e.quantity ?? 1), 0)
+  const bioEstablishment = (bioinformatics.type === 'inhouse' || bioinformatics.type === 'hybrid')
+    ? (bioinformatics.inhouseItems ?? [])
+        .filter(item => item.enabled && (item.quantity ?? 0) > 0)
+        .reduce((sum, item) => sum + (item.pricePerUnit ?? 0) * (item.quantity ?? 1) * ((item.pctUse ?? 100) / 100), 0)
+    : 0
+  const establishmentCost = equipmentEstablishment + bioEstablishment
 
   // Potential purchases to reach recommended quantities
   const catalogue = getEffectiveCatalogue()

@@ -1,8 +1,9 @@
-import { useState, useId } from 'react'
+import { useState, useId, useMemo } from 'react'
 import { useProject } from '../../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
 import { getEffectiveCatalogue } from '../../lib/catalogue'
 import { fmt } from '../../lib/format'
+import { createDefaultFixedConsumables } from '../../lib/defaults'
 import type { ConsumableWorkflowStep } from '../../types'
 
 const inputClass = 'border border-[var(--gx-border)] rounded-[var(--gx-radius)] bg-[var(--gx-bg)] text-[var(--gx-text)] p-2 text-sm focus:outline-none focus:border-[var(--gx-accent)]'
@@ -84,6 +85,13 @@ export default function Step3() {
   const catalogue = getEffectiveCatalogue()
   const { consumables } = project
   const fixedConsumables = project.fixedConsumables ?? []
+
+  // WHO GCT default prices/quantities by name (from defaults.ts)
+  const fixedDefaults = useMemo(() => {
+    const map = new Map<string, { unitCostUsd: number; quantityPerYear: number }>()
+    createDefaultFixedConsumables().forEach(d => map.set(d.name, { unitCostUsd: d.unitCostUsd, quantityPerYear: d.quantityPerYear }))
+    return map
+  }, [])
   const samplesPerYear = project.pathogens.reduce((sum, p) => sum + p.samplesPerYear, 0)
 
   // Determine if all pathogens are bacterial
@@ -133,7 +141,13 @@ export default function Step3() {
       } else if (catItem.workflow && VALID_STEPS.includes(catItem.workflow as ConsumableWorkflowStep)) {
         workflows = { [catItem.workflow as ConsumableWorkflowStep]: true }
       }
-      updateFixed(index, { name: newName, unitCostUsd: catItem.unit_price_usd ?? 0, workflows })
+      const defaults = fixedDefaults.get(newName)
+      updateFixed(index, {
+        name: newName,
+        unitCostUsd: catItem.unit_price_usd ?? defaults?.unitCostUsd ?? 0,
+        quantityPerYear: defaults?.quantityPerYear ?? 0,
+        workflows,
+      })
     } else {
       updateFixed(index, { name: newName })
     }
