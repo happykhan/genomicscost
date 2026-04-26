@@ -164,6 +164,7 @@ describe('calculateCosts', () => {
   it('returns zero costs when samplesPerYear is 0', () => {
     const project = {
       ...createDefaultProject(),
+      fixedConsumables: [],
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 0 }],
     }
     const costs = calculateCosts(project)
@@ -176,6 +177,7 @@ describe('calculateCosts', () => {
     // kit price $526.15 → $3,683.05
     const project = {
       ...createDefaultProject(),
+      fixedConsumables: [],
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 200 }],
       sequencers: [{
         platformId: 'illumina',
@@ -213,6 +215,7 @@ describe('calculateCosts', () => {
   it('library prep cost: samples × cost per sample', () => {
     const project = {
       ...createDefaultProject(),
+      fixedConsumables: [],
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 100 }],
       sequencers: [{
         platformId: 'illumina',
@@ -251,6 +254,7 @@ describe('calculateCosts', () => {
     // 31 per run → ceil(220/31) = 8 runs
     const project = {
       ...createDefaultProject(),
+      fixedConsumables: [],
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 200 }],
       sequencers: [{
         platformId: 'illumina',
@@ -295,6 +299,7 @@ describe('calculateCosts', () => {
     // wrong (double subtract): ceil(200/10)=20 runs × $100 = $2000
     const project = {
       ...createDefaultProject(),
+      fixedConsumables: [],
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 200 }],
       sequencers: [{
         platformId: 'illumina',
@@ -331,6 +336,7 @@ describe('calculateCosts', () => {
   it('disabled sequencer contributes zero cost', () => {
     const project = {
       ...createDefaultProject(),
+      fixedConsumables: [],
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 200 }],
       sequencers: [{
         platformId: 'illumina',
@@ -367,6 +373,7 @@ describe('calculateCosts', () => {
   it('equipment uses WHO formula: depreciation (age-adjusted) + 15% maintenance × pctSequencing', () => {
     const project = {
       ...createDefaultProject(),
+      fixedConsumables: [],
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 100 }],
       sequencers: [],
       consumables: [],
@@ -402,6 +409,7 @@ describe('calculateCosts', () => {
   it('facility cost: monthly × 12 × global facilityPctSequencing', () => {
     const project = {
       ...createDefaultProject(),
+      fixedConsumables: [],
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 100 }],
       sequencers: [],
       consumables: [],
@@ -426,6 +434,7 @@ describe('calculateCosts', () => {
   it('QMS cost: costUsd × quantity × pctSequencing', () => {
     const project = {
       ...createDefaultProject(),
+      fixedConsumables: [],
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 100 }],
       sequencers: [],
       consumables: [],
@@ -450,6 +459,7 @@ describe('calculateCosts', () => {
   it('cloud bioinformatics: pricePerUnit × qty × samplesThisScenario / totalSamples', () => {
     const project = {
       ...createDefaultProject(),
+      fixedConsumables: [],
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 200 }],
       sequencers: [],
       consumables: [],
@@ -477,6 +487,7 @@ describe('calculateCosts', () => {
   it('hybrid bioinformatics: cloud cost + inhouse depreciation', () => {
     const project = {
       ...createDefaultProject(),
+      fixedConsumables: [],
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 200 }],
       sequencers: [],
       consumables: [],
@@ -506,6 +517,7 @@ describe('calculateCosts', () => {
   it('inhouse bioinformatics: depreciation of inhouse items', () => {
     const project = {
       ...createDefaultProject(),
+      fixedConsumables: [],
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 200 }],
       sequencers: [],
       consumables: [],
@@ -531,6 +543,7 @@ describe('calculateCosts', () => {
   it('training costs: group-level trainingGroupCostUsd on project', () => {
     const project = {
       ...createDefaultProject(),
+      fixedConsumables: [],
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 100 }],
       sequencers: [],
       consumables: [],
@@ -553,7 +566,7 @@ describe('calculateCosts', () => {
   })
 
   it('costPerSample = total / samplesPerYear', () => {
-    const project = createDefaultProject()
+    const project = { ...createDefaultProject(), fixedConsumables: [] }
     const costs = calculateCosts(project)
     const totalSamples = project.pathogens.reduce((sum, p) => sum + p.samplesPerYear, 0)
     if (totalSamples > 0) {
@@ -562,7 +575,7 @@ describe('calculateCosts', () => {
   })
 
   it('workflow breakdown sums approximately to total', () => {
-    const project = createDefaultProject()
+    const project = { ...createDefaultProject(), fixedConsumables: [] }
     const costs = calculateCosts(project)
     const wfTotal = Object.values(costs.workflowBreakdown).reduce((a, b) => a + b, 0)
     // Bioinformatics is excluded from the shared split so it can differ slightly
@@ -590,6 +603,7 @@ describe('calculateCosts', () => {
     }
     const project = {
       ...createDefaultProject(),
+      fixedConsumables: [],
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 100 }],
       sequencers: [
         { ...seq, label: 'Sequencer 1' },
@@ -614,6 +628,7 @@ describe('calculateCosts', () => {
     // With explicit assignments matching old behaviour, cost should be identical
     const project = {
       ...createDefaultProject(),
+      fixedConsumables: [],
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 200 }],
       sequencers: [{
         platformId: 'illumina',
@@ -672,6 +687,7 @@ describe('calculateCosts', () => {
     }
     const splitProject = {
       ...createDefaultProject(),
+      fixedConsumables: [],
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 500 }],
       sequencers: [
         { ...seq, label: 'Sequencer 1', assignments: [{ pathogenIndex: 0, samples: 250 }] },
@@ -724,6 +740,7 @@ describe('calculateCosts', () => {
     }
     const singleProject = {
       ...createDefaultProject(),
+      fixedConsumables: [],
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 100 }],
       sequencers: [
         { ...seq, label: 'Sequencer 1', assignments: [{ pathogenIndex: 0, samples: 100 }] },
@@ -762,6 +779,7 @@ describe('calculateCosts', () => {
     // Sequencers without assignments field at all — should use global total
     const project = {
       ...createDefaultProject(),
+      fixedConsumables: [],
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 100 }],
       sequencers: [{
         platformId: 'illumina',
@@ -799,6 +817,7 @@ describe('calculateCosts', () => {
   it('multi-pathogen: total samplesPerYear is sum across pathogens', () => {
     const project = {
       ...createDefaultProject(),
+      fixedConsumables: [],
       pathogens: [
         { pathogenName: 'SARS-CoV-2', pathogenType: 'viral' as const, genomeSizeMb: 0.03, samplesPerYear: 100 },
         { pathogenName: 'M. tuberculosis', pathogenType: 'bacterial' as const, genomeSizeMb: 4.4, samplesPerYear: 50 },

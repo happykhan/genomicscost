@@ -102,15 +102,15 @@ describe('buildFilteredConsumables', () => {
 // ── isConsumablesAtDefaults ────────────────────────────────────────────────────
 
 describe('isConsumablesAtDefaults', () => {
-  it('returns true for a fresh default project consumables', () => {
+  it('returns false for a fresh default project (per-sample consumables start empty)', () => {
     const project = createDefaultProject()
-    expect(isConsumablesAtDefaults(project.consumables)).toBe(true)
+    // New projects have empty per-sample consumables — empty = user intent, returns false
+    expect(isConsumablesAtDefaults(project.consumables)).toBe(false)
   })
 
   it('returns false when a unit cost has been changed from $5', () => {
-    const project = createDefaultProject()
-    project.consumables[0].unitCostUsd = 10
-    expect(isConsumablesAtDefaults(project.consumables)).toBe(false)
+    const items = [{ name: 'RNA extraction kit (250 reactions)', unitCostUsd: 10, quantityPerSample: 0.004, enabled: true }]
+    expect(isConsumablesAtDefaults(items)).toBe(false)
   })
 
   it('returns false when a custom item name is added', () => {

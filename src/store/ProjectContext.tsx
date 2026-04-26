@@ -196,6 +196,11 @@ function migrateProject(raw: unknown): Project {
     })
   }
 
+  // Existing projects get an empty fixedConsumables array (they keep their per-sample consumables)
+  if (!Array.isArray(p.fixedConsumables)) {
+    p.fixedConsumables = []
+  }
+
   return p as unknown as Project
 }
 

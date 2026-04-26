@@ -270,6 +270,10 @@ export function calculateCosts(project: Project): CostBreakdown {
       return sum + qty * (c.unitCostUsd ?? 0)
     }, 0)
 
+  const fixedConsumablesTotal = (project.fixedConsumables ?? [])
+    .filter(c => c.enabled)
+    .reduce((sum, c) => sum + (c.quantityPerYear ?? 0) * (c.unitCostUsd ?? 0), 0)
+
   // WHO GCT: depreciation (age-adjusted) + 15% maintenance, both scaled by pctSequencing
   // Only 'buy' items contribute — 'have' are sunk costs excluded from programme budget
   const annualEquipment = equipment
@@ -356,12 +360,14 @@ export function calculateCosts(project: Project): CostBreakdown {
     .filter(q => q.enabled)
     .reduce((sum, q) => sum + (q.costUsd ?? 0) * (q.quantity ?? 1) * (q.pctSequencing ?? 100) / 100, 0)
 
+  const totalConsumables = annualConsumables + fixedConsumablesTotal
+
   // WHO GCT: 7% incidentals on all reagent/consumable costs
-  const incidentals = (seqCosts.sequencingReagents + seqCosts.libraryPrep + annualConsumables) * 0.07
+  const incidentals = (seqCosts.sequencingReagents + seqCosts.libraryPrep + totalConsumables) * 0.07
 
   // WHO GCT: equipment operational cost (depreciation + maintenance) is always included
   const total =
-    seqCosts.sequencingReagents + seqCosts.libraryPrep + annualConsumables +
+    seqCosts.sequencingReagents + seqCosts.libraryPrep + totalConsumables +
     annualEquipment + incidentals +
     annualPersonnel + annualFacility + annualTransport + annualBioinformatics + annualQMS + annualTraining + adminCost
 
@@ -477,7 +483,7 @@ export function calculateCosts(project: Project): CostBreakdown {
   return {
     sequencingReagents: seqCosts.sequencingReagents,
     libraryPrep: seqCosts.libraryPrep,
-    consumables: annualConsumables,
+    consumables: totalConsumables,
     equipment: annualEquipment,
     incidentals,
     establishmentCost,

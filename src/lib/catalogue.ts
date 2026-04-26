@@ -62,6 +62,7 @@ export interface BundledReagent {
   quantity_per_sample: number
   workflow: string
   workflows?: string[]
+  unit_price_usd?: number | null
 }
 
 export interface BundledEquipmentItem {

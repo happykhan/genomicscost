@@ -24,7 +24,7 @@ import type { Project, SequencerAssignment } from '../types'
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function makeProject(overrides: Partial<Project> = {}): Project {
-  return { ...createDefaultProject(), ...overrides }
+  return { ...createDefaultProject(), fixedConsumables: [], ...overrides }
 }
 
 // ── Section 1: Run sizing (Annex 4) ──────────────────────────────────────────
@@ -718,6 +718,7 @@ describe('WHO GCT — full demo workbook scenario', () => {
 
     return {
       ...createDefaultProject(),
+      fixedConsumables: [],
       id: 'demo-wb-test',
       name: 'WHO GCT Demo Workbook',
       country: 'Demo',

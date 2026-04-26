@@ -38,6 +38,14 @@ export type ConsumableWorkflowStep =
   | 'ngs_library_preparation'
   | 'sequencing'
 
+export interface FixedConsumableItem {
+  name: string
+  unitCostUsd: number
+  quantityPerYear: number
+  enabled: boolean
+  workflows?: Partial<Record<ConsumableWorkflowStep, boolean>>
+}
+
 export interface CatalogueReagent {
   name: string
   category: string
@@ -226,6 +234,7 @@ export interface Project {
   transport: TransportItem[]
   bioinformatics: BioinformaticsConfig
   qms: QMSItem[]
+  fixedConsumables: FixedConsumableItem[]
   exchangeRate: number
   currency: string
   // WHO GCT: group-level training cost (not per-person)

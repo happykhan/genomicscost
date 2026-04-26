@@ -1,4 +1,4 @@
-import type { Project, SequencerConfig, PathogenEntry, BioCloudItem, BioInhouseItem, ConsumableWorkflowStep, EquipmentItem } from '../types'
+import type { Project, SequencerConfig, PathogenEntry, BioCloudItem, BioInhouseItem, ConsumableWorkflowStep, EquipmentItem, FixedConsumableItem } from '../types'
 import { getEffectiveCatalogue } from './catalogue'
 import type { BundledCatalogue, BundledReagent } from './catalogue'
 
@@ -180,6 +180,8 @@ export function buildFilteredConsumables(
 export function isConsumablesAtDefaults(
   consumables: ConsumableItem[],
 ): boolean {
+  // Empty list = user intent (per-sample section now starts blank), don't auto-rebuild
+  if (consumables.length === 0) return false
   // If the user has changed any price from the $5 placeholder, they've customised
   if (consumables.some(c => c.unitCostUsd !== 5)) return false
 
@@ -189,6 +191,53 @@ export function isConsumablesAtDefaults(
   if (consumables.some(c => !catalogueNames.has(c.name))) return false
 
   return true
+}
+
+/**
+ * WHO GCT Excel Annex 4 default reagent/consumable shopping list.
+ * These are absolute annual quantities (not per-sample). Quantities of 0
+ * mean the user should fill in their own annual count.
+ */
+export function createDefaultFixedConsumables(): FixedConsumableItem[] {
+  type R = 'sample_receipt'
+  type N = 'nucleic_acid_extraction'
+  type P = 'pcr_testing'
+  type L = 'ngs_library_preparation'
+  type S = 'sequencing'
+
+  const wf = (...steps: ConsumableWorkflowStep[]): Partial<Record<ConsumableWorkflowStep, boolean>> =>
+    Object.fromEntries(steps.map(s => [s, true])) as Partial<Record<ConsumableWorkflowStep, boolean>>
+
+  return [
+    { name: 'Viral transport media sampling kits with 10 ml tubes and swabs (50-pck)', unitCostUsd: 78,   quantityPerYear: 0, enabled: true, workflows: wf('sample_receipt' as R) },
+    { name: 'Specimen transport packaging (ambient) (150-pck)',                         unitCostUsd: 473,  quantityPerYear: 0, enabled: true, workflows: wf('sample_receipt' as R) },
+    { name: 'Specimen transport packaging (2–8C) (150-pck)',                            unitCostUsd: 473,  quantityPerYear: 0, enabled: true, workflows: wf('sample_receipt' as R) },
+    { name: 'Specimen transport packaging (-20C) (150-pck)',                            unitCostUsd: 473,  quantityPerYear: 0, enabled: true, workflows: wf('sample_receipt' as R) },
+    { name: 'Cold packs (24-pck)',                                                      unitCostUsd: 180,  quantityPerYear: 2, enabled: true, workflows: wf('sample_receipt' as R) },
+    { name: 'PCR plates (10/pack) 96-well reaction plate',                             unitCostUsd: 33,   quantityPerYear: 0, enabled: true, workflows: wf('nucleic_acid_extraction' as N, 'pcr_testing' as P) },
+    { name: 'PCR plate covers adhesive film (1 cover per plate)',                      unitCostUsd: 142,  quantityPerYear: 0, enabled: true, workflows: wf('nucleic_acid_extraction' as N, 'pcr_testing' as P) },
+    { name: 'Pipette filter tips 10uL (96 tips x 10 racks)',                           unitCostUsd: 185,  quantityPerYear: 0, enabled: true, workflows: wf('nucleic_acid_extraction' as N, 'pcr_testing' as P, 'ngs_library_preparation' as L, 'sequencing' as S) },
+    { name: 'Pipette filter tips 200uL (96 tips x 10 racks)',                          unitCostUsd: 56,   quantityPerYear: 0, enabled: true, workflows: wf('nucleic_acid_extraction' as N, 'pcr_testing' as P, 'ngs_library_preparation' as L, 'sequencing' as S) },
+    { name: 'Pipette filter tips 1000uL (96 tips x 10 racks)',                         unitCostUsd: 163,  quantityPerYear: 0, enabled: true, workflows: wf('nucleic_acid_extraction' as N, 'pcr_testing' as P, 'ngs_library_preparation' as L, 'sequencing' as S) },
+    { name: '0.2mL PCR tubes, thin-walled (1000; strips)',                             unitCostUsd: 145,  quantityPerYear: 0, enabled: true, workflows: wf('nucleic_acid_extraction' as N, 'pcr_testing' as P) },
+    { name: '1.5mL PCR tubes, LoBind (250)',                                           unitCostUsd: 13,   quantityPerYear: 0, enabled: true, workflows: wf('nucleic_acid_extraction' as N, 'pcr_testing' as P, 'ngs_library_preparation' as L, 'sequencing' as S) },
+    { name: '50mL conical tubes (100)',                                                 unitCostUsd: 161,  quantityPerYear: 0, enabled: true, workflows: wf('nucleic_acid_extraction' as N, 'ngs_library_preparation' as L) },
+    { name: 'RNA extraction kit (250 reactions)',                                       unitCostUsd: 723,  quantityPerYear: 0, enabled: true, workflows: wf('nucleic_acid_extraction' as N) },
+    { name: 'PCR testing kit (96 reactions)',                                           unitCostUsd: 384,  quantityPerYear: 0, enabled: true, workflows: wf('pcr_testing' as P) },
+    { name: 'Fluorometer DNA HS assay kit (500)',                                       unitCostUsd: 211,  quantityPerYear: 0, enabled: true, workflows: wf('ngs_library_preparation' as L) },
+    { name: 'Fluorometer assay tubes (500)',                                            unitCostUsd: 82,   quantityPerYear: 0, enabled: true, workflows: wf('ngs_library_preparation' as L) },
+    { name: '(Molecular grade) nuclease free H2O',                                     unitCostUsd: 124,  quantityPerYear: 0, enabled: true, workflows: wf('nucleic_acid_extraction' as N, 'pcr_testing' as P, 'ngs_library_preparation' as L, 'sequencing' as S) },
+    { name: 'Ethanol, 99% lab grade, 1L',                                              unitCostUsd: 223,  quantityPerYear: 0, enabled: true, workflows: wf('nucleic_acid_extraction' as N, 'ngs_library_preparation' as L) },
+    { name: 'Reagent reservoir, sterile (pack of 50)',                                  unitCostUsd: 141,  quantityPerYear: 0, enabled: true, workflows: wf('ngs_library_preparation' as L) },
+    { name: 'NaOH, 1N 100mL',                                                          unitCostUsd: 133,  quantityPerYear: 1, enabled: true, workflows: wf('sequencing' as S) },
+    { name: 'Bleach, lab grade (4-6%, 1L)',                                             unitCostUsd: 137,  quantityPerYear: 1, enabled: true, workflows: wf('sequencing' as S) },
+    { name: 'Tween 20, 500 mL',                                                        unitCostUsd: 50,   quantityPerYear: 0, enabled: true, workflows: wf('sequencing' as S) },
+    { name: 'Q5 Hot Start HiFi DNA Polymerase (500 units)',                             unitCostUsd: 600,  quantityPerYear: 0, enabled: true, workflows: wf('pcr_testing' as P) },
+    { name: '10mM dNTP (5x1mL)',                                                        unitCostUsd: 1040, quantityPerYear: 0, enabled: true, workflows: wf('pcr_testing' as P) },
+    { name: 'dS DNA HS assay kit for fluoremeter (500)',                                unitCostUsd: 193,  quantityPerYear: 0, enabled: true, workflows: wf('pcr_testing' as P) },
+    { name: 'High sensitivity DNA assay kit for bioanalyser (110 samples)',             unitCostUsd: 824,  quantityPerYear: 0, enabled: true, workflows: wf('pcr_testing' as P) },
+    { name: 'Universal One-Step RT-qPCR Kit (200 rxns)',                               unitCostUsd: 345,  quantityPerYear: 0, enabled: true, workflows: wf('pcr_testing' as P) },
+  ]
 }
 
 /**
@@ -225,8 +274,8 @@ export function createDefaultProject(): Project {
   ]
   const defaultSequencers = [createDefaultSequencer('Sequencer 1')]
 
-  // Auto-populate consumables filtered by the default pathogen/sequencer combination
-  const defaultConsumables = buildFilteredConsumables(defaultPathogens, defaultSequencers)
+  // Per-sample consumables start empty; fixed consumables come from the Excel defaults
+  const defaultConsumables: ConsumableItem[] = []
 
   // All lab/facility/bioinformatics equipment from catalogue, pre-populated per WHO Excel
   const defaultEquipment = createDefaultEquipment(catalogue)
@@ -269,6 +318,7 @@ export function createDefaultProject(): Project {
     pathogens: defaultPathogens,
     sequencers: defaultSequencers,
     consumables: defaultConsumables,
+    fixedConsumables: createDefaultFixedConsumables(),
     equipment: defaultEquipment,
     personnel: defaultPersonnel,
     facility: defaultFacility,
