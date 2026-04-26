@@ -83,8 +83,11 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
     const isCustomKit = sequencer.reagentKitName === 'Other sequencing kit'
     if (!selectedKit && !isCustomKit) return
     const readLengthBp = isCustomKit ? (sequencer.customKitReadLengthBp ?? 0) : (selectedKit?.read_length_bp ?? 0)
-    const maxReadsPfc = isCustomKit ? 0 : (selectedKit?.max_reads_per_flowcell ?? 0)
     const maxOutputMb = isCustomKit ? (sequencer.customKitMaxOutputMb ?? 0) : (selectedKit?.max_output_mb ?? 0)
+    // For custom kits derive read count from output÷readLength so the min-reads floor applies (matches Excel Annex 4)
+    const maxReadsPfc = isCustomKit
+      ? (readLengthBp > 0 && maxOutputMb > 0 ? Math.floor((maxOutputMb * 1e6) / readLengthBp) : 0)
+      : (selectedKit?.max_reads_per_flowcell ?? 0)
     const calculated = calculateSamplesPerRunMulti(
       assignedPathogens.length > 0 ? assignedPathogens : pathogens,
       sequencer.coverageX,
@@ -388,12 +391,15 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
           {sequencer.reagentKitName === 'Other sequencing kit' && (
             <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label className={labelClass}>Max flow cell output (Mb)</label>
+                <label className={labelClass}>Max flow cell output (bytes)</label>
                 <input type="number" min={0} className={inputClass}
-                  value={sequencer.customKitMaxOutputMb ?? ''}
-                  placeholder="e.g. 1200"
-                  onChange={e => { const v = parseFloat(e.target.value); updateSequencer(index, { customKitMaxOutputMb: isNaN(v) ? undefined : v }) }}
+                  value={sequencer.customKitMaxOutputMb != null ? Math.round(sequencer.customKitMaxOutputMb * 1e6) : ''}
+                  placeholder="e.g. 180000000000"
+                  onChange={e => { const bytes = parseFloat(e.target.value); updateSequencer(index, { customKitMaxOutputMb: isNaN(bytes) ? undefined : bytes / 1e6 }) }}
                 />
+                {sequencer.customKitMaxOutputMb != null && (
+                  <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>≈ {(sequencer.customKitMaxOutputMb / 1000).toFixed(1)} Gb</div>
+                )}
               </div>
               <div>
                 <label className={labelClass}>Read length (bp)</label>
