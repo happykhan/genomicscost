@@ -390,7 +390,97 @@ export default function Step4() {
         {t('label_section_b_equipment')}
       </div>
 
-      <div className="card mb-4" style={{ overflowX: 'auto' }}>
+      {/* Mobile card view */}
+      <div className="sm:hidden flex flex-col gap-2 mb-4">
+        {otherItems.length === 0 && (
+          <p className="text-sm" style={{ color: 'var(--gx-text-muted)' }}>{t('label_no_equipment')}</p>
+        )}
+        {otherItems.map(item => {
+          const lifespan = Math.max(1, item.lifespanYears ?? 5)
+          const age = Math.max(0, Math.min(item.ageYears ?? 0, lifespan - 1))
+          const remainingLife = Math.max(1, lifespan - age)
+          const totalCost = item.unitCostUsd * item.quantity
+          const pct = (item.pctSequencing ?? 100) / 100
+          const annual = item.status === 'buy' ? ((totalCost / remainingLife) * pct + totalCost * maintenanceRate * pct) : 0
+          return (
+            <div key={item.idx} className="card p-3 flex flex-col gap-2" style={{ opacity: item.status === 'skip' ? 0.4 : 1 }}>
+              <div className="flex gap-2 items-start">
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    value={item.name}
+                    title={item.name}
+                    list={`equip-names-m-${item.idx}`}
+                    onChange={e => handleEquipmentNameChange(item.idx, e.target.value)}
+                    className={inputClass}
+                    style={{ width: '100%', fontWeight: 500 }}
+                    placeholder={t('col_name')}
+                  />
+                  <datalist id={`equip-names-m-${item.idx}`}>
+                    {catalogueEquipmentNames.map(n => <option key={n} value={n} />)}
+                  </datalist>
+                </div>
+                <button
+                  onClick={() => removeItem(item.idx)}
+                  className="text-xs px-2 py-1 rounded flex-shrink-0"
+                  style={{ color: 'var(--gx-text-muted)', background: 'none', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
+                >
+                  ×
+                </button>
+              </div>
+              <div className="flex rounded overflow-hidden" style={{ border: '1px solid var(--gx-border)', width: 'fit-content' }}>
+                {STATUS_OPTIONS.map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => updateItem(item.idx, { status: opt.value })}
+                    className="px-3 py-1 text-xs font-medium"
+                    style={{
+                      background: item.status === opt.value ? 'var(--gx-accent)' : 'var(--gx-bg-alt)',
+                      color: item.status === opt.value ? 'var(--gx-bg)' : 'var(--gx-text-muted)',
+                      border: 'none',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {t(opt.labelKey)}
+                  </button>
+                ))}
+              </div>
+              {item.status === 'buy' && (
+                <>
+                  <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-col gap-0.5">
+                      <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_qty')}</label>
+                      <input type="number" value={item.quantity} min={1} onChange={e => updateItem(item.idx, { quantity: (v => isNaN(v) ? 1 : v)(parseInt(e.target.value)) })} className={inputClass} style={{ width: 70, textAlign: 'center' }} />
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_price_each')}</label>
+                      <input type="number" value={item.unitCostUsd} min={0} onChange={e => updateItem(item.idx, { unitCostUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 100, textAlign: 'right' }} />
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_life_yr')}</label>
+                      <input type="number" value={item.lifespanYears ?? 10} min={1} max={30} onChange={e => updateItem(item.idx, { lifespanYears: (v => isNaN(v) ? 10 : v)(parseInt(e.target.value)) })} className={inputClass} style={{ width: 70, textAlign: 'center' }} />
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_age_yr')}</label>
+                      <input type="number" value={item.ageYears ?? 0} min={0} max={(item.lifespanYears ?? 10) - 1} onChange={e => updateItem(item.idx, { ageYears: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 70, textAlign: 'center' }} />
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_pct_seq')}</label>
+                      <input type="number" value={item.pctSequencing ?? 100} min={0} max={100} onChange={e => updateItem(item.idx, { pctSequencing: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 70, textAlign: 'center' }} />
+                    </div>
+                  </div>
+                  <div className="text-sm font-semibold" style={{ color: 'var(--gx-accent)' }}>
+                    {t('col_annual_usd_yr')}: ${fmt(annual)}
+                  </div>
+                </>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Desktop table view */}
+      <div className="hidden sm:block card mb-4" style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--gx-border)', color: 'var(--gx-text-muted)', textAlign: 'left' }}>

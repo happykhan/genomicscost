@@ -376,7 +376,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
             {kits.map(k => (
               <option key={k.name} value={k.name}>{k.name}</option>
             ))}
-            <option value="Other sequencing kit">Other sequencing kit</option>
+            <option value="Other sequencing kit">{t('opt_other_seq_kit')}</option>
           </select>
           {selectedKit && (
             <div className="text-xs mt-1 flex gap-4" style={{ color: 'var(--gx-text-muted)' }}>
@@ -391,18 +391,18 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
           {sequencer.reagentKitName === 'Other sequencing kit' && (
             <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="sm:col-span-3">
-                <label className={labelClass}>Kit display name (shown in summary)</label>
+                <label className={labelClass}>{t('label_custom_kit_display_name')}</label>
                 <input type="text" className={inputClass}
                   value={sequencer.customKitDisplayName ?? ''}
-                  placeholder="e.g. ONT MinION R10.4.1"
+                  placeholder={t('placeholder_custom_kit_name')}
                   onChange={e => updateSequencer(index, { customKitDisplayName: e.target.value || undefined })}
                 />
               </div>
               <div>
-                <label className={labelClass}>Max flow cell output (bytes)</label>
+                <label className={labelClass}>{t('label_max_flowcell_output')}</label>
                 <input type="number" min={0} className={inputClass}
                   value={sequencer.customKitMaxOutputMb != null ? Math.round(sequencer.customKitMaxOutputMb * 1e6) : ''}
-                  placeholder="e.g. 180000000000"
+                  placeholder={t('placeholder_max_output_bytes')}
                   onChange={e => { const bytes = parseFloat(e.target.value); updateSequencer(index, { customKitMaxOutputMb: isNaN(bytes) ? undefined : bytes / 1e6 }) }}
                 />
                 {sequencer.customKitMaxOutputMb != null && (
@@ -410,21 +410,21 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
                 )}
               </div>
               <div>
-                <label className={labelClass}>Read length (bp)</label>
+                <label className={labelClass}>{t('label_read_length_bp')}</label>
                 <input type="number" min={0} className={inputClass}
                   value={sequencer.customKitReadLengthBp ?? ''}
-                  placeholder="e.g. 150"
+                  placeholder={t('placeholder_read_length')}
                   onChange={e => { const v = parseInt(e.target.value); updateSequencer(index, { customKitReadLengthBp: isNaN(v) ? undefined : v }) }}
                 />
               </div>
               <div>
-                <label className={labelClass}>Kit packs per run</label>
+                <label className={labelClass}>{t('label_kit_packs_per_run')}</label>
                 <input type="number" min={0} step={0.1} className={inputClass}
                   value={sequencer.customKitPacksPerRun ?? ''}
-                  placeholder="e.g. 1"
+                  placeholder={t('placeholder_kit_packs')}
                   onChange={e => { const v = parseFloat(e.target.value); updateSequencer(index, { customKitPacksPerRun: isNaN(v) ? undefined : v }) }}
                 />
-                <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>e.g. 0.2 if kit has 5 flow cells</div>
+                <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>{t('hint_kit_packs_per_run')}</div>
               </div>
             </div>
           )}
@@ -443,12 +443,12 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
             />
           </div>
           <div>
-            <label className={labelClass}>Per sample (at max loading)</label>
+            <label className={labelClass}>{t('label_per_sample_max_loading')}</label>
             <div className="p-2 text-sm rounded" style={{ border: '1px solid var(--gx-border)', background: 'var(--gx-bg-alt)', color: 'var(--gx-text)' }}>
               {sequencer.samplesPerRun > 0
                 ? `$${(sequencer.reagentKitPrice / sequencer.samplesPerRun).toFixed(2)}`
                 : '—'}
-              <span className="text-xs ml-2" style={{ color: 'var(--gx-text-muted)' }}>= kit ÷ {sequencer.samplesPerRun} samples</span>
+              <span className="text-xs ml-2" style={{ color: 'var(--gx-text-muted)' }}>{t('hint_kit_div_samples', { count: sequencer.samplesPerRun })}</span>
             </div>
           </div>
         </div>
@@ -475,7 +475,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
               <label className={labelClass} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 {t('field_coverage')}<Tooltip content={t('tooltip_coverage')} />
                 {!sequencer.coverageXUserSet && (
-                  <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text-muted)', border: '1px solid var(--gx-border)', fontWeight: 400 }}>auto</span>
+                  <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text-muted)', border: '1px solid var(--gx-border)', fontWeight: 400 }}>{t('label_auto')}</span>
                 )}
               </label>
               <input
@@ -499,7 +499,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
                   style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--gx-text-muted)', textDecoration: 'underline' }}
                   onClick={() => updateSequencer(index, { coverageXUserSet: false })}
                 >
-                  reset to auto
+                  {t('btn_reset_auto')}
                 </button>
               )}
               {!sequencer.coverageXUserSet && (
@@ -533,19 +533,19 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
                   const binding = readsFromCoverage >= minReads ? 'coverage' : 'min-reads'
                   return (
                     <div className="text-xs mt-1" style={{ color: binding === 'min-reads' ? '#b45309' : 'var(--gx-text-muted)' }}>
-                      Binding constraint: {binding === 'coverage'
-                        ? `coverage (${Math.round(readsFromCoverage).toLocaleString()} reads/sample)`
-                        : `minimum reads floor (${minReads.toLocaleString()} reads; coverage only needs ${Math.round(readsFromCoverage).toLocaleString()})`
+                      {t('label_binding_constraint')}: {binding === 'coverage'
+                        ? t('label_binding_coverage', { reads: Math.round(readsFromCoverage).toLocaleString() })
+                        : t('label_binding_min_reads', { minReads: minReads.toLocaleString(), coverageReads: Math.round(readsFromCoverage).toLocaleString() })
                       }
-                      {barcodingLimit < Infinity && sequencer.samplesPerRun >= barcodingLimit && ' · barcoding limit'}
+                      {barcodingLimit < Infinity && sequencer.samplesPerRun >= barcodingLimit && ` · ${t('label_barcoding_limit')}`}
                     </div>
                   )
                 }
                 if (selectedKit.max_output_mb) {
                   return (
                     <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>
-                      Binding constraint: coverage ({(p.genomeSizeMb * sequencer.coverageX * buffer).toFixed(1)} Mb/sample)
-                      {barcodingLimit < Infinity && sequencer.samplesPerRun >= barcodingLimit && ' · barcoding limit'}
+                      {t('label_binding_constraint')}: {t('label_binding_coverage_mb', { mb: (p.genomeSizeMb * sequencer.coverageX * buffer).toFixed(1) })}
+                      {barcodingLimit < Infinity && sequencer.samplesPerRun >= barcodingLimit && ` · ${t('label_barcoding_limit')}`}
                     </div>
                   )
                 }
@@ -592,13 +592,13 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
           const loadingPct = Math.round(avgSPR / maxSPR * 100)
           return (
             <div className="card p-3" style={{ background: 'var(--gx-bg-alt)' }}>
-              <div className="text-xs font-semibold mb-2" style={{ color: 'var(--gx-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Run capacity</div>
+              <div className="text-xs font-semibold mb-2" style={{ color: 'var(--gx-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('label_run_capacity')}</div>
               <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-                <div style={{ color: 'var(--gx-text-muted)' }}>Runs/yr (max loading)</div>
+                <div style={{ color: 'var(--gx-text-muted)' }}>{t('label_runs_yr_max')}</div>
                 <div className="text-right font-medium" style={{ color: 'var(--gx-text)' }}>{runsMax}</div>
                 <div style={{ color: 'var(--gx-text-muted)' }}>
-                  Avg samples/run
-                  <div className="font-normal" style={{ fontSize: '0.6rem', color: 'var(--gx-text-muted)', opacity: 0.7 }}>enter planned avg</div>
+                  {t('label_avg_samples_run')}
+                  <div className="font-normal" style={{ fontSize: '0.6rem', color: 'var(--gx-text-muted)', opacity: 0.7 }}>{t('hint_enter_planned_avg')}</div>
                 </div>
                 <div className="text-right">
                   <input
@@ -610,18 +610,18 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
                     onChange={e => { const v = parseInt(e.target.value); updateSequencer(index, { avgSamplesPerRun: isNaN(v) ? undefined : Math.min(v, maxSPR) }) }}
                     style={{ width: 60, textAlign: 'right', border: '1px solid var(--gx-border)', borderRadius: 'var(--gx-radius)', background: 'var(--gx-bg)', color: 'var(--gx-text)', padding: '1px 4px', fontSize: '0.75rem' }}
                   />
-                  <span className="ml-1" style={{ color: 'var(--gx-text-muted)' }}>/ {maxSPR} max</span>
+                  <span className="ml-1" style={{ color: 'var(--gx-text-muted)' }}>{t('hint_of_max', { max: maxSPR })}</span>
                 </div>
-                <div style={{ color: 'var(--gx-text-muted)' }}>Runs/yr (avg loading)</div>
+                <div style={{ color: 'var(--gx-text-muted)' }}>{t('label_runs_yr_avg')}</div>
                 <div className="text-right font-medium" style={{ color: 'var(--gx-text)' }}>{runsAvg}</div>
-                <div style={{ color: 'var(--gx-text-muted)' }}>% loading capacity/run</div>
+                <div style={{ color: 'var(--gx-text-muted)' }}>{t('label_loading_capacity_run')}</div>
                 <div className="text-right font-medium" style={{ color: loadingPct < 50 ? '#f59e0b' : 'var(--gx-accent)' }}>{loadingPct}%</div>
               </div>
               {loadingPct < 50 && (
-                <div className="text-xs mt-2" style={{ color: '#b45309' }}>High reagent cost wastage — consider more samples per run.</div>
+                <div className="text-xs mt-2" style={{ color: '#b45309' }}>{t('warn_high_wastage')}</div>
               )}
               {runsAvg > 52 && (
-                <div className="text-xs mt-2" style={{ color: '#b45309' }}>Consider higher-throughput sequencing items (&gt;52 runs/yr).</div>
+                <div className="text-xs mt-2" style={{ color: '#b45309' }}>{t('warn_high_throughput')}</div>
               )}
             </div>
           )
@@ -634,7 +634,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
               {t('field_buffer_pct')} — {sequencer.bufferPct}%
               <Tooltip content={t('tooltip_buffer_pct')} />
               {!sequencer.bufferPctUserSet && (
-                <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text-muted)', border: '1px solid var(--gx-border)', fontWeight: 400 }}>auto</span>
+                <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text-muted)', border: '1px solid var(--gx-border)', fontWeight: 400 }}>{t('label_auto')}</span>
               )}
             </label>
             <input
@@ -710,41 +710,41 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
             {libPrepKits.map(k => (
               <option key={k.name} value={k.name}>{k.name}</option>
             ))}
-            <option value="Other library preparation kit">Other library preparation kit</option>
+            <option value="Other library preparation kit">{t('opt_other_lib_prep_kit')}</option>
           </select>
           {selectedLibPrepKit && (
             <div className="text-xs mt-1 flex gap-4" style={{ color: 'var(--gx-text-muted)' }}>
-              {selectedLibPrepKit.pack_size && <span>Pack size: {selectedLibPrepKit.pack_size} reactions</span>}
-              {selectedLibPrepKit.barcoding_limit && <span>Barcoding limit: {selectedLibPrepKit.barcoding_limit}</span>}
+              {selectedLibPrepKit.pack_size && <span>{t('label_pack_size')}: {selectedLibPrepKit.pack_size} {t('label_reactions')}</span>}
+              {selectedLibPrepKit.barcoding_limit && <span>{t('label_barcoding_limit')}: {selectedLibPrepKit.barcoding_limit}</span>}
             </div>
           )}
           {isCustomLibPrep && (
             <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="sm:col-span-2">
-                <label className={labelClass}>Kit display name (shown in summary)</label>
+                <label className={labelClass}>{t('label_custom_kit_display_name')}</label>
                 <input type="text" className={inputClass}
                   value={sequencer.customLibPrepDisplayName ?? ''}
-                  placeholder="e.g. ONT Native Barcoding Kit 24"
+                  placeholder={t('placeholder_custom_lib_prep_name')}
                   onChange={e => updateSequencer(index, { customLibPrepDisplayName: e.target.value || undefined })}
                 />
               </div>
               <div>
-                <label className={labelClass}>Max barcodes available (total)</label>
+                <label className={labelClass}>{t('label_max_barcodes')}</label>
                 <input type="number" min={1} className={inputClass}
                   value={sequencer.customLibPrepMaxBarcodes ?? ''}
-                  placeholder="e.g. 96, 384, 768"
+                  placeholder={t('placeholder_barcodes_total')}
                   onChange={e => { const v = parseInt(e.target.value); updateSequencer(index, { customLibPrepMaxBarcodes: isNaN(v) ? undefined : v }) }}
                 />
-                <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>Limits samples per run</div>
+                <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>{t('hint_limits_samples_per_run')}</div>
               </div>
               <div>
-                <label className={labelClass}>Barcodes per pack</label>
+                <label className={labelClass}>{t('label_barcodes_per_pack')}</label>
                 <input type="number" min={1} className={inputClass}
                   value={sequencer.customLibPrepBarcodesPerPack ?? ''}
-                  placeholder="e.g. 96"
+                  placeholder={t('placeholder_barcodes_per_pack')}
                   onChange={e => { const v = parseInt(e.target.value); updateSequencer(index, { customLibPrepBarcodesPerPack: isNaN(v) ? undefined : v }) }}
                 />
-                <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>Used to calculate kits needed/yr</div>
+                <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>{t('hint_calc_kits_needed')}</div>
               </div>
             </div>
           )}
@@ -759,21 +759,21 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
           return (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className={labelClass}>Library prep kit price (USD)</label>
+                <label className={labelClass}>{t('label_lib_prep_kit_price')}</label>
                 <input
                   type="number"
                   className={inputClass}
                   value={packSize > 0 ? parseFloat(kitPrice.toFixed(2)) : ''}
                   min={0}
                   step={1}
-                  placeholder={packSize === 0 ? 'Enter pack size first' : undefined}
+                  placeholder={packSize === 0 ? t('placeholder_enter_pack_size') : undefined}
                   disabled={packSize === 0}
                   onChange={e => {
                     const v = parseFloat(e.target.value)
                     if (!isNaN(v) && packSize > 0) updateSequencer(index, { libPrepCostPerSample: parseFloat((v / packSize).toFixed(4)) })
                   }}
                 />
-                {packSize > 0 && <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>÷ {packSize} reactions</div>}
+                {packSize > 0 && <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>{t('hint_div_reactions', { count: packSize })}</div>}
               </div>
               <div>
                 <label className={labelClass}>{t('field_lib_prep_cost')}</label>
@@ -785,7 +785,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
                   step={0.01}
                   onChange={e => updateSequencer(index, { libPrepCostPerSample: parseFloat(e.target.value) || 0 })}
                 />
-                {packSize > 0 && <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>× {packSize} reactions = kit price</div>}
+                {packSize > 0 && <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>{t('hint_mul_reactions_kit', { count: packSize })}</div>}
               </div>
             </div>
           )
@@ -1040,7 +1040,7 @@ export default function Step2() {
   const { sequencers } = project
 
   function addSequencer() {
-    const label = `Sequencer ${sequencers.length + 1}`
+    const label = t('label_sequencer_n', { n: sequencers.length + 1 })
     const newSeq = createDefaultSequencer(label)
     updateProject({ sequencers: [...sequencers, newSeq] })
   }
@@ -1099,11 +1099,11 @@ export default function Step2() {
         return (
           <div className="card p-4 mt-2 grid grid-cols-2 gap-4 text-sm">
             <div>
-              <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total reactions across all sequencers (incl. retests)</div>
+              <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_total_reactions')}</div>
               <div className="text-lg font-bold mt-0.5" style={{ color: 'var(--gx-text)' }}>{totalReactions.toLocaleString()}</div>
             </div>
             <div>
-              <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total samples sequenced across all sequencers</div>
+              <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_total_samples_sequenced')}</div>
               <div className="text-lg font-bold mt-0.5" style={{ color: 'var(--gx-accent)' }}>{totalSamples.toLocaleString()}</div>
             </div>
           </div>
