@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useProject } from '../../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
 import { getEffectiveCatalogue } from '../../lib/catalogue'
@@ -12,6 +13,25 @@ const DEFAULT_PATHOGEN_ENTRY: PathogenEntry = {
   pathogenType: 'viral',
   genomeSizeMb: 0.03,
   samplesPerYear: 100,
+}
+
+function ExchangeRateInput({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  const [raw, setRaw] = useState(String(value))
+  return (
+    <input
+      type="text"
+      inputMode="decimal"
+      className={inputClass}
+      value={raw}
+      onChange={e => setRaw(e.target.value)}
+      onBlur={() => {
+        const v = parseFloat(raw)
+        const safe = isNaN(v) || v <= 0 ? 1 : v
+        setRaw(String(safe))
+        onChange(safe)
+      }}
+    />
+  )
 }
 
 export default function Step1() {
@@ -236,14 +256,7 @@ export default function Step1() {
             </div>
             <div>
               <label className={labelClass}>{t('field_exchange_rate')}</label>
-              <input
-                type="number"
-                className={inputClass}
-                value={project.exchangeRate}
-                min={0}
-                step={0.01}
-                onChange={e => { const v = parseFloat(e.target.value); updateProject({ exchangeRate: isNaN(v) ? 1 : v }) }}
-              />
+              <ExchangeRateInput value={project.exchangeRate} onChange={v => updateProject({ exchangeRate: v })} />
               <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>
                 {t('note_usd_default')}
               </div>

@@ -692,13 +692,22 @@ export default function Step3() {
               { label: 'Sequencing & library preparation reagents', value: sequencingReagentsTotal },
               { label: 'Reagents & consumables (Section B)', value: fixedTotal },
               { label: 'Per-sample reagents & consumables (Section C)', value: consumableTotal },
-              { label: 'Incidentals (waste bags, PPE, ethanol, etc.)', value: costs.incidentals },
             ].map(row => (
               <tr key={row.label} style={{ borderBottom: '1px solid var(--gx-border)' }}>
                 <td className="px-4 py-2 text-xs" style={{ color: 'var(--gx-text-muted)' }}>{row.label}</td>
                 <td className="px-4 py-2 text-right text-xs" style={{ color: 'var(--gx-text)' }}>${fmt(row.value)}</td>
               </tr>
             ))}
+            <tr style={{ borderBottom: '1px solid var(--gx-border)' }}>
+              <td className="px-4 py-2 text-xs" style={{ color: 'var(--gx-text-muted)' }}>
+                Incidentals (waste bags, PPE, ethanol, etc.)
+                <span style={{ marginLeft: 6, fontStyle: 'italic' }}>
+                  — {project.incidentalsPct ?? 7}% of reagent/consumable costs.{' '}
+                  <a href="/catalogue" style={{ color: 'var(--gx-accent)', textDecoration: 'underline' }}>Change in Other Settings</a>
+                </span>
+              </td>
+              <td className="px-4 py-2 text-right text-xs" style={{ color: 'var(--gx-text)' }}>${fmt(costs.incidentals)}</td>
+            </tr>
             <tr style={{ borderBottom: '1px solid var(--gx-border)', background: 'var(--gx-bg-alt)' }}>
               <td className="px-4 py-2 text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>Total annual reagent &amp; consumable cost</td>
               <td className="px-4 py-2 text-right text-sm font-semibold" style={{ color: 'var(--gx-accent)' }}>
