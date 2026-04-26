@@ -346,7 +346,7 @@ export default function Step3() {
                 const itemType = catalogue.reagents.find(r => r.name === item.name)?.category === 'consumable' ? 'Cons.' : 'Reag.'
 
                 return (
-                  <tr key={idx} style={{ borderBottom: '1px solid var(--gx-border)', opacity: item.enabled ? 1 : 0.4 }}>
+                  <tr key={`${item.name}-${idx}`} style={{ borderBottom: '1px solid var(--gx-border)', opacity: item.enabled ? 1 : 0.4 }}>
                     {WF_STEPS.map(step => {
                       const active = !!item.workflows?.[step]
                       return (
@@ -467,7 +467,7 @@ export default function Step3() {
 
                 return (
                   <tr
-                    key={idx}
+                    key={`${item.name}-${idx}`}
                     style={{
                       borderBottom: '1px solid var(--gx-border)',
                       opacity: item.enabled ? 1 : 0.4,
