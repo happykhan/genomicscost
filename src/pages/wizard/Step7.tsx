@@ -41,7 +41,7 @@ export default function Step7() {
     updateProject({ qms: qms.map((q, i) => i === idx ? { ...q, ...patch } : q) })
   }
   function addQMS() {
-    updateProject({ qms: [...qms, { activity: 'New QMS activity', costUsd: 0, quantity: 1, pctSequencing: 100, enabled: true }] })
+    updateProject({ qms: [...qms, { activity: 'New QMS activity', costUsd: 0, quantity: 1, pctSequencing: 85, enabled: true }] })
   }
   function removeQMS(idx: number) {
     updateProject({ qms: qms.filter((_, i) => i !== idx) })
@@ -252,11 +252,12 @@ export default function Step7() {
         {qmsOpen && (
           <>
             <div className="card mb-2" style={{ overflowX: 'auto' }}>
-              <table className="w-full text-sm" style={{ minWidth: 520, tableLayout: 'fixed' }}>
+              <table className="w-full text-sm" style={{ minWidth: 580, tableLayout: 'fixed' }}>
                 <colgroup>
                   <col style={{ width: 'auto' }} />
                   <col style={{ width: 120 }} />
-                  <col style={{ width: 90 }} />
+                  <col style={{ width: 80 }} />
+                  <col style={{ width: 80 }} />
                   <col style={{ width: 110 }} />
                   <col style={{ width: 44 }} />
                   <col style={{ width: 40 }} />
@@ -266,6 +267,11 @@ export default function Step7() {
                     <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_activity')}</th>
                     <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_cost')}</th>
                     <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_quantity')}</th>
+                    <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', gap: 2 }}>
+                        % attr.<Tooltip content="Percentage of this cost attributed to the sequencing programme (vs. other lab activities). WHO default is 85%." />
+                      </span>
+                    </th>
                     <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual')}</th>
                     <th className="text-center px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_on')}</th>
                     <th className="px-3 py-2"></th>
@@ -283,8 +289,11 @@ export default function Step7() {
                       <td className="px-3 py-2">
                         <input type="number" value={q.quantity} min={0} onChange={e => updateQMS(idx, { quantity: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: '100%', textAlign: 'center' }} />
                       </td>
+                      <td className="px-3 py-2">
+                        <input type="number" value={q.pctSequencing ?? 85} min={0} max={100} onChange={e => updateQMS(idx, { pctSequencing: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: '100%', textAlign: 'right' }} />
+                      </td>
                       <td className="px-3 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>
-                        {q.enabled ? fmt(q.costUsd * q.quantity * (q.pctSequencing ?? 100) / 100) : '—'}
+                        {q.enabled ? fmt(q.costUsd * q.quantity * (q.pctSequencing ?? 85) / 100) : '—'}
                       </td>
                       <td className="px-3 py-2 text-center">
                         <input type="checkbox" checked={q.enabled} onChange={e => updateQMS(idx, { enabled: e.target.checked })} style={{ accentColor: 'var(--gx-accent)', width: 15, height: 15 }} />
