@@ -274,7 +274,10 @@ export function calculateCosts(project: Project): CostBreakdown {
     .filter(c => c.enabled)
     .reduce((sum, c) => sum + (c.quantityPerYear ?? 0) * (c.unitCostUsd ?? 0), 0)
 
-  // WHO GCT: depreciation (age-adjusted) + 15% maintenance, both scaled by pctSequencing
+  const maintenanceRate = (project.maintenancePct ?? 15) / 100
+  const incidentalsRate = (project.incidentalsPct ?? 7) / 100
+
+  // WHO GCT: depreciation (age-adjusted) + maintenance % × pctSequencing
   // Only 'buy' items contribute — 'have' are sunk costs excluded from programme budget
   const annualEquipment = equipment
     .filter(e => e.status === 'buy')
@@ -285,7 +288,7 @@ export function calculateCosts(project: Project): CostBreakdown {
       const totalCost = (e.unitCostUsd ?? 0) * (e.quantity ?? 1)
       const pct = (e.pctSequencing ?? 100) / 100
       const depreciation = (totalCost / remainingLife) * pct
-      const maintenance = totalCost * 0.15 * pct
+      const maintenance = totalCost * maintenanceRate * pct
       return sum + depreciation + maintenance
     }, 0)
 
@@ -362,8 +365,8 @@ export function calculateCosts(project: Project): CostBreakdown {
 
   const totalConsumables = annualConsumables + fixedConsumablesTotal
 
-  // WHO GCT: 7% incidentals on all reagent/consumable costs
-  const incidentals = (seqCosts.sequencingReagents + seqCosts.libraryPrep + totalConsumables) * 0.07
+  // WHO GCT: incidentals % on all reagent/consumable costs
+  const incidentals = (seqCosts.sequencingReagents + seqCosts.libraryPrep + totalConsumables) * incidentalsRate
 
   // WHO GCT: equipment operational cost (depreciation + maintenance) is always included
   const total =
@@ -462,7 +465,7 @@ export function calculateCosts(project: Project): CostBreakdown {
     }
 
     const pathConsumables = annualConsumables * proportion
-    const pathIncidentals = (pathReagents + pathLibPrep + pathConsumables) * 0.07
+    const pathIncidentals = (pathReagents + pathLibPrep + pathConsumables) * incidentalsRate
     const pathShared = fixedTotal * proportion
     const pathTotal = pathReagents + pathLibPrep + pathConsumables + pathIncidentals + pathShared
 

@@ -149,7 +149,9 @@ export default function Step4() {
     })
   }
 
-  // WHO GCT: depreciation (age-adjusted) + 15% maintenance × pctSequencing
+  const maintenanceRate = (project.maintenancePct ?? 15) / 100
+
+  // WHO GCT: depreciation (age-adjusted) + maintenance % × pctSequencing
   const annualTotal = equipment
     .filter(e => e.status === 'buy')
     .reduce((sum, e) => {
@@ -158,7 +160,7 @@ export default function Step4() {
       const remainingLife = Math.max(1, lifespan - age)
       const totalCost = e.unitCostUsd * e.quantity
       const pct = (e.pctSequencing ?? 100) / 100
-      return sum + (totalCost / remainingLife) * pct + totalCost * 0.15 * pct
+      return sum + (totalCost / remainingLife) * pct + totalCost * maintenanceRate * pct
     }, 0)
 
   const establishmentTotal = equipment
@@ -227,7 +229,7 @@ export default function Step4() {
     const remainingLife = Math.max(1, lifespan - age)
     const totalCost = item.unitCostUsd * item.quantity
     const pct = (item.pctSequencing ?? 100) / 100
-    const annual = item.status === 'buy' ? ((totalCost / remainingLife) * pct + totalCost * 0.15 * pct) : 0
+    const annual = item.status === 'buy' ? ((totalCost / remainingLife) * pct + totalCost * maintenanceRate * pct) : 0
     return (
       <div
         key={item.idx}

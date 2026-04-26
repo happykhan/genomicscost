@@ -339,5 +339,7 @@ export function createDefaultProject(): Project {
     trainingGroupCostUsd: 5000,
     adminCostPct: 0,
     facilityPctSequencing: 100,
+    maintenancePct: 15,
+    incidentalsPct: 7,
   }
 }

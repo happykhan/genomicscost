@@ -201,6 +201,10 @@ function migrateProject(raw: unknown): Project {
     p.fixedConsumables = []
   }
 
+  // WHO methodology defaults for existing projects
+  if (typeof p.maintenancePct !== 'number') p.maintenancePct = 15
+  if (typeof p.incidentalsPct !== 'number') p.incidentalsPct = 7
+
   return p as unknown as Project
 }
 

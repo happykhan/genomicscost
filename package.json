@@ -1,7 +1,7 @@
 {
   "name": "genomicscost",
   "private": true,
-  "version": "1.0.36",
+  "version": "1.0.38",
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -243,6 +243,9 @@ export interface Project {
   adminCostPct: number
   // WHO GCT: single global % of facility attributed to sequencing (0–100)
   facilityPctSequencing: number
+  // WHO GCT methodology overrides (defaults: 15% maintenance, 7% incidentals)
+  maintenancePct: number
+  incidentalsPct: number
 }
 
 export interface PathogenCostBreakdown {

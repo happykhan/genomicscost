@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useProject } from '../store/ProjectContext'
 import toast from 'react-hot-toast'
 import {
   getEffectiveCatalogue,
@@ -166,7 +167,7 @@ function RowActions({
 
 // ── Tab definitions ──────────────────────────────────────────────────────────
 
-type TabId = 'reagent_kits' | 'library_prep' | 'reagents' | 'equipment' | 'pathogens' | 'bioinformatics'
+type TabId = 'reagent_kits' | 'library_prep' | 'reagents' | 'equipment' | 'pathogens' | 'bioinformatics' | 'settings'
 
 interface TabDef {
   id: TabId
@@ -181,6 +182,7 @@ const TABS: TabDef[] = [
   { id: 'equipment', labelKey: 'catalogue_tab_equipment', count: c => c.equipment.length },
   { id: 'pathogens', labelKey: 'catalogue_tab_pathogens', count: c => c.pathogens.length },
   { id: 'bioinformatics', labelKey: 'catalogue_tab_bioinformatics', count: c => c.bioinformatics_cloud.cloud_platforms.length },
+  { id: 'settings', labelKey: 'catalogue_tab_settings', count: () => 2 },
 ]
 
 // ── Add-row modal ────────────────────────────────────────────────────────────
@@ -324,6 +326,8 @@ function getFieldDefs(tab: TabId): Array<{ key: string; label: string; type: 'te
         { key: 'description', label: 'Description', type: 'text' },
         { key: 'pricing_model', label: 'Pricing model', type: 'text' },
       ]
+    case 'settings':
+      return []
   }
 }
 
@@ -1183,6 +1187,68 @@ function BioinformaticsTab({ onRefresh }: { onRefresh: () => void }) {
   )
 }
 
+// ── Other Settings tab ───────────────────────────────────────────────────────
+
+function SettingsTab() {
+  const settingsInputClass = 'border border-[var(--gx-border)] rounded-[var(--gx-radius)] bg-[var(--gx-bg)] text-[var(--gx-text)] p-2 text-sm focus:outline-none focus:border-[var(--gx-accent)]'
+  const { project, updateProject } = useProject()
+
+  const settings = [
+    {
+      label: 'Equipment maintenance rate',
+      description: 'Annual maintenance cost as a percentage of equipment purchase cost. WHO GCT default: 15%.',
+      field: 'maintenancePct' as const,
+      value: project.maintenancePct ?? 15,
+      unit: '%',
+      min: 0, max: 50, step: 1,
+    },
+    {
+      label: 'Incidentals rate',
+      description: 'Incidentals (waste bags, PPE, ethanol, etc.) as a percentage of total reagent and consumable costs. WHO GCT default: 7%.',
+      field: 'incidentalsPct' as const,
+      value: project.incidentalsPct ?? 7,
+      unit: '%',
+      min: 0, max: 30, step: 0.5,
+    },
+  ]
+
+  return (
+    <div className="space-y-4 mt-4">
+      <p className="text-sm" style={{ color: 'var(--gx-text-muted)' }}>
+        WHO GCT methodology parameters. These defaults match the WHO Excel workbook. Change them here to reflect your local context.
+      </p>
+      {settings.map(s => (
+        <div key={s.field} className="card p-4 flex flex-wrap gap-4 items-start">
+          <div className="flex-1 min-w-48">
+            <div className="text-sm font-medium mb-0.5" style={{ color: 'var(--gx-text)' }}>{s.label}</div>
+            <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{s.description}</div>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              value={s.value}
+              min={s.min}
+              max={s.max}
+              step={s.step}
+              onChange={e => updateProject({ [s.field]: parseFloat(e.target.value) || 0 })}
+              className={settingsInputClass}
+              style={{ width: 80, textAlign: 'right' }}
+            />
+            <span className="text-sm" style={{ color: 'var(--gx-text-muted)' }}>{s.unit}</span>
+            <button
+              onClick={() => updateProject({ [s.field]: s.field === 'maintenancePct' ? 15 : 7 })}
+              className="text-xs px-2 py-1 rounded"
+              style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text-muted)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
+            >
+              Reset to WHO default
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 // ── Main Catalogue page ──────────────────────────────────────────────────────
 
 export default function Catalogue() {
@@ -1383,6 +1449,7 @@ export default function Catalogue() {
       {activeTab === 'equipment' && <EquipmentTab onRefresh={refresh} />}
       {activeTab === 'pathogens' && <PathogensTab onRefresh={refresh} />}
       {activeTab === 'bioinformatics' && <BioinformaticsTab onRefresh={refresh} />}
+      {activeTab === 'settings' && <SettingsTab />}
     </div>
   )
 }
