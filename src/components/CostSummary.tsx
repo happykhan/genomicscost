@@ -53,24 +53,24 @@ export default function CostSummary() {
             {showBioCloud && showBioInhouse && (
               <>
                 <div className="flex justify-between items-center text-xs py-0.5 pl-3" style={{ color: 'var(--gx-text-muted)' }}>
-                  <span>Cloud (operational)</span>
+                  <span>{t('label_cloud_operational')}</span>
                   <span>${fmt(costs.bioinformaticsCloud)}</span>
                 </div>
                 <div className="flex justify-between items-center text-xs py-0.5 pl-3" style={{ borderBottom: '1px solid var(--gx-border)', color: 'var(--gx-text-muted)' }}>
-                  <span>In-house (depreciation)</span>
+                  <span>{t('label_inhouse_depreciation')}</span>
                   <span>${fmt(costs.bioinformaticsInhouse)}</span>
                 </div>
               </>
             )}
             {!showBioCloud && showBioInhouse && (
               <div className="flex justify-between items-center text-xs py-0.5 pl-3" style={{ borderBottom: '1px solid var(--gx-border)', color: 'var(--gx-text-muted)', fontStyle: 'italic' }}>
-                <span>Annual depreciation of hardware</span>
+                <span>{t('label_annual_depreciation_hw')}</span>
                 <span>${fmt(costs.bioinformaticsInhouse)}</span>
               </div>
             )}
             {showBioCloud && !showBioInhouse && (
               <div className="flex justify-between items-center text-xs py-0.5 pl-3" style={{ borderBottom: '1px solid var(--gx-border)', color: 'var(--gx-text-muted)', fontStyle: 'italic' }}>
-                <span>Cloud operational cost</span>
+                <span>{t('label_cloud_op_cost')}</span>
                 <span>${fmt(costs.bioinformaticsCloud)}</span>
               </div>
             )}

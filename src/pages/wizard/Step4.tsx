@@ -353,11 +353,11 @@ export default function Step4() {
       {/* A. Sequencing Instruments */}
       <div className="mb-8">
         <div className="text-xs uppercase tracking-wider mb-2 font-semibold" style={{ color: 'var(--gx-text-muted)' }}>
-          A. Sequencing Instruments
+          {t('label_section_a_instruments')}
         </div>
         <div className="flex flex-col gap-2 mb-3">
           {instrumentItems.length === 0 && (
-            <p className="text-sm" style={{ color: 'var(--gx-text-muted)' }}>No sequencing instruments added yet.</p>
+            <p className="text-sm" style={{ color: 'var(--gx-text-muted)' }}>{t('label_no_instruments')}</p>
           )}
           {instrumentItems.map(item => renderItemCard(item))}
         </div>
@@ -368,10 +368,10 @@ export default function Step4() {
             value=""
             onChange={e => { if (e.target.value) { addInstrumentFromCatalogue(e.target.value); e.target.value = '' } }}
           >
-            <option value="">Add from catalogue…</option>
+            <option value="">{t('label_add_catalogue')}</option>
             {catalogueInstrumentNames.map(name => (
               <option key={name} value={name} disabled={equipment.some(e => e.name === name)}>
-                {name}{equipment.some(e => e.name === name) ? ' (added)' : ''}
+                {name}{equipment.some(e => e.name === name) ? ` (${t('label_added')})` : ''}
               </option>
             ))}
           </select>
@@ -380,34 +380,34 @@ export default function Step4() {
             className="px-4 py-2 rounded text-sm font-medium"
             style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
           >
-            Custom instrument
+            {t('btn_custom_instrument')}
           </button>
         </div>
       </div>
 
       {/* B. Other Equipment */}
       <div className="text-xs uppercase tracking-wider mb-2 font-semibold" style={{ color: 'var(--gx-text-muted)' }}>
-        B. Other Equipment
+        {t('label_section_b_equipment')}
       </div>
 
       <div className="card mb-4" style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--gx-border)', color: 'var(--gx-text-muted)', textAlign: 'left' }}>
-              <th className="px-3 py-2" style={{ fontWeight: 500, minWidth: 160 }}>Name</th>
-              <th className="px-3 py-2" style={{ fontWeight: 500 }}>Status</th>
+              <th className="px-3 py-2" style={{ fontWeight: 500, minWidth: 160 }}>{t('col_name')}</th>
+              <th className="px-3 py-2" style={{ fontWeight: 500 }}>{t('col_status')}</th>
               <th className="px-3 py-2" style={{ fontWeight: 500, textAlign: 'center' }}>{t('col_qty')}</th>
               <th className="px-3 py-2" style={{ fontWeight: 500, textAlign: 'right' }}>{t('col_price_each')}</th>
               <th className="px-3 py-2" style={{ fontWeight: 500, textAlign: 'center' }}>{t('col_life_yr')}</th>
               <th className="px-3 py-2" style={{ fontWeight: 500, textAlign: 'center' }}>{t('col_age_yr')}</th>
               <th className="px-3 py-2" style={{ fontWeight: 500, textAlign: 'center' }}>{t('col_pct_seq')}</th>
-              <th className="px-3 py-2" style={{ fontWeight: 500, textAlign: 'right' }}>$/yr</th>
+              <th className="px-3 py-2" style={{ fontWeight: 500, textAlign: 'right' }}>{t('col_annual_usd_yr')}</th>
               <th className="px-3 py-2"></th>
             </tr>
           </thead>
           <tbody>
             {otherItems.length === 0 && (
-              <tr><td colSpan={9} className="px-3 py-3 text-sm" style={{ color: 'var(--gx-text-muted)' }}>No equipment added yet.</td></tr>
+              <tr><td colSpan={9} className="px-3 py-3 text-sm" style={{ color: 'var(--gx-text-muted)' }}>{t('label_no_equipment')}</td></tr>
             )}
             {otherItems.map(item => {
               const lifespan = Math.max(1, item.lifespanYears ?? 5)
@@ -526,14 +526,14 @@ export default function Step4() {
         </button>
         {otherItems.length > 0 && !confirmClearOther && (
           <button onClick={() => setConfirmClearOther(true)} className="px-4 py-2 rounded text-sm font-medium" style={{ background: 'none', color: 'var(--gx-text-muted)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>
-            Clear all
+            {t('btn_clear_all')}
           </button>
         )}
         {confirmClearOther && (
           <span className="flex items-center gap-2 text-sm">
-            <span style={{ color: '#92400e' }}>Remove all {otherItems.length} items?</span>
-            <button onClick={() => { updateProject({ equipment: equipment.filter(e => e.category === 'sequencing_platform') }); setConfirmClearOther(false) }} className="px-3 py-1 rounded text-xs font-medium" style={{ background: '#dc2626', color: '#fff', border: 'none', cursor: 'pointer' }}>Yes, clear</button>
-            <button onClick={() => setConfirmClearOther(false)} className="px-3 py-1 rounded text-xs font-medium" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>Cancel</button>
+            <span style={{ color: '#92400e' }}>{t('confirm_remove_n', { count: otherItems.length })}</span>
+            <button onClick={() => { updateProject({ equipment: equipment.filter(e => e.category === 'sequencing_platform') }); setConfirmClearOther(false) }} className="px-3 py-1 rounded text-xs font-medium" style={{ background: '#dc2626', color: '#fff', border: 'none', cursor: 'pointer' }}>{t('btn_yes_clear')}</button>
+            <button onClick={() => setConfirmClearOther(false)} className="px-3 py-1 rounded text-xs font-medium" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>{t('btn_cancel')}</button>
           </span>
         )}
       </div>

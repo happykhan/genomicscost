@@ -232,7 +232,7 @@ export default function Step8() {
       [t('label_report_title')],
       [project.name || t('label_unnamed_project'), project.country || '', project.year],
       [],
-      [t('col_category'), t('col_annual_usd'), t('col_pct_of_total'), 'Cost/sample USD'],
+      [t('col_category'), t('col_annual_usd'), t('col_pct_of_total'), t('col_cost_per_sample_usd')],
     ]
     for (const r of rows) {
       const perSample = samplesPerYear > 0 ? r.value / samplesPerYear : 0
@@ -240,10 +240,10 @@ export default function Step8() {
       // Bioinformatics sub-rows
       if (r.label === t('label_bioinformatics') && (costs.bioinformaticsCloud > 0 || costs.bioinformaticsInhouse > 0)) {
         if (costs.bioinformaticsCloud > 0) {
-          summaryData.push(['  Cloud (operational)', Math.round(costs.bioinformaticsCloud), null, null])
+          summaryData.push([`  ${t('label_cloud_operational')}`, Math.round(costs.bioinformaticsCloud), null, null])
         }
         if (costs.bioinformaticsInhouse > 0) {
-          summaryData.push(['  In-house (annual depreciation)', Math.round(costs.bioinformaticsInhouse), null, null])
+          summaryData.push([`  ${t('label_inhouse_depreciation')}`, Math.round(costs.bioinformaticsInhouse), null, null])
         }
       }
     }
@@ -256,11 +256,11 @@ export default function Step8() {
       .filter(e => e.status === 'buy')
       .reduce((s, e) => s + (e.unitCostUsd ?? 0) * (e.quantity ?? 1), 0)
     const bioEstab = costs.establishmentCost - equipEstab
-    if (equipEstab > 0) summaryData.push(['  Equipment establishment', Math.round(equipEstab)])
-    if (bioEstab > 0) summaryData.push(['  In-house bioinformatics establishment', Math.round(bioEstab)])
+    if (equipEstab > 0) summaryData.push([`  ${t('label_equip_establishment')}`, Math.round(equipEstab)])
+    if (bioEstab > 0) summaryData.push([`  ${t('label_bio_establishment')}`, Math.round(bioEstab)])
     summaryData.push([])
-    summaryData.push(['Maintenance %', project.maintenancePct ?? 15])
-    summaryData.push(['Incidentals %', project.incidentalsPct ?? 7])
+    summaryData.push([t('label_maintenance_pct'), project.maintenancePct ?? 15])
+    summaryData.push([t('label_incidentals_pct'), project.incidentalsPct ?? 7])
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summaryData), 'Summary')
 
     // ── Workflow sheet ──────────────────────────────────────────────────────
@@ -436,10 +436,10 @@ export default function Step8() {
         const raw = JSON.parse(ev.target?.result as string)
         // Apply same migration logic as the context uses for loaded projects
         loadProjectFromData(raw)
-        toast.success(`Loaded "${raw.name || 'project'}"`)
+        toast.success(t('toast_project_loaded', { name: raw.name || 'project' }))
         navigate('/wizard/1')
       } catch {
-        toast.error('Could not read project file — make sure it is a valid .json file')
+        toast.error(t('toast_project_load_error'))
       }
     }
     reader.readAsText(file)
@@ -487,16 +487,16 @@ export default function Step8() {
           </div>
           <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', fontSize: '0.78rem' }}>
             {project.name && (
-              <span><strong style={{ color: '#0f172a' }}>Project:</strong> <span style={{ color: '#475569' }}>{project.name}</span></span>
+              <span><strong style={{ color: '#0f172a' }}>{t('field_project_name')}:</strong> <span style={{ color: '#475569' }}>{project.name}</span></span>
             )}
             {project.country && (
-              <span><strong style={{ color: '#0f172a' }}>Country:</strong> <span style={{ color: '#475569' }}>{project.country}</span></span>
+              <span><strong style={{ color: '#0f172a' }}>{t('field_country')}:</strong> <span style={{ color: '#475569' }}>{project.country}</span></span>
             )}
-            <span><strong style={{ color: '#0f172a' }}>Year:</strong> <span style={{ color: '#475569' }}>{project.year}</span></span>
+            <span><strong style={{ color: '#0f172a' }}>{t('field_year')}:</strong> <span style={{ color: '#475569' }}>{project.year}</span></span>
             {project.pathogens.length > 0 && (
-              <span><strong style={{ color: '#0f172a' }}>Pathogen:</strong> <span style={{ color: '#475569' }}>{project.pathogens.map(p => p.pathogenName).join(', ') || t('label_no_pathogen')}</span></span>
+              <span><strong style={{ color: '#0f172a' }}>{t('field_pathogen_name')}:</strong> <span style={{ color: '#475569' }}>{project.pathogens.map(p => p.pathogenName).join(', ') || t('label_no_pathogen')}</span></span>
             )}
-            <span><strong style={{ color: '#0f172a' }}>Samples/yr:</strong> <span style={{ color: '#475569' }}>{samplesPerYear.toLocaleString()}</span></span>
+            <span><strong style={{ color: '#0f172a' }}>{t('label_samples_per_yr')}:</strong> <span style={{ color: '#475569' }}>{samplesPerYear.toLocaleString()}</span></span>
           </div>
         </div>
       </div>
@@ -576,14 +576,14 @@ export default function Step8() {
                       {row.label}
                       {row.label === t('label_equipment') && (
                         <div className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)', fontWeight: 400 }}>
-                          Annual depreciation + maintenance. One-off capital cost shown below as establishment cost.
+                          {t('label_equip_depreciation_note')}
                         </div>
                       )}
                       {isBio && !showBioSub && costs.bioinformaticsCloud > 0 && (
-                        <div className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)', fontWeight: 400 }}>Cloud (operational)</div>
+                        <div className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)', fontWeight: 400 }}>{t('label_cloud_operational')}</div>
                       )}
                       {isBio && !showBioSub && costs.bioinformaticsInhouse > 0 && (
-                        <div className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)', fontWeight: 400 }}>In-house (annual depreciation)</div>
+                        <div className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)', fontWeight: 400 }}>{t('label_inhouse_depreciation')}</div>
                       )}
                     </td>
                     <td className="px-4 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>${fmt(row.value)}</td>
@@ -597,7 +597,7 @@ export default function Step8() {
                   {showBioSub && (
                     <>
                       <tr style={{ borderBottom: 'none' }}>
-                        <td className="px-4 py-1 pl-8 text-xs" style={{ color: 'var(--gx-text-muted)' }}>Cloud (operational)</td>
+                        <td className="px-4 py-1 pl-8 text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_cloud_operational')}</td>
                         <td className="px-4 py-1 text-right text-xs" style={{ color: 'var(--gx-text-muted)' }}>${fmt(costs.bioinformaticsCloud)}</td>
                         {showLocalCurrency && (
                           <td className="px-4 py-1 text-right text-xs" style={{ color: 'var(--gx-text-muted)' }}>
@@ -607,7 +607,7 @@ export default function Step8() {
                         <td className="px-4 py-1 text-right text-xs" style={{ color: 'var(--gx-text-muted)' }}></td>
                       </tr>
                       <tr style={{ borderBottom: '1px solid var(--gx-border)' }}>
-                        <td className="px-4 py-1 pl-8 text-xs" style={{ color: 'var(--gx-text-muted)' }}>In-house (annual depreciation)</td>
+                        <td className="px-4 py-1 pl-8 text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_inhouse_depreciation')}</td>
                         <td className="px-4 py-1 text-right text-xs" style={{ color: 'var(--gx-text-muted)' }}>${fmt(costs.bioinformaticsInhouse)}</td>
                         {showLocalCurrency && (
                           <td className="px-4 py-1 text-right text-xs" style={{ color: 'var(--gx-text-muted)' }}>
@@ -652,11 +652,11 @@ export default function Step8() {
           <thead>
             <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
               <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_workflow_step')}</th>
-              <th className="text-right px-2 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Annual</th>
+              <th className="text-right px-2 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual')}</th>
               {showLocalCurrency && (
                 <th className="text-right px-2 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{currency}</th>
               )}
-              <th className="text-right px-2 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>/sample</th>
+              <th className="text-right px-2 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_per_sample')}</th>
               {showLocalCurrency && (
                 <th className="text-right px-2 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{currency}/sample</th>
               )}
@@ -789,22 +789,22 @@ export default function Step8() {
       {costs.perPathogenBreakdown.length > 0 && (
         <div className="card mb-6" style={{ overflowX: 'auto' }}>
           <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--gx-border)', background: 'var(--gx-bg-alt)' }}>
-            <h3 className="text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>Cost per sample by pathogen</h3>
+            <h3 className="text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>{t('label_cost_per_pathogen')}</h3>
             <p className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)' }}>
-              Sequencing + library prep attributed from assignments; consumables and overheads split proportionally by sample volume.
+              {t('label_cost_per_pathogen_desc')}
             </p>
           </div>
           <table className="w-full" style={{ fontSize: '0.78rem' }}>
             <thead>
               <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
-                <th className="text-left px-2 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Pathogen</th>
-                <th className="text-right px-2 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Samples/yr</th>
-                <th className="text-right px-2 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Seq. reagents</th>
-                <th className="text-right px-2 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Lib. prep</th>
-                <th className="text-right px-2 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Consumables</th>
-                <th className="text-right px-2 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Overheads</th>
-                <th className="text-right px-2 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Total annual</th>
-                <th className="text-right px-2 py-2 font-medium" style={{ color: 'var(--gx-text)' }}>Cost/sample</th>
+                <th className="text-left px-2 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('field_pathogen_name')}</th>
+                <th className="text-right px-2 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('label_samples_per_yr')}</th>
+                <th className="text-right px-2 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_seq_reagents')}</th>
+                <th className="text-right px-2 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_lib_prep')}</th>
+                <th className="text-right px-2 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('label_consumables')}</th>
+                <th className="text-right px-2 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_overheads')}</th>
+                <th className="text-right px-2 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('label_total_annual')}</th>
+                <th className="text-right px-2 py-2 font-medium" style={{ color: 'var(--gx-text)' }}>{t('label_cost_per_sample')}</th>
               </tr>
             </thead>
             <tbody>
@@ -855,19 +855,19 @@ export default function Step8() {
         <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--gx-text)' }}>{t('label_key_assumptions')}</h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-2 text-xs">
           <div>
-            <span style={{ color: 'var(--gx-text-muted)' }}>Maintenance %</span>
+            <span style={{ color: 'var(--gx-text-muted)' }}>{t('label_maintenance_pct')}</span>
             <div className="font-medium" style={{ color: 'var(--gx-text)' }}>{project.maintenancePct ?? 15}%</div>
           </div>
           <div>
-            <span style={{ color: 'var(--gx-text-muted)' }}>Incidentals %</span>
+            <span style={{ color: 'var(--gx-text-muted)' }}>{t('label_incidentals_pct')}</span>
             <div className="font-medium" style={{ color: 'var(--gx-text)' }}>{project.incidentalsPct ?? 7}%</div>
           </div>
           <div>
-            <span style={{ color: 'var(--gx-text-muted)' }}>Exchange rate</span>
+            <span style={{ color: 'var(--gx-text-muted)' }}>{t('label_exchange_rate')}</span>
             <div className="font-medium" style={{ color: 'var(--gx-text)' }}>1 USD = {exchangeRate} {currency}</div>
           </div>
           <div>
-            <span style={{ color: 'var(--gx-text-muted)' }}>Samples/yr</span>
+            <span style={{ color: 'var(--gx-text-muted)' }}>{t('label_samples_per_yr')}</span>
             <div className="font-medium" style={{ color: 'var(--gx-text)' }}>{samplesPerYear.toLocaleString()}</div>
           </div>
         </div>
@@ -954,11 +954,11 @@ export default function Step8() {
                   </td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '2px 8px 2px 0', color: '#475569' }}>Maintenance %</td>
+                  <td style={{ padding: '2px 8px 2px 0', color: '#475569' }}>{t('label_maintenance_pct')}</td>
                   <td style={{ padding: '2px 0', color: '#0f172a', fontWeight: 500 }}>{project.maintenancePct ?? 15}%</td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '2px 8px 2px 0', color: '#475569' }}>Incidentals %</td>
+                  <td style={{ padding: '2px 8px 2px 0', color: '#475569' }}>{t('label_incidentals_pct')}</td>
                   <td style={{ padding: '2px 0', color: '#0f172a', fontWeight: 500 }}>{project.incidentalsPct ?? 7}%</td>
                 </tr>
               </tbody>
@@ -1050,15 +1050,15 @@ export default function Step8() {
         {(project.fixedConsumables ?? []).filter(c => c.enabled && c.quantityPerYear > 0).length > 0 && (
           <div style={{ marginBottom: 20 }}>
             <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>
-              Section B — Fixed Annual Reagents &amp; Consumables
+              {t('label_section_b_fixed_reagents')}
             </h3>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem' }}>
               <thead>
                 <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                  <th style={{ textAlign: 'left', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Item</th>
-                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Qty/yr</th>
-                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Unit cost (USD)</th>
-                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Annual cost (USD)</th>
+                  <th style={{ textAlign: 'left', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_item')}</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_qty_yr')}</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_unit_cost_usd')}</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_annual_cost_usd')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -1073,7 +1073,7 @@ export default function Step8() {
                   </tr>
                 ))}
                 <tr style={{ borderTop: '2px solid #e2e8f0', fontWeight: 700 }}>
-                  <td colSpan={3} style={{ padding: '4px 8px', color: '#0f172a' }}>Subtotal</td>
+                  <td colSpan={3} style={{ padding: '4px 8px', color: '#0f172a' }}>{t('label_subtotal')}</td>
                   <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0d9488' }}>
                     ${fmt((project.fixedConsumables ?? []).filter(c => c.enabled && c.quantityPerYear > 0).reduce((s, c) => s + c.quantityPerYear * c.unitCostUsd, 0))}
                   </td>
@@ -1087,17 +1087,17 @@ export default function Step8() {
         {project.bioinformatics.type !== 'none' && costs.bioinformatics > 0 && (
           <div style={{ marginBottom: 20 }}>
             <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>
-              Bioinformatics ({project.bioinformatics.type})
+              {t('label_bioinformatics')} ({project.bioinformatics.type})
             </h3>
             {(project.bioinformatics.type === 'inhouse' || project.bioinformatics.type === 'hybrid') &&
               (project.bioinformatics.inhouseItems ?? []).filter(i => i.enabled).length > 0 && (
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', marginBottom: 10 }}>
                 <thead>
                   <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                    <th style={{ textAlign: 'left', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Component (in-house)</th>
-                    <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Purchase cost (USD)</th>
-                    <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Remaining life (yr)</th>
-                    <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Depreciation/yr (USD)</th>
+                    <th style={{ textAlign: 'left', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_component_inhouse')}</th>
+                    <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_purchase_cost_usd')}</th>
+                    <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_remaining_life_yr')}</th>
+                    <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_depreciation_yr_usd')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1121,8 +1121,8 @@ export default function Step8() {
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', marginBottom: 10 }}>
                 <thead>
                   <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                    <th style={{ textAlign: 'left', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Component (cloud)</th>
-                    <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Annual cost (USD)</th>
+                    <th style={{ textAlign: 'left', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_component_cloud')}</th>
+                    <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_annual_cost_usd')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1140,7 +1140,7 @@ export default function Step8() {
               </table>
             )}
             <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', textAlign: 'right', paddingRight: 8 }}>
-              Total bioinformatics: ${fmt(costs.bioinformatics)}
+              {t('label_bio_total')}: ${fmt(costs.bioinformatics)}
             </div>
           </div>
         )}
@@ -1149,16 +1149,16 @@ export default function Step8() {
         {project.qms.filter(q => q.enabled).length > 0 && (
           <div style={{ marginBottom: 20 }}>
             <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>
-              Quality Management System (QMS)
+              {t('label_qms_full')}
             </h3>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem' }}>
               <thead>
                 <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                  <th style={{ textAlign: 'left', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Activity</th>
-                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Cost (USD)</th>
-                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Qty</th>
-                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>% attr.</th>
-                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Annual (USD)</th>
+                  <th style={{ textAlign: 'left', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_activity')}</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_cost')}</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_qty')}</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_pct_attr')}</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_annual_usd')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -1175,7 +1175,7 @@ export default function Step8() {
                   )
                 })}
                 <tr style={{ borderTop: '2px solid #e2e8f0', fontWeight: 700 }}>
-                  <td colSpan={4} style={{ padding: '4px 8px', color: '#0f172a' }}>Total QMS</td>
+                  <td colSpan={4} style={{ padding: '4px 8px', color: '#0f172a' }}>{t('label_total_qms')}</td>
                   <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0d9488' }}>${fmt(costs.qms)}</td>
                 </tr>
               </tbody>
@@ -1271,13 +1271,13 @@ export default function Step8() {
           className="px-5 py-2 rounded text-sm font-medium"
           style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
         >
-          Download project file
+          {t('btn_download_project')}
         </button>
         <label
           className="px-5 py-2 rounded text-sm font-medium"
           style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer', display: 'inline-block' }}
         >
-          Load project file
+          {t('btn_load_project')}
           <input type="file" accept=".json" onChange={handleLoadProject} style={{ display: 'none' }} />
         </label>
         <button

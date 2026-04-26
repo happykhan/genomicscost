@@ -72,8 +72,8 @@ export default function Step7() {
         <div className="flex items-center gap-3 mb-3 p-3 rounded" style={{ background: 'var(--gx-bg-alt)', border: '1px solid var(--gx-border)' }}>
           <label className="text-xs font-medium" style={{ color: 'var(--gx-text)', whiteSpace: 'nowrap' }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-              % of facility used for sequencing
-              <Tooltip content="Percentage of the facility costs attributed to the sequencing programme. Applied to all facility line items." />
+              {t('label_pct_facility_sequencing')}
+              <Tooltip content={t('tooltip_facility_pct')} />
             </span>
           </label>
           <input
@@ -104,7 +104,7 @@ export default function Step7() {
                     {t('col_monthly_cost')}<Tooltip content={t('tooltip_facility_monthly')} />
                   </span>
                 </th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Annual (attributed)</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual_attr')}</th>
                 <th className="px-3 py-2"></th>
               </tr>
             </thead>
@@ -160,11 +160,11 @@ export default function Step7() {
           <table className="w-full text-sm" style={{ minWidth: 560 }}>
             <thead>
               <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
-                <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Transportation service</th>
-                <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Shipment method</th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Annual cost (USD)</th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>% for sequencing</th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Cost/sample</th>
+                <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_transport_service')}</th>
+                <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_shipment_method')}</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual_cost_transport')}</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_pct_sequencing')}</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_cost_per_sample_usd')}</th>
                 <th className="px-3 py-2"></th>
               </tr>
             </thead>
@@ -198,7 +198,7 @@ export default function Step7() {
             </tbody>
             <tfoot style={{ borderTop: '2px solid var(--gx-border)' }}>
               <tr>
-                <td colSpan={2} className="px-3 py-2 text-xs font-semibold" style={{ color: 'var(--gx-text-muted)' }}>Total annual transport-related cost</td>
+                <td colSpan={2} className="px-3 py-2 text-xs font-semibold" style={{ color: 'var(--gx-text-muted)' }}>{t('label_total_transport')}</td>
                 <td className="px-3 py-2 text-right text-xs font-semibold" style={{ color: 'var(--gx-text)' }}>${fmt(transportTotal)}</td>
                 <td />
                 <td className="px-3 py-2 text-right text-xs font-semibold" style={{ color: 'var(--gx-text)' }}>
@@ -215,14 +215,14 @@ export default function Step7() {
 
         {/* Combined facility + transport output */}
         <div className="p-4 rounded" style={{ background: 'var(--gx-bg-alt)', border: '1px solid var(--gx-border)' }}>
-          <div className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--gx-text-muted)' }}>Calculated costs — Facility and transport</div>
+          <div className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--gx-text-muted)' }}>{t('label_calc_costs_facility')}</div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total annual facility and transportation cost</div>
+              <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_total_facility_transport')}</div>
               <div className="text-sm font-semibold" style={{ color: 'var(--gx-accent)' }}>${fmt(facilityTransportTotal)}</div>
             </div>
             <div>
-              <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Facility and transportation cost per sample</div>
+              <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_facility_transport_per_sample')}</div>
               <div className="text-sm font-semibold" style={{ color: 'var(--gx-accent)' }}>${fmt(facilityTransportPerSample)}</div>
             </div>
           </div>
@@ -245,7 +245,7 @@ export default function Step7() {
               className="text-xs px-2 py-0.5 rounded"
               style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text-muted)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
             >
-              {qmsOpen ? '▲ Hide' : '▼ Show'}
+              {qmsOpen ? `▲ ${t('btn_hide')}` : `▼ ${t('btn_show')}`}
             </button>
           </div>
         </div>
@@ -269,7 +269,7 @@ export default function Step7() {
                     <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_quantity')}</th>
                     <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>
                       <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', gap: 2 }}>
-                        % attr.<Tooltip content="Percentage of this cost attributed to the sequencing programme (vs. other lab activities). WHO default is 85%." />
+                        {t('col_pct_attr')}<Tooltip content={t('tooltip_pct_attr')} />
                       </span>
                     </th>
                     <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual')}</th>

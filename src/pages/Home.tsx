@@ -16,10 +16,10 @@ export default function Home() {
       try {
         const raw = JSON.parse(ev.target?.result as string)
         loadProjectFromData(raw)
-        toast.success(`Loaded "${raw.name || 'project'}"`)
+        toast.success(t('toast_project_loaded', { name: raw.name || 'project' }))
         navigate('/wizard/1')
       } catch {
-        toast.error('Could not read file — make sure it is a valid project .json')
+        toast.error(t('toast_project_load_error'))
       }
     }
     reader.readAsText(file)
@@ -72,7 +72,7 @@ export default function Home() {
             className="px-8 py-3 rounded-lg text-base font-semibold"
             style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer', display: 'inline-block' }}
           >
-            Load project file
+            {t('btn_load_project')}
             <input type="file" accept=".json" onChange={handleLoadFile} style={{ display: 'none' }} />
           </label>
         </div>

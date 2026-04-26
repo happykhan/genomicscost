@@ -114,12 +114,12 @@ export default function Step6() {
                 <thead>
                   <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
                     <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_item')}</th>
-                    <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Description</th>
+                    <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_description')}</th>
                     <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_price_per_unit')}</th>
                     <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_qty')}</th>
-                    <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Samples (scenario)</th>
-                    <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Samples (all)</th>
-                    <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Total cost</th>
+                    <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_samples_scenario')}</th>
+                    <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_samples_total')}</th>
+                    <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_total_cost')}</th>
                     <th className="px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_on')}</th>
                     <th className="px-3 py-2"></th>
                   </tr>
@@ -180,14 +180,14 @@ export default function Step6() {
               <table className="w-full text-sm" style={{ minWidth: 550 }}>
                 <thead>
                   <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
-                    <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Component</th>
-                    <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Description</th>
+                    <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_component')}</th>
+                    <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_description')}</th>
                     <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_price_each')}</th>
                     <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_qty')}</th>
-                    <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>% use</th>
-                    <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Lifetime (yr)</th>
-                    <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Age (yr)</th>
-                    <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Depreciation/yr</th>
+                    <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_pct_use')}</th>
+                    <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_lifetime_yr')}</th>
+                    <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_age_yr')}</th>
+                    <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_depreciation_yr')}</th>
                     <th className="px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_on')}</th>
                     <th className="px-3 py-2"></th>
                   </tr>
@@ -247,24 +247,24 @@ export default function Step6() {
         {bioinformatics.type !== 'none' && (
           <div className="p-4 rounded flex flex-col gap-3" style={{ background: 'var(--gx-bg-alt)', border: '1px solid var(--gx-border)' }}>
             <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--gx-text-muted)' }}>
-              Calculated costs — Bioinformatics
+              {t('label_calc_costs_bio')}
             </div>
 
             {/* Cloud block */}
             {showCloud && (
               <div>
-                <div className="text-xs font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>Cloud-based</div>
+                <div className="text-xs font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>{t('label_cloud_based')}</div>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total purchase cost</div>
+                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_total_purchase_cost')}</div>
                     <div className="text-sm font-medium" style={{ color: 'var(--gx-text)' }}>${fmt(cloudPurchaseCost)}</div>
                   </div>
                   <div>
-                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total annual cost</div>
+                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_total_annual_cost')}</div>
                     <div className="text-sm font-medium" style={{ color: 'var(--gx-text)' }}>${fmt(cloudTotal)}</div>
                   </div>
                   <div>
-                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total cost per sample</div>
+                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_total_cost_per_sample')}</div>
                     <div className="text-sm font-medium" style={{ color: 'var(--gx-text)' }}>
                       {samplesPerYear > 0 ? `$${fmt(cloudTotal / samplesPerYear)}` : '—'}
                     </div>
@@ -276,14 +276,14 @@ export default function Step6() {
             {/* In-house block */}
             {showInhouse && (
               <div>
-                <div className="text-xs font-semibold mb-2" style={{ color: 'var(--gx-text)' }}>In-house</div>
+                <div className="text-xs font-semibold mb-2" style={{ color: 'var(--gx-text)' }}>{t('opt_inhouse')}</div>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem' }}>
                   <thead>
                     <tr style={{ borderBottom: '1px solid var(--gx-border)', color: 'var(--gx-text-muted)' }}>
-                      <th style={{ textAlign: 'left', fontWeight: 500, paddingBottom: 4 }}>Component</th>
-                      <th style={{ textAlign: 'right', fontWeight: 500, paddingBottom: 4 }}>Purchase cost</th>
-                      <th style={{ textAlign: 'right', fontWeight: 500, paddingBottom: 4 }}>Remaining life (yr)</th>
-                      <th style={{ textAlign: 'right', fontWeight: 500, paddingBottom: 4 }}>Annual depreciation</th>
+                      <th style={{ textAlign: 'left', fontWeight: 500, paddingBottom: 4 }}>{t('col_component')}</th>
+                      <th style={{ textAlign: 'right', fontWeight: 500, paddingBottom: 4 }}>{t('col_purchase_cost')}</th>
+                      <th style={{ textAlign: 'right', fontWeight: 500, paddingBottom: 4 }}>{t('col_remaining_life')}</th>
+                      <th style={{ textAlign: 'right', fontWeight: 500, paddingBottom: 4 }}>{t('col_annual_depreciation')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -301,7 +301,7 @@ export default function Step6() {
                       )
                     })}
                     {bioinformatics.inhouseItems.filter(i => i.enabled && (i.quantity ?? 0) > 0).length === 0 && (
-                      <tr><td colSpan={4} style={{ color: 'var(--gx-text-muted)', padding: '4px 0' }}>No active items.</td></tr>
+                      <tr><td colSpan={4} style={{ color: 'var(--gx-text-muted)', padding: '4px 0' }}>{t('label_no_active_items')}</td></tr>
                     )}
                   </tbody>
                   <tfoot>
@@ -309,7 +309,7 @@ export default function Step6() {
                       <td style={{ padding: '4px 0', fontWeight: 600, color: 'var(--gx-text)', fontSize: '0.8rem' }}>Total</td>
                       <td style={{ textAlign: 'right', fontWeight: 600, color: 'var(--gx-text)' }}>
                         ${fmt(inhousePurchaseCost)}
-                        <div style={{ fontWeight: 400, fontStyle: 'italic', color: 'var(--gx-text-muted)', fontSize: '0.7rem' }}>included in establishment cost</div>
+                        <div style={{ fontWeight: 400, fontStyle: 'italic', color: 'var(--gx-text-muted)', fontSize: '0.7rem' }}>{t('label_included_establishment')}</div>
                       </td>
                       <td></td>
                       <td style={{ textAlign: 'right', fontWeight: 600, color: 'var(--gx-accent)' }}>
@@ -325,18 +325,18 @@ export default function Step6() {
             {/* Hybrid combined totals */}
             {bioinformatics.type === 'hybrid' && (
               <div style={{ borderTop: '1px solid var(--gx-border)', paddingTop: 8 }}>
-                <div className="text-xs font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>Hybrid — for users with a combination of the above</div>
+                <div className="text-xs font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>{t('label_hybrid_desc')}</div>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total hybrid purchase cost</div>
+                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_total_hybrid_purchase')}</div>
                     <div className="text-sm font-medium" style={{ color: 'var(--gx-text)' }}>${fmt(cloudPurchaseCost + inhousePurchaseCost)}</div>
                   </div>
                   <div>
-                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total hybrid operational cost</div>
+                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_total_hybrid_operational')}</div>
                     <div className="text-sm font-semibold" style={{ color: 'var(--gx-accent)' }}>${fmt(bioTotal)}</div>
                   </div>
                   <div>
-                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total hybrid cost per sample</div>
+                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('label_total_hybrid_per_sample')}</div>
                     <div className="text-sm font-semibold" style={{ color: 'var(--gx-accent)' }}>
                       {samplesPerYear > 0 ? `$${fmt(bioTotal / samplesPerYear)}` : '—'}
                     </div>

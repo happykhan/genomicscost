@@ -31,9 +31,10 @@ const WF_ABBREV: Record<string, string> = {
   sample_receipt: 'SR', nucleic_acid_extraction: 'NA', pcr_testing: 'PCR',
   ngs_library_preparation: 'Lib', sequencing: 'Seq',
 }
-const WF_FULL: Record<string, string> = {
-  sample_receipt: 'Sample receipt', nucleic_acid_extraction: 'Nucleic acid extraction',
-  pcr_testing: 'PCR testing', ngs_library_preparation: 'NGS library preparation', sequencing: 'Sequencing',
+// Workflow full names — use i18n keys; resolved at render time
+const WF_FULL_KEYS: Record<string, string> = {
+  sample_receipt: 'wf_sample_receipt', nucleic_acid_extraction: 'wf_nucleic_acid_extraction',
+  pcr_testing: 'wf_pcr_testing', ngs_library_preparation: 'ws_library_prep', sequencing: 'ws_sequencing',
 }
 
 // ── Shared helper components ─────────────────────────────────────────────────
@@ -229,7 +230,7 @@ function AddRowModal({
         </h3>
 
         <div className="mb-3">
-          <label className="text-xs block mb-1" style={{ color: 'var(--gx-text-muted)' }}>Name</label>
+          <label className="text-xs block mb-1" style={{ color: 'var(--gx-text-muted)' }}>{t('col_name')}</label>
           <input
             type="text"
             value={name}
@@ -242,7 +243,7 @@ function AddRowModal({
 
         {fieldDefs.map(f => (
           <div key={f.key} className="mb-3">
-            <label className="text-xs block mb-1" style={{ color: 'var(--gx-text-muted)' }}>{f.label}</label>
+            <label className="text-xs block mb-1" style={{ color: 'var(--gx-text-muted)' }}>{t(f.labelKey)}</label>
             <input
               type={f.type}
               value={fields[f.key] ?? ''}
@@ -283,48 +284,48 @@ function AddRowModal({
   )
 }
 
-function getFieldDefs(tab: TabId): Array<{ key: string; label: string; type: 'text' | 'number' }> {
+function getFieldDefs(tab: TabId): Array<{ key: string; labelKey: string; type: 'text' | 'number' }> {
   switch (tab) {
     case 'equipment':
       return [
-        { key: 'category', label: 'Category', type: 'text' },
-        { key: 'workflow_step', label: 'Workflow step', type: 'text' },
-        { key: 'unit_cost_usd', label: 'Unit cost (USD)', type: 'number' },
-        { key: 'recommended_quantity', label: 'Recommended quantity', type: 'number' },
+        { key: 'category', labelKey: 'col_category', type: 'text' },
+        { key: 'workflow_step', labelKey: 'col_workflow_step', type: 'text' },
+        { key: 'unit_cost_usd', labelKey: 'col_unit_cost_usd', type: 'number' },
+        { key: 'recommended_quantity', labelKey: 'col_rec_qty', type: 'number' },
       ]
     case 'reagent_kits':
       return [
-        { key: 'unit_price_usd', label: 'Unit price (USD)', type: 'number' },
-        { key: 'read_length_bp', label: 'Read length (bp)', type: 'number' },
-        { key: 'max_reads_per_flowcell', label: 'Max reads per flowcell', type: 'number' },
-        { key: 'max_output_mb', label: 'Max output (Mb)', type: 'number' },
+        { key: 'unit_price_usd', labelKey: 'col_price_usd', type: 'number' },
+        { key: 'read_length_bp', labelKey: 'col_read_length_bp', type: 'number' },
+        { key: 'max_reads_per_flowcell', labelKey: 'col_max_reads', type: 'number' },
+        { key: 'max_output_mb', labelKey: 'col_max_output_mb', type: 'number' },
       ]
     case 'library_prep':
       return [
-        { key: 'pathogen_type', label: 'Pathogen type', type: 'text' },
-        { key: 'compatible_platforms', label: 'Compatible platforms (comma-separated)', type: 'text' },
-        { key: 'pack_size', label: 'Pack size', type: 'number' },
-        { key: 'barcoding_limit', label: 'Barcoding limit', type: 'number' },
-        { key: 'unit_price_usd', label: 'Unit price (USD)', type: 'number' },
+        { key: 'pathogen_type', labelKey: 'field_pathogen_type', type: 'text' },
+        { key: 'compatible_platforms', labelKey: 'col_platforms', type: 'text' },
+        { key: 'pack_size', labelKey: 'col_pack_size', type: 'number' },
+        { key: 'barcoding_limit', labelKey: 'col_barcoding_limit', type: 'number' },
+        { key: 'unit_price_usd', labelKey: 'col_price_usd', type: 'number' },
       ]
     case 'reagents':
       return [
-        { key: 'category', label: 'Category', type: 'text' },
-        { key: 'pack_size', label: 'Pack size', type: 'number' },
-        { key: 'quantity_per_sample', label: 'Quantity per sample', type: 'number' },
-        { key: 'workflow', label: 'Workflow', type: 'text' },
+        { key: 'category', labelKey: 'col_category', type: 'text' },
+        { key: 'pack_size', labelKey: 'col_pack_size', type: 'number' },
+        { key: 'quantity_per_sample', labelKey: 'col_qty_sample', type: 'number' },
+        { key: 'workflow', labelKey: 'col_workflow_step', type: 'text' },
       ]
     case 'pathogens':
       return [
-        { key: 'type', label: 'Type (Virus / Bacteria)', type: 'text' },
-        { key: 'genome_type', label: 'Genome type (DNA / RNA)', type: 'text' },
-        { key: 'genome_size_mb', label: 'Genome size (Mb)', type: 'number' },
-        { key: 'required_coverage_x', label: 'Default coverage (x)', type: 'number' },
+        { key: 'type', labelKey: 'col_type', type: 'text' },
+        { key: 'genome_type', labelKey: 'col_genome', type: 'text' },
+        { key: 'genome_size_mb', labelKey: 'col_size_mb', type: 'number' },
+        { key: 'required_coverage_x', labelKey: 'col_coverage_x', type: 'number' },
       ]
     case 'bioinformatics':
       return [
-        { key: 'description', label: 'Description', type: 'text' },
-        { key: 'pricing_model', label: 'Pricing model', type: 'text' },
+        { key: 'description', labelKey: 'col_description', type: 'text' },
+        { key: 'pricing_model', labelKey: 'col_pricing_model', type: 'text' },
       ]
     case 'settings':
       return []
@@ -406,11 +407,11 @@ function EquipmentTab({ onRefresh }: { onRefresh: () => void }) {
         <table className="w-full text-xs">
           <thead>
             <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
-              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Name</th>
-              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Category</th>
-              <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Unit cost (USD)</th>
-              <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Rec. qty</th>
-              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Catalogue ref</th>
+              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_name')}</th>
+              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_category')}</th>
+              <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_unit_cost_usd')}</th>
+              <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_rec_qty')}</th>
+              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_catalogue_ref')}</th>
               <th className="px-3 py-2"></th>
             </tr>
           </thead>
@@ -571,11 +572,11 @@ function ReagentKitsTab({ onRefresh }: { onRefresh: () => void }) {
         <table className="w-full text-xs">
           <thead>
             <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
-              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Name</th>
-              <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Price (USD)</th>
-              <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Max reads</th>
-              <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Max output (Mb)</th>
-              <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Read length (bp)</th>
+              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_name')}</th>
+              <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_price_usd')}</th>
+              <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_max_reads')}</th>
+              <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_max_output_mb')}</th>
+              <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_read_length_bp')}</th>
               <th className="px-3 py-2"></th>
             </tr>
           </thead>
@@ -701,11 +702,11 @@ function LibPrepTab({ onRefresh }: { onRefresh: () => void }) {
         <table className="w-full text-xs">
           <thead>
             <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
-              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Name</th>
-              <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Price (USD)</th>
-              <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Barcoding limit</th>
-              <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Pack size</th>
-              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Platforms</th>
+              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_name')}</th>
+              <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_price_usd')}</th>
+              <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_barcoding_limit')}</th>
+              <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_pack_size')}</th>
+              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_platforms')}</th>
               <th className="px-3 py-2"></th>
             </tr>
           </thead>
@@ -825,11 +826,11 @@ function ReagentsTab({ onRefresh }: { onRefresh: () => void }) {
         <table className="w-full text-xs">
           <thead>
             <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
-              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Name</th>
-              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Category</th>
-              <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Pack size</th>
-              <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Qty/sample</th>
-              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Workflow steps</th>
+              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_name')}</th>
+              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_category')}</th>
+              <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_pack_size')}</th>
+              <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_qty_sample')}</th>
+              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_workflow_steps')}</th>
               <th className="px-3 py-2"></th>
             </tr>
           </thead>
@@ -858,7 +859,7 @@ function ReagentsTab({ onRefresh }: { onRefresh: () => void }) {
                           <button
                             key={step}
                             onClick={() => handleWorkflowToggle(r, step)}
-                            title={WF_FULL[step]}
+                            title={t(WF_FULL_KEYS[step])}
                             className="text-xs px-1.5 py-0.5 rounded"
                             style={{
                               background: active ? 'var(--gx-accent)' : 'var(--gx-bg-alt)',
@@ -959,11 +960,11 @@ function PathogensTab({ onRefresh }: { onRefresh: () => void }) {
         <table className="w-full text-xs">
           <thead>
             <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
-              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Name</th>
-              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Type</th>
-              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Genome</th>
-              <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Size (Mb)</th>
-              <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Coverage (x)</th>
+              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_name')}</th>
+              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_type')}</th>
+              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_genome')}</th>
+              <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_size_mb')}</th>
+              <th className="text-right px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_coverage_x')}</th>
               <th className="px-3 py-2"></th>
             </tr>
           </thead>
@@ -1012,6 +1013,7 @@ function PathogenAddModal({ onClose, onAdd }: {
   onClose: () => void
   onAdd: (name: string, data: Record<string, unknown>) => void
 }) {
+  const { t } = useTranslation()
   const [name, setName] = useState('')
   const [type, setType] = useState('Virus')
   const [genomeType, setGenomeType] = useState('DNA')
@@ -1037,23 +1039,23 @@ function PathogenAddModal({ onClose, onAdd }: {
       onClick={onClose}
     >
       <div className="card p-6" style={{ maxWidth: 440, width: '90%' }} onClick={e => e.stopPropagation()}>
-        <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--gx-text)' }}>Add custom pathogen</h3>
+        <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--gx-text)' }}>{t('label_add_custom_pathogen')}</h3>
 
         <div className="mb-3">
-          <label className="text-xs block mb-1" style={{ color: 'var(--gx-text-muted)' }}>Name</label>
+          <label className="text-xs block mb-1" style={{ color: 'var(--gx-text-muted)' }}>{t('col_name')}</label>
           <input type="text" value={name} onChange={e => setName(e.target.value)} className={inputClass} style={{ width: '100%' }} autoFocus />
         </div>
 
         <div className="grid grid-cols-2 gap-3 mb-3">
           <div>
-            <label className="text-xs block mb-1" style={{ color: 'var(--gx-text-muted)' }}>Type</label>
+            <label className="text-xs block mb-1" style={{ color: 'var(--gx-text-muted)' }}>{t('col_type')}</label>
             <select value={type} onChange={e => setType(e.target.value)} className={selectClass}>
               <option value="Virus">Virus</option>
               <option value="Bacteria">Bacteria</option>
             </select>
           </div>
           <div>
-            <label className="text-xs block mb-1" style={{ color: 'var(--gx-text-muted)' }}>Genome type</label>
+            <label className="text-xs block mb-1" style={{ color: 'var(--gx-text-muted)' }}>{t('col_genome')}</label>
             <select value={genomeType} onChange={e => setGenomeType(e.target.value)} className={selectClass}>
               <option value="DNA">DNA</option>
               <option value="RNA">RNA</option>
@@ -1063,11 +1065,11 @@ function PathogenAddModal({ onClose, onAdd }: {
 
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div>
-            <label className="text-xs block mb-1" style={{ color: 'var(--gx-text-muted)' }}>Genome size (Mb)</label>
+            <label className="text-xs block mb-1" style={{ color: 'var(--gx-text-muted)' }}>{t('col_size_mb')}</label>
             <input type="number" value={genomeSizeMb} min={0} step={0.001} onChange={e => setGenomeSizeMb(e.target.value)} className={inputClass} style={{ width: '100%' }} />
           </div>
           <div>
-            <label className="text-xs block mb-1" style={{ color: 'var(--gx-text-muted)' }}>Default coverage (x)</label>
+            <label className="text-xs block mb-1" style={{ color: 'var(--gx-text-muted)' }}>{t('col_coverage_x')}</label>
             <input type="number" value={coverageX} min={1} step={1} onChange={e => setCoverageX(e.target.value)} className={inputClass} style={{ width: '100%' }} />
           </div>
         </div>
@@ -1075,11 +1077,11 @@ function PathogenAddModal({ onClose, onAdd }: {
         <div className="flex gap-2">
           <button onClick={handleSubmit} disabled={!name.trim()} className="px-4 py-1.5 rounded text-sm font-medium"
             style={{ background: name.trim() ? 'var(--gx-accent)' : 'var(--gx-bg-alt)', color: name.trim() ? 'var(--gx-bg)' : 'var(--gx-text-muted)', border: 'none', cursor: name.trim() ? 'pointer' : 'default' }}>
-            Add pathogen
+            {t('btn_add_pathogen')}
           </button>
           <button onClick={onClose} className="px-4 py-1.5 rounded text-sm font-medium"
             style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>
-            Cancel
+            {t('btn_cancel')}
           </button>
         </div>
       </div>
@@ -1146,9 +1148,9 @@ function BioinformaticsTab({ onRefresh }: { onRefresh: () => void }) {
         <table className="w-full text-xs">
           <thead>
             <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
-              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Name</th>
-              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Description</th>
-              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Pricing model</th>
+              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_name')}</th>
+              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_description')}</th>
+              <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_pricing_model')}</th>
               <th className="px-3 py-2"></th>
             </tr>
           </thead>
@@ -1192,19 +1194,20 @@ function BioinformaticsTab({ onRefresh }: { onRefresh: () => void }) {
 function SettingsTab() {
   const settingsInputClass = 'border border-[var(--gx-border)] rounded-[var(--gx-radius)] bg-[var(--gx-bg)] text-[var(--gx-text)] p-2 text-sm focus:outline-none focus:border-[var(--gx-accent)]'
   const { project, updateProject } = useProject()
+  const { t } = useTranslation()
 
   const settings = [
     {
-      label: 'Equipment maintenance rate',
-      description: 'Annual maintenance cost as a percentage of equipment purchase cost. WHO GCT default: 15%.',
+      label: t('label_equip_maintenance_rate'),
+      description: t('label_equip_maintenance_desc'),
       field: 'maintenancePct' as const,
       value: project.maintenancePct ?? 15,
       unit: '%',
       min: 0, max: 50, step: 1,
     },
     {
-      label: 'Incidentals rate',
-      description: 'Incidentals (waste bags, PPE, ethanol, etc.) as a percentage of total reagent and consumable costs. WHO GCT default: 7%.',
+      label: t('label_incidentals_rate'),
+      description: t('label_incidentals_desc'),
       field: 'incidentalsPct' as const,
       value: project.incidentalsPct ?? 7,
       unit: '%',
@@ -1215,7 +1218,7 @@ function SettingsTab() {
   return (
     <div className="space-y-4 mt-4">
       <p className="text-sm" style={{ color: 'var(--gx-text-muted)' }}>
-        WHO GCT methodology parameters. These defaults match the WHO Excel workbook. Change them here to reflect your local context.
+        {t('label_settings_desc')}
       </p>
       {settings.map(s => (
         <div key={s.field} className="card p-4 flex flex-wrap gap-4 items-start">
@@ -1240,7 +1243,7 @@ function SettingsTab() {
               className="text-xs px-2 py-1 rounded"
               style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text-muted)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
             >
-              Reset to WHO default
+              {t('btn_reset_who_default')}
             </button>
           </div>
         </div>
@@ -1301,16 +1304,12 @@ export default function Catalogue() {
 
         if (format === 'effective') {
           if (total === 0) {
-            toast.success('Imported full catalogue (no differences from bundled defaults)')
+            toast.success(t('catalogue_toast_imported_no_diff'))
           } else {
-            const parts: string[] = []
-            if (stats.edits > 0) parts.push(`${stats.edits} edit${stats.edits !== 1 ? 's' : ''}`)
-            if (stats.additions > 0) parts.push(`${stats.additions} addition${stats.additions !== 1 ? 's' : ''}`)
-            if (stats.deletions > 0) parts.push(`${stats.deletions} deletion${stats.deletions !== 1 ? 's' : ''}`)
-            toast.success(`Imported full catalogue (${parts.join(', ')} after diff)`)
+            toast.success(t('catalogue_toast_imported_diff', { edits: stats.edits, additions: stats.additions, deletions: stats.deletions }))
           }
         } else {
-          toast.success(`Imported ${total} override${total !== 1 ? 's' : ''}`)
+          toast.success(t('catalogue_toast_imported_n', { count: total }))
         }
         refresh()
       } catch (err) {
@@ -1339,7 +1338,7 @@ export default function Catalogue() {
             className="text-xs mb-2 flex items-center gap-1"
             style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--gx-text-muted)' }}
           >
-            ← Back to costing tool
+            {t('btn_back_to_tool')}
           </button>
           <h1 className="text-xl font-bold" style={{ color: 'var(--gx-text)' }}>{t('catalogue_title')}</h1>
           <p className="text-sm mt-1" style={{ color: 'var(--gx-text-muted)' }}>

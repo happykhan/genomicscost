@@ -265,7 +265,7 @@ export default function Step3() {
       {enabledSequencers.length > 0 && (
         <div className="mb-6">
           <div className="text-xs uppercase tracking-wider mb-2 font-semibold" style={{ color: 'var(--gx-text-muted)' }}>
-            A. Sequencing &amp; Library Prep Reagents
+            {t('label_section_a_seq_reagents')}
           </div>
           <div className="card" style={{ border: '1px solid var(--gx-border)', borderRadius: 'var(--gx-radius)', background: 'var(--gx-bg-alt)', padding: '12px 16px' }}>
             {enabledSequencers.map((seq, idx) => {
@@ -303,13 +303,13 @@ export default function Step3() {
                     {seq.label} — {platformName}
                   </div>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs" style={{ color: 'var(--gx-text-muted)' }}>
-                    <div>Reagent kit: {(seq.reagentKitName === 'Other sequencing kit' ? seq.customKitDisplayName : null) || seq.reagentKitName || '—'}</div>
+                    <div>{t('label_reagent_kit_short')}: {(seq.reagentKitName === 'Other sequencing kit' ? seq.customKitDisplayName : null) || seq.reagentKitName || '—'}</div>
                     <div className="text-right">
-                      {runsPerYear} runs/yr · {kitsPerYear} kits/yr = <span style={{ color: 'var(--gx-accent)' }}>${fmt(reagentCostAnnual)}</span>
+                      {runsPerYear} {t('label_runs_yr')} · {kitsPerYear} {t('label_kits_yr')} = <span style={{ color: 'var(--gx-accent)' }}>${fmt(reagentCostAnnual)}</span>
                     </div>
-                    <div>Library prep: {(seq.libPrepKitName === 'Other library preparation kit' ? seq.customLibPrepDisplayName : null) || seq.libPrepKitName || '—'}</div>
+                    <div>{t('label_library_prep_short')}: {(seq.libPrepKitName === 'Other library preparation kit' ? seq.customLibPrepDisplayName : null) || seq.libPrepKitName || '—'}</div>
                     <div className="text-right">
-                      {libKitsPerYear !== null && <span>{libKitsPerYear} kits/yr · </span>}
+                      {libKitsPerYear !== null && <span>{libKitsPerYear} {t('label_kits_yr')} · </span>}
                       ${fmt(seq.libPrepCostPerSample ?? 0)}/sample = <span style={{ color: 'var(--gx-accent)' }}>${fmt(libPrepCostAnnual)}</span>
                     </div>
                   </div>
@@ -325,7 +325,7 @@ export default function Step3() {
       {/* Section B: Fixed-Quantity Reagents & Consumables (shopping list, absolute annual qty) */}
       <div className="mb-6">
         <div className="text-xs uppercase tracking-wider mb-2 font-semibold" style={{ color: 'var(--gx-text-muted)' }}>
-          B. Reagents &amp; Consumables
+          {t('label_section_b_reagents')}
         </div>
         <div className="card" style={{ overflowX: 'auto' }}>
           <table className="w-full text-sm" style={{ minWidth: 680 }}>
@@ -336,12 +336,12 @@ export default function Step3() {
                     {WF_ABBREV[step]}
                   </th>
                 ))}
-                <th className="px-3 py-2 text-left text-xs font-medium" style={{ color: 'var(--gx-text-muted)', width: 60 }}>Type</th>
-                <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Item</th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Qty/yr</th>
+                <th className="px-3 py-2 text-left text-xs font-medium" style={{ color: 'var(--gx-text-muted)', width: 60 }}>{t('col_type')}</th>
+                <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_item')}</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_qty_yr')}</th>
                 <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_unit_cost')}</th>
                 <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual')}</th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)', whiteSpace: 'nowrap' }}>Cost/workflow step</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)', whiteSpace: 'nowrap' }}>{t('col_cost_per_wf_step')}</th>
                 <th className="px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_on')}</th>
                 <th className="px-3 py-2"></th>
               </tr>
@@ -419,21 +419,21 @@ export default function Step3() {
         {/* Section B: Add/Clear buttons */}
         <div className="flex items-center gap-2 mt-3">
           <button onClick={addFixed} className="px-4 py-2 rounded text-sm font-medium" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>
-            + Add item
+            {t('btn_add')}
           </button>
           {!confirmClearFixed ? (
             <button onClick={() => setConfirmClearFixed(true)} className="px-4 py-2 rounded text-sm font-medium" style={{ background: 'none', color: 'var(--gx-text-muted)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>
-              Clear all
+              {t('btn_clear_all')}
             </button>
           ) : (
             <span className="flex items-center gap-2 text-sm">
-              <span style={{ color: '#92400e' }}>Remove all {fixedConsumables.length} items?</span>
-              <button onClick={() => { updateProject({ fixedConsumables: [] }); setConfirmClearFixed(false) }} className="px-3 py-1 rounded text-xs font-medium" style={{ background: '#dc2626', color: '#fff', border: 'none', cursor: 'pointer' }}>Yes, clear</button>
-              <button onClick={() => setConfirmClearFixed(false)} className="px-3 py-1 rounded text-xs font-medium" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>Cancel</button>
+              <span style={{ color: '#92400e' }}>{t('confirm_remove_n', { count: fixedConsumables.length })}</span>
+              <button onClick={() => { updateProject({ fixedConsumables: [] }); setConfirmClearFixed(false) }} className="px-3 py-1 rounded text-xs font-medium" style={{ background: '#dc2626', color: '#fff', border: 'none', cursor: 'pointer' }}>{t('btn_yes_clear')}</button>
+              <button onClick={() => setConfirmClearFixed(false)} className="px-3 py-1 rounded text-xs font-medium" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>{t('btn_cancel')}</button>
             </span>
           )}
           <span className="ml-auto text-sm font-medium" style={{ color: 'var(--gx-text-muted)' }}>
-            Subtotal: <span style={{ color: 'var(--gx-accent)' }}>${fmt(fixedTotal)}</span>
+            {t('label_subtotal')}: <span style={{ color: 'var(--gx-accent)' }}>${fmt(fixedTotal)}</span>
           </span>
         </div>
       </div>
@@ -441,7 +441,7 @@ export default function Step3() {
       {/* Section C: Per-Sample Reagents & Consumables (volume-dependent, starts blank) */}
       <div className="mb-6">
         <div className="text-xs uppercase tracking-wider mb-2 font-semibold" style={{ color: 'var(--gx-text-muted)' }}>
-          C. Per-Sample Reagent Usage (optional — for volume-dependent items)
+          {t('label_section_c_per_sample')}
         </div>
         <div className="card" style={{ overflowX: 'auto' }}>
           <table className="w-full text-sm" style={{ minWidth: 700 }}>
@@ -452,12 +452,12 @@ export default function Step3() {
                     {WF_ABBREV[step]}
                   </th>
                 ))}
-                <th className="px-3 py-2 text-left text-xs font-medium" style={{ color: 'var(--gx-text-muted)', width: 60 }}>Type</th>
+                <th className="px-3 py-2 text-left text-xs font-medium" style={{ color: 'var(--gx-text-muted)', width: 60 }}>{t('col_type')}</th>
                 <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_item')}</th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Qty/sample · units/yr</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_qty_sample_units_yr')}</th>
                 <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_unit_cost')}</th>
                 <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual')}</th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)', whiteSpace: 'nowrap' }}>Cost/workflow step</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)', whiteSpace: 'nowrap' }}>{t('col_cost_per_wf_step')}</th>
                 <th className="px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_on')}</th>
                 <th className="px-3 py-2"></th>
               </tr>
@@ -541,7 +541,7 @@ export default function Step3() {
                             border: '1px solid #fcd34d',
                             width: 'fit-content',
                           }}>
-                            Viral reagent — may not apply to bacterial pathogens
+                            {t('warn_viral_reagent')}
                           </span>
                         )}
                       </div>
@@ -653,24 +653,24 @@ export default function Step3() {
             className="px-4 py-2 rounded text-sm font-medium"
             style={{ background: 'none', color: 'var(--gx-text-muted)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
           >
-            Clear all
+            {t('btn_clear_all')}
           </button>
         ) : (
           <span className="flex items-center gap-2 text-sm">
-            <span style={{ color: '#92400e' }}>Remove all {consumables.length} items?</span>
+            <span style={{ color: '#92400e' }}>{t('confirm_remove_n', { count: consumables.length })}</span>
             <button
               onClick={() => { updateProject({ consumables: [] }); setConfirmClear(false) }}
               className="px-3 py-1 rounded text-xs font-medium"
               style={{ background: '#dc2626', color: '#fff', border: 'none', cursor: 'pointer' }}
             >
-              Yes, clear
+              {t('btn_yes_clear')}
             </button>
             <button
               onClick={() => setConfirmClear(false)}
               className="px-3 py-1 rounded text-xs font-medium"
               style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
             >
-              Cancel
+              {t('btn_cancel')}
             </button>
           </span>
         )}
@@ -682,16 +682,16 @@ export default function Step3() {
           <thead>
             <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
               <th className="text-left px-4 py-2 text-xs font-semibold" style={{ color: 'var(--gx-text-muted)' }}>
-                Calculated costs — Reagents &amp; Consumables
+                {t('label_calc_costs_reagents')}
               </th>
-              <th className="text-right px-4 py-2 text-xs font-semibold" style={{ color: 'var(--gx-text-muted)' }}>Annual cost</th>
+              <th className="text-right px-4 py-2 text-xs font-semibold" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual_cost')}</th>
             </tr>
           </thead>
           <tbody>
             {[
-              { label: 'Sequencing & library preparation reagents', value: sequencingReagentsTotal },
-              { label: 'Reagents & consumables (Section B)', value: fixedTotal },
-              { label: 'Per-sample reagents & consumables (Section C)', value: consumableTotal },
+              { label: t('label_seq_lib_prep_reagents'), value: sequencingReagentsTotal },
+              { label: t('label_reagents_section_b'), value: fixedTotal },
+              { label: t('label_per_sample_section_c'), value: consumableTotal },
             ].map(row => (
               <tr key={row.label} style={{ borderBottom: '1px solid var(--gx-border)' }}>
                 <td className="px-4 py-2 text-xs" style={{ color: 'var(--gx-text-muted)' }}>{row.label}</td>
@@ -700,23 +700,23 @@ export default function Step3() {
             ))}
             <tr style={{ borderBottom: '1px solid var(--gx-border)' }}>
               <td className="px-4 py-2 text-xs" style={{ color: 'var(--gx-text-muted)' }}>
-                Incidentals (waste bags, PPE, ethanol, etc.)
+                {t('label_incidentals_detail')}
                 <span style={{ marginLeft: 6, fontStyle: 'italic' }}>
-                  — {project.incidentalsPct ?? 7}% of reagent/consumable costs.{' '}
-                  <a href="/catalogue" style={{ color: 'var(--gx-accent)', textDecoration: 'underline' }}>Change in Other Settings</a>
+                  — {project.incidentalsPct ?? 7}% {t('label_of_reagent_costs')}.{' '}
+                  <a href="/catalogue" style={{ color: 'var(--gx-accent)', textDecoration: 'underline' }}>{t('label_change_other_settings')}</a>
                 </span>
               </td>
               <td className="px-4 py-2 text-right text-xs" style={{ color: 'var(--gx-text)' }}>${fmt(costs.incidentals)}</td>
             </tr>
             <tr style={{ borderBottom: '1px solid var(--gx-border)', background: 'var(--gx-bg-alt)' }}>
-              <td className="px-4 py-2 text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>Total annual reagent &amp; consumable cost</td>
+              <td className="px-4 py-2 text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>{t('label_total_annual_reagent_cost')}</td>
               <td className="px-4 py-2 text-right text-sm font-semibold" style={{ color: 'var(--gx-accent)' }}>
                 ${fmt(sequencingReagentsTotal + fixedTotal + consumableTotal + costs.incidentals)}
               </td>
             </tr>
             <tr>
               <td className="px-4 py-2 text-xs" style={{ color: 'var(--gx-text-muted)' }}>
-                Cost per sample ({samplesPerYear.toLocaleString()} samples/yr)
+                {t('label_cost_per_sample')} ({samplesPerYear.toLocaleString()} {t('label_samples_per_yr')})
               </td>
               <td className="px-4 py-2 text-right text-xs font-medium" style={{ color: 'var(--gx-text)' }}>
                 {samplesPerYear > 0
