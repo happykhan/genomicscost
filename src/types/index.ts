@@ -111,10 +111,12 @@ export interface SequencerConfig {
   // WHO GCT row 26: user-entered average samples per run (may be less than max capacity)
   avgSamplesPerRun?: number
   // Custom kit specs (used when reagentKitName === 'Other sequencing kit')
+  customKitDisplayName?: string
   customKitMaxOutputMb?: number
   customKitReadLengthBp?: number
   customKitPacksPerRun?: number
   // Custom lib prep specs (used when libPrepKitName === 'Other library preparation kit')
+  customLibPrepDisplayName?: string
   customLibPrepMaxBarcodes?: number
   customLibPrepBarcodesPerPack?: number
   // True when user has manually overridden coverageX; false/absent = auto from assignments

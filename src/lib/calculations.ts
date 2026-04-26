@@ -170,15 +170,29 @@ function calcSequencerCosts(
 ): { sequencingReagents: number; libraryPrep: number } {
   if (!seq.enabled || assignedSamples <= 0) return { sequencingReagents: 0, libraryPrep: 0 }
 
+  const catalogue = getEffectiveCatalogue()
   const samplesIncludingRetests = assignedSamples * (1 + (seq.retestPct ?? 0) / 100)
   // Use avgSamplesPerRun if set (WHO GCT row 26), otherwise fall back to max capacity
   const maxSamplesPerRun = Math.max(1, seq.samplesPerRun ?? 1)
   const effectiveSamplesPerRun = Math.max(1, seq.avgSamplesPerRun ?? maxSamplesPerRun)
   const runsNeeded = Math.ceil(samplesIncludingRetests / effectiveSamplesPerRun)
 
+  // Library prep cost: kits × kit_price (controls also need prepping — matches Excel)
+  const selectedLibKit = catalogue.library_prep_kits.find(k => k.name === seq.libPrepKitName)
+  const libPackSize = seq.libPrepKitName === 'Other library preparation kit'
+    ? (seq.customLibPrepBarcodesPerPack ?? 0)
+    : (selectedLibKit?.pack_size ?? 0)
+  const kitPrice = libPackSize > 0 ? (seq.libPrepCostPerSample ?? 0) * libPackSize : 0
+  const libKitsNeeded = libPackSize > 0
+    ? Math.ceil((samplesIncludingRetests + runsNeeded * (seq.controlsPerRun ?? 0)) / libPackSize)
+    : 0
+  const libraryPrep = libPackSize > 0 && kitPrice > 0
+    ? libKitsNeeded * kitPrice
+    : samplesIncludingRetests * (seq.libPrepCostPerSample ?? 0)
+
   return {
     sequencingReagents: runsNeeded * (seq.reagentKitPrice ?? 0),
-    libraryPrep: samplesIncludingRetests * (seq.libPrepCostPerSample ?? 0),
+    libraryPrep,
   }
 }
 

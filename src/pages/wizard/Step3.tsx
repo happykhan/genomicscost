@@ -141,7 +141,7 @@ export default function Step3() {
 
       updateConsumable(index, {
         name: newName,
-        unitCostUsd: 5, // placeholder — user must enter local price
+        unitCostUsd: 0,
         quantityPerSample: qtyPerSample,
         workflows,
       })
@@ -201,19 +201,22 @@ export default function Step3() {
               const packsPerRun = seq.customKitPacksPerRun ?? 1
               const kitsPerYear = Math.ceil(runsPerYear * packsPerRun)
               const reagentCostAnnual = runsPerYear * (seq.reagentKitPrice ?? 0)
-              const libPrepCostAnnual = samplesWithRetests * (seq.libPrepCostPerSample ?? 0)
+
               const platform = catalogue.platforms.find(p => p.id === seq.platformId)
               const platformName = platform?.name ?? seq.platformId
 
-              // Library prep kits per year
+              // Library prep kits per year (controls also prepped each run — matches Excel)
               const selectedLibKit = catalogue.library_prep_kits.find(k => k.name === seq.libPrepKitName)
               const libPackSize = seq.libPrepKitName === 'Other library preparation kit'
                 ? (seq.customLibPrepBarcodesPerPack ?? 0)
                 : (selectedLibKit?.pack_size ?? 0)
-              // Controls are also library-prepped each run — include them in kit count (matches Excel)
               const libKitsPerYear = libPackSize > 0
                 ? Math.ceil((samplesWithRetests + runsPerYear * (seq.controlsPerRun ?? 0)) / libPackSize)
                 : null
+              const kitPrice = libPackSize > 0 ? (seq.libPrepCostPerSample ?? 0) * libPackSize : 0
+              const libPrepCostAnnual = libKitsPerYear != null && kitPrice > 0
+                ? libKitsPerYear * kitPrice
+                : samplesWithRetests * (seq.libPrepCostPerSample ?? 0)
 
               return (
                 <div key={idx} className={idx > 0 ? 'mt-3 pt-3' : ''} style={idx > 0 ? { borderTop: '1px solid var(--gx-border)' } : undefined}>
@@ -221,11 +224,11 @@ export default function Step3() {
                     {seq.label} — {platformName}
                   </div>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs" style={{ color: 'var(--gx-text-muted)' }}>
-                    <div>Reagent kit: {seq.reagentKitName || '—'}</div>
+                    <div>Reagent kit: {(seq.reagentKitName === 'Other sequencing kit' ? seq.customKitDisplayName : null) || seq.reagentKitName || '—'}</div>
                     <div className="text-right">
                       {runsPerYear} runs/yr · {kitsPerYear} kits/yr = <span style={{ color: 'var(--gx-accent)' }}>${fmt(reagentCostAnnual)}</span>
                     </div>
-                    <div>Library prep: {seq.libPrepKitName || '—'}</div>
+                    <div>Library prep: {(seq.libPrepKitName === 'Other library preparation kit' ? seq.customLibPrepDisplayName : null) || seq.libPrepKitName || '—'}</div>
                     <div className="text-right">
                       {libKitsPerYear !== null && <span>{libKitsPerYear} kits/yr · </span>}
                       ${fmt(seq.libPrepCostPerSample ?? 0)}/sample = <span style={{ color: 'var(--gx-accent)' }}>${fmt(libPrepCostAnnual)}</span>
@@ -256,7 +259,7 @@ export default function Step3() {
                 ))}
                 <th className="px-3 py-2 text-left text-xs font-medium" style={{ color: 'var(--gx-text-muted)', width: 60 }}>Type</th>
                 <th className="text-left px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_item')}</th>
-                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Qty/sample · samples/unit</th>
+                <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Qty/sample · units/yr</th>
                 <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_unit_cost')}</th>
                 <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>{t('col_annual')}</th>
                 <th className="text-right px-3 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)', whiteSpace: 'nowrap' }}>Cost/workflow step</th>
@@ -381,6 +384,11 @@ export default function Step3() {
                           />
                           <span className="text-xs" style={{ color: 'var(--gx-text-muted)', whiteSpace: 'nowrap' }}>/unit</span>
                         </div>
+                        {samplesPerYear > 0 && item.quantityPerSample > 0 && (
+                          <div className="text-xs font-medium" style={{ color: 'var(--gx-accent)', whiteSpace: 'nowrap' }}>
+                            = {Math.ceil(samplesPerYear * item.quantityPerSample)} units/yr
+                          </div>
+                        )}
                       </div>
                     </td>
 

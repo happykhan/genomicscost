@@ -390,6 +390,14 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
           )}
           {sequencer.reagentKitName === 'Other sequencing kit' && (
             <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="sm:col-span-3">
+                <label className={labelClass}>Kit display name (shown in summary)</label>
+                <input type="text" className={inputClass}
+                  value={sequencer.customKitDisplayName ?? ''}
+                  placeholder="e.g. ONT MinION R10.4.1"
+                  onChange={e => updateSequencer(index, { customKitDisplayName: e.target.value || undefined })}
+                />
+              </div>
               <div>
                 <label className={labelClass}>Max flow cell output (bytes)</label>
                 <input type="number" min={0} className={inputClass}
@@ -712,6 +720,14 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
           )}
           {isCustomLibPrep && (
             <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="sm:col-span-2">
+                <label className={labelClass}>Kit display name (shown in summary)</label>
+                <input type="text" className={inputClass}
+                  value={sequencer.customLibPrepDisplayName ?? ''}
+                  placeholder="e.g. ONT Native Barcoding Kit 24"
+                  onChange={e => updateSequencer(index, { customLibPrepDisplayName: e.target.value || undefined })}
+                />
+              </div>
               <div>
                 <label className={labelClass}>Max barcodes available (total)</label>
                 <input type="number" min={1} className={inputClass}
