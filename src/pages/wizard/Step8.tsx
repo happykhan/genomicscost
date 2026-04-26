@@ -23,7 +23,7 @@ function pct(part: number, total: number) {
 }
 
 export default function Step8() {
-  const { project, costs, saveProject } = useProject()
+  const { project, costs, saveProject, updateProject } = useProject()
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [showPriceEditor, setShowPriceEditor] = useState(false)
@@ -416,6 +416,36 @@ export default function Step8() {
     }
   }
 
+  function handleDownloadProject() {
+    const filename = `${(project.name || 'genomics-cost').replace(/\s+/g, '-')}-project.json`
+    const blob = new Blob([JSON.stringify(project, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  function handleLoadProject(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = ev => {
+      try {
+        const raw = JSON.parse(ev.target?.result as string)
+        // Apply same migration logic as the context uses for loaded projects
+        updateProject(raw)
+        toast.success(`Loaded "${raw.name || 'project'}"`)
+        navigate('/wizard/1')
+      } catch {
+        toast.error('Could not read project file — make sure it is a valid .json file')
+      }
+    }
+    reader.readAsText(file)
+    e.target.value = ''
+  }
+
   return (
     <div className="gx-print-region">
       {/* Screen header */}
@@ -764,33 +794,33 @@ export default function Step8() {
               Sequencing + library prep attributed from assignments; consumables and overheads split proportionally by sample volume.
             </p>
           </div>
-          <table className="w-full text-sm">
+          <table className="w-full" style={{ fontSize: '0.78rem' }}>
             <thead>
               <tr style={{ background: 'var(--gx-bg-alt)', borderBottom: '1px solid var(--gx-border)' }}>
-                <th className="text-left px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Pathogen</th>
-                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Samples/yr</th>
-                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Seq. reagents</th>
-                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Library prep</th>
-                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Consumables</th>
-                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Overheads</th>
-                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text-muted)' }}>Total annual</th>
-                <th className="text-right px-4 py-2 text-xs font-medium" style={{ color: 'var(--gx-text)' }}>Cost/sample</th>
+                <th className="text-left px-2 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Pathogen</th>
+                <th className="text-right px-2 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Samples/yr</th>
+                <th className="text-right px-2 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Seq. reagents</th>
+                <th className="text-right px-2 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Lib. prep</th>
+                <th className="text-right px-2 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Consumables</th>
+                <th className="text-right px-2 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Overheads</th>
+                <th className="text-right px-2 py-2 font-medium" style={{ color: 'var(--gx-text-muted)' }}>Total annual</th>
+                <th className="text-right px-2 py-2 font-medium" style={{ color: 'var(--gx-text)' }}>Cost/sample</th>
               </tr>
             </thead>
             <tbody>
               {costs.perPathogenBreakdown.map(pb => (
                 <tr key={pb.pathogenName} style={{ borderBottom: '1px solid var(--gx-border)' }}>
-                  <td className="px-4 py-2">
-                    <div className="text-xs font-medium" style={{ color: 'var(--gx-text)' }}>{pb.pathogenName}</div>
-                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)', textTransform: 'capitalize' }}>{pb.pathogenType}</div>
+                  <td className="px-2 py-1.5">
+                    <div className="font-medium" style={{ color: 'var(--gx-text)' }}>{pb.pathogenName}</div>
+                    <div style={{ color: 'var(--gx-text-muted)', textTransform: 'capitalize' }}>{pb.pathogenType}</div>
                   </td>
-                  <td className="px-4 py-2 text-right text-xs" style={{ color: 'var(--gx-text-muted)' }}>{pb.samples.toLocaleString()}</td>
-                  <td className="px-4 py-2 text-right text-xs" style={{ color: 'var(--gx-text)' }}>${fmt(pb.sequencingReagents)}</td>
-                  <td className="px-4 py-2 text-right text-xs" style={{ color: 'var(--gx-text)' }}>${fmt(pb.libraryPrep)}</td>
-                  <td className="px-4 py-2 text-right text-xs" style={{ color: 'var(--gx-text)' }}>${fmt(pb.consumables)}</td>
-                  <td className="px-4 py-2 text-right text-xs" style={{ color: 'var(--gx-text-muted)' }}>${fmt(pb.sharedCosts + pb.incidentals)}</td>
-                  <td className="px-4 py-2 text-right text-xs font-medium" style={{ color: 'var(--gx-text)' }}>${fmt(pb.total)}</td>
-                  <td className="px-4 py-2 text-right font-bold" style={{ color: 'var(--gx-accent)' }}>${fmtCurrency(pb.costPerSample, 2)}</td>
+                  <td className="px-2 py-1.5 text-right" style={{ color: 'var(--gx-text-muted)' }}>{pb.samples.toLocaleString()}</td>
+                  <td className="px-2 py-1.5 text-right" style={{ color: 'var(--gx-text)' }}>${fmt(pb.sequencingReagents)}</td>
+                  <td className="px-2 py-1.5 text-right" style={{ color: 'var(--gx-text)' }}>${fmt(pb.libraryPrep)}</td>
+                  <td className="px-2 py-1.5 text-right" style={{ color: 'var(--gx-text)' }}>${fmt(pb.consumables)}</td>
+                  <td className="px-2 py-1.5 text-right" style={{ color: 'var(--gx-text-muted)' }}>${fmt(pb.sharedCosts + pb.incidentals)}</td>
+                  <td className="px-2 py-1.5 text-right font-medium" style={{ color: 'var(--gx-text)' }}>${fmt(pb.total)}</td>
+                  <td className="px-2 py-1.5 text-right font-bold" style={{ color: 'var(--gx-accent)' }}>${fmtCurrency(pb.costPerSample, 2)}</td>
                 </tr>
               ))}
             </tbody>
@@ -1236,6 +1266,20 @@ export default function Step8() {
         >
           {t('btn_share')}
         </button>
+        <button
+          onClick={handleDownloadProject}
+          className="px-5 py-2 rounded text-sm font-medium"
+          style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
+        >
+          Download project file
+        </button>
+        <label
+          className="px-5 py-2 rounded text-sm font-medium"
+          style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer', display: 'inline-block' }}
+        >
+          Load project file
+          <input type="file" accept=".json" onChange={handleLoadProject} style={{ display: 'none' }} />
+        </label>
         <button
           onClick={() => navigate('/wizard/1')}
           className="px-5 py-2 rounded text-sm font-medium"
