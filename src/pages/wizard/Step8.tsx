@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
+import type { ConsumableWorkflowStep } from '../../types'
 import { useProject } from '../../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
@@ -65,67 +66,341 @@ export default function Step8() {
   }
 
   function handleExportCSV() {
-    const sep = ','
-    const lines: string[] = [
-      `${t('col_category')}${sep}${t('col_annual_usd')}${sep}${t('col_pct_of_total')}`,
-      ...rows.map(r => `${r.label}${sep}${r.value}${sep}${pct(r.value, costs.total)}`),
-      `${t('label_annual_total')}${sep}${costs.total}${sep}100`,
-      '',
-      `${t('label_cost_per_sample')}${sep}${costs.costPerSample}`,
-    ]
+    // Helper to escape CSV fields containing commas or quotes
+    const esc = (v: string | number | undefined | null): string => {
+      const s = String(v ?? '')
+      return s.includes(',') || s.includes('"') || s.includes('\n')
+        ? `"${s.replace(/"/g, '""')}"`
+        : s
+    }
+    const row = (...cells: (string | number | undefined | null)[]) => cells.map(esc).join(',')
+
+    const lines: string[] = []
+
+    // Section 1: Project info
+    lines.push('--- PROJECT INFO ---')
+    lines.push(row('Project', project.name || 'Unnamed'))
+    lines.push(row('Country', project.country || ''))
+    lines.push(row('Year', project.year))
+    lines.push(row('Samples/yr', samplesPerYear))
+    lines.push(row('Pathogens', project.pathogens.map(p => p.pathogenName).join('; ')))
+    lines.push(row('Currency', currency))
+    lines.push(row('Exchange rate (1 USD)', exchangeRate))
+    lines.push('')
+
+    // Section 2: Cost summary
+    lines.push('--- COST SUMMARY ---')
+    lines.push(row('Category', 'Annual USD', '% of total', 'Cost/sample USD'))
+    for (const r of rows) {
+      const perSample = samplesPerYear > 0 ? r.value / samplesPerYear : 0
+      lines.push(row(r.label, Math.round(r.value), pct(r.value, costs.total), perSample.toFixed(2)))
+    }
+    lines.push(row('TOTAL', Math.round(costs.total), 100, costs.costPerSample.toFixed(2)))
+    lines.push(row('Establishment cost (one-off)', Math.round(costs.establishmentCost)))
+    lines.push('')
+
+    // Section 3: Workflow breakdown
+    lines.push('--- WORKFLOW BREAKDOWN ---')
+    lines.push(row('Step', 'Annual USD', 'Cost/sample USD', '%'))
+    for (const r of workflowRows) {
+      const perSample = samplesPerYear > 0 ? r.value / samplesPerYear : 0
+      lines.push(row(r.label, Math.round(r.value), perSample.toFixed(2), pct(r.value, workflowTotal)))
+    }
+    lines.push('')
+
+    // Section 4: Fixed consumables (Section B)
+    const enabledFixed = (project.fixedConsumables ?? []).filter(c => c.enabled && c.quantityPerYear > 0)
+    if (enabledFixed.length > 0) {
+      const wfKeys: ConsumableWorkflowStep[] = ['sample_receipt', 'nucleic_acid_extraction', 'pcr_testing', 'ngs_library_preparation', 'sequencing']
+      const wfShort = ['R', 'N', 'P', 'L', 'S']
+      lines.push('--- SECTION B: FIXED ANNUAL REAGENTS & CONSUMABLES ---')
+      lines.push(row('Item', 'Qty/yr', 'Unit cost USD', 'Annual cost USD', 'Workflows'))
+      for (const c of enabledFixed) {
+        const annual = c.quantityPerYear * c.unitCostUsd
+        const wfStr = wfKeys.map((k, i) => (c.workflows?.[k] ? wfShort[i] : '')).filter(Boolean).join('/') || 'all'
+        lines.push(row(c.name, c.quantityPerYear, c.unitCostUsd.toFixed(2), annual.toFixed(2), wfStr))
+      }
+      const fixedTotal = enabledFixed.reduce((s, c) => s + c.quantityPerYear * c.unitCostUsd, 0)
+      lines.push(row('SUBTOTAL', '', '', fixedTotal.toFixed(2)))
+      lines.push('')
+    }
+
+    // Section 5: Per-sample consumables (Section C)
+    const enabledPerSample = project.consumables.filter(c => c.enabled)
+    if (enabledPerSample.length > 0) {
+      lines.push('--- SECTION C: PER-SAMPLE CONSUMABLES ---')
+      lines.push(row('Item', 'Qty/sample', 'Unit cost USD', 'Annual cost USD'))
+      for (const c of enabledPerSample) {
+        const annual = c.unitCostUsd * c.quantityPerSample * samplesPerYear
+        lines.push(row(c.name, c.quantityPerSample, c.unitCostUsd.toFixed(2), annual.toFixed(2)))
+      }
+      lines.push('')
+    }
+
+    // Section 6: Equipment
+    if (project.equipment.length > 0) {
+      lines.push('--- EQUIPMENT ---')
+      lines.push(row('Item', 'Category', 'Status', 'Qty', 'Unit cost USD', 'Lifespan yr', 'Age yr', '% seq', 'Annual depreciation USD'))
+      const maintenanceRate = (project.maintenancePct ?? 15) / 100
+      for (const e of project.equipment) {
+        const lifespan = Math.max(1, e.lifespanYears ?? 5)
+        const age = Math.max(0, Math.min(e.ageYears ?? 0, lifespan - 1))
+        const remainingLife = Math.max(1, lifespan - age)
+        const totalCost = (e.unitCostUsd ?? 0) * (e.quantity ?? 1)
+        const pctSeq = (e.pctSequencing ?? 100) / 100
+        const depreciation = e.status === 'buy' ? (totalCost / remainingLife) * pctSeq : 0
+        const maintenance = e.status === 'buy' ? totalCost * maintenanceRate * pctSeq : 0
+        lines.push(row(e.name, e.category, e.status, e.quantity, e.unitCostUsd, lifespan, age, e.pctSequencing ?? 100, (depreciation + maintenance).toFixed(2)))
+      }
+      lines.push('')
+    }
+
+    // Section 7: Personnel
+    if (project.personnel.length > 0) {
+      lines.push('--- PERSONNEL ---')
+      lines.push(row('Role', 'Annual salary USD', '% time', 'Annual attributed USD'))
+      for (const p of project.personnel) {
+        lines.push(row(p.role, p.annualSalaryUsd, p.pctTime, (p.annualSalaryUsd * p.pctTime / 100).toFixed(2)))
+      }
+      if ((project.trainingGroupCostUsd ?? 0) > 0) {
+        lines.push(row('Training (group)', '', '', (project.trainingGroupCostUsd ?? 0).toFixed(2)))
+      }
+      if (costs.adminCost > 0) {
+        lines.push(row(`Admin overhead (${project.adminCostPct}%)`, '', '', costs.adminCost.toFixed(2)))
+      }
+      lines.push('')
+    }
+
+    // Section 8: Bioinformatics
+    if (project.bioinformatics.type !== 'none') {
+      lines.push('--- BIOINFORMATICS ---')
+      lines.push(row('Type', project.bioinformatics.type))
+      if ((project.bioinformatics.type === 'cloud' || project.bioinformatics.type === 'hybrid') && project.bioinformatics.cloudItems?.length) {
+        lines.push(row('Component', 'Price/unit USD', 'Qty', 'Samples this scenario', 'Total samples all', 'Annual cost USD'))
+        for (const item of project.bioinformatics.cloudItems.filter(i => i.enabled)) {
+          const totalAll = Math.max(1, item.totalSamplesAllPathogens || samplesPerYear)
+          const annual = item.pricePerUnit * item.quantity * (item.samplesThisScenario || samplesPerYear) / totalAll
+          lines.push(row(item.name, item.pricePerUnit, item.quantity, item.samplesThisScenario, item.totalSamplesAllPathogens, annual.toFixed(2)))
+        }
+      }
+      if ((project.bioinformatics.type === 'inhouse' || project.bioinformatics.type === 'hybrid') && project.bioinformatics.inhouseItems?.length) {
+        lines.push(row('Component', 'Price/unit USD', 'Qty', '% use', 'Lifespan yr', 'Age yr', 'Annual depreciation USD'))
+        for (const item of project.bioinformatics.inhouseItems.filter(i => i.enabled)) {
+          const remainingLife = Math.max(1, (item.lifespanYears ?? 1) - (item.ageYears ?? 0))
+          const annual = item.pricePerUnit * item.quantity * (item.pctUse / 100) / remainingLife
+          lines.push(row(item.name, item.pricePerUnit, item.quantity, item.pctUse, item.lifespanYears, item.ageYears, annual.toFixed(2)))
+        }
+      }
+      lines.push(row('Total cloud', costs.bioinformaticsCloud.toFixed(2)))
+      lines.push(row('Total in-house', costs.bioinformaticsInhouse.toFixed(2)))
+      lines.push(row('Total bioinformatics', costs.bioinformatics.toFixed(2)))
+      lines.push('')
+    }
+
+    // Section 9: QMS
+    const enabledQms = project.qms.filter(q => q.enabled)
+    if (enabledQms.length > 0) {
+      lines.push('--- QMS ---')
+      lines.push(row('Activity', 'Cost USD', 'Qty', '% attributed', 'Annual USD'))
+      for (const q of enabledQms) {
+        const annual = q.costUsd * q.quantity * (q.pctSequencing / 100)
+        lines.push(row(q.activity, q.costUsd, q.quantity, q.pctSequencing, annual.toFixed(2)))
+      }
+      lines.push('')
+    }
+
+    // Section 10: Assumptions
+    lines.push('--- ASSUMPTIONS ---')
+    lines.push(row('Parameter', 'Value'))
+    lines.push(row('Maintenance %', project.maintenancePct ?? 15))
+    lines.push(row('Incidentals %', project.incidentalsPct ?? 7))
+    lines.push(row('Exchange rate (1 USD)', exchangeRate))
+    lines.push(row('Currency', currency))
+    lines.push(row('Samples/yr', samplesPerYear))
+    lines.push(row('Pathogens', project.pathogens.map(p => p.pathogenName).join('; ')))
+
     downloadCSV(lines.join('\n'), `${project.name || 'genomics-cost'}-results.csv`)
   }
 
   async function handleExportExcel() {
     const XLSX = await import('xlsx')
     const wb = XLSX.utils.book_new()
+    const maintenanceRate = (project.maintenancePct ?? 15) / 100
 
-    // Summary sheet
-    const summaryData = [
+    // ── Summary sheet (enhanced) ────────────────────────────────────────────
+    const summaryData: (string | number | null)[][] = [
       [t('label_report_title')],
       [project.name || t('label_unnamed_project'), project.country || '', project.year],
       [],
-      [t('col_category'), t('col_annual_usd'), t('col_pct_of_total')],
-      ...rows.map(r => [r.label, r.value, pct(r.value, costs.total)]),
-      [],
-      [t('label_annual_total'), costs.total, 100],
-      [t('label_cost_per_sample'), costs.costPerSample],
-      [t('label_establishment_cost'), costs.establishmentCost],
+      [t('col_category'), t('col_annual_usd'), t('col_pct_of_total'), 'Cost/sample USD'],
     ]
+    for (const r of rows) {
+      const perSample = samplesPerYear > 0 ? r.value / samplesPerYear : 0
+      summaryData.push([r.label, Math.round(r.value), pct(r.value, costs.total), +perSample.toFixed(2)])
+      // Bioinformatics sub-rows
+      if (r.label === t('label_bioinformatics') && (costs.bioinformaticsCloud > 0 || costs.bioinformaticsInhouse > 0)) {
+        if (costs.bioinformaticsCloud > 0) {
+          summaryData.push(['  Cloud (operational)', Math.round(costs.bioinformaticsCloud), null, null])
+        }
+        if (costs.bioinformaticsInhouse > 0) {
+          summaryData.push(['  In-house (annual depreciation)', Math.round(costs.bioinformaticsInhouse), null, null])
+        }
+      }
+    }
+    summaryData.push([])
+    summaryData.push([t('label_annual_total'), Math.round(costs.total), 100, +costs.costPerSample.toFixed(2)])
+    summaryData.push([t('label_cost_per_sample'), +costs.costPerSample.toFixed(2)])
+    summaryData.push([t('label_establishment_cost'), Math.round(costs.establishmentCost)])
+    // Establishment breakdown
+    const equipEstab = project.equipment
+      .filter(e => e.status === 'buy')
+      .reduce((s, e) => s + (e.unitCostUsd ?? 0) * (e.quantity ?? 1), 0)
+    const bioEstab = costs.establishmentCost - equipEstab
+    if (equipEstab > 0) summaryData.push(['  Equipment establishment', Math.round(equipEstab)])
+    if (bioEstab > 0) summaryData.push(['  In-house bioinformatics establishment', Math.round(bioEstab)])
+    summaryData.push([])
+    summaryData.push(['Maintenance %', project.maintenancePct ?? 15])
+    summaryData.push(['Incidentals %', project.incidentalsPct ?? 7])
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summaryData), 'Summary')
 
-    // Workflow sheet
+    // ── Workflow sheet ──────────────────────────────────────────────────────
     const wfData = [
       [t('col_workflow_step'), t('col_annual_usd'), t('col_cost_per_sample_usd'), '%'],
       ...workflowRows.map(r => {
         const perSample = samplesPerYear > 0 ? r.value / samplesPerYear : 0
-        return [r.label, r.value, perSample, pct(r.value, workflowTotal)]
+        return [r.label, Math.round(r.value), +perSample.toFixed(2), pct(r.value, workflowTotal)]
       }),
     ]
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wfData), 'Workflow')
 
-    // Equipment sheet
-    const eqData = [
-      [t('col_item'), 'Status', t('col_qty'), t('col_price_each'), t('col_life_yr'), t('col_annual')],
-      ...project.equipment.map(e => [
-        e.name, e.status, e.quantity, e.unitCostUsd, e.lifespanYears,
-        e.status === 'buy' ? (e.unitCostUsd * e.quantity) / e.lifespanYears : 0,
-      ]),
+    // ── Equipment sheet (enhanced with age, % seq, maintenance) ─────────────
+    const eqData: (string | number)[][] = [
+      [t('col_item'), 'Category', 'Status', t('col_qty'), t('col_price_each'), t('col_life_yr'), 'Age (yr)', '% seq', 'Annual depreciation USD', 'Annual maintenance USD', 'Total annual USD'],
     ]
+    for (const e of project.equipment) {
+      const lifespan = Math.max(1, e.lifespanYears ?? 5)
+      const age = Math.max(0, Math.min(e.ageYears ?? 0, lifespan - 1))
+      const remainingLife = Math.max(1, lifespan - age)
+      const totalCost = (e.unitCostUsd ?? 0) * (e.quantity ?? 1)
+      const pctSeq = (e.pctSequencing ?? 100) / 100
+      const depreciation = e.status === 'buy' ? (totalCost / remainingLife) * pctSeq : 0
+      const maintenance = e.status === 'buy' ? totalCost * maintenanceRate * pctSeq : 0
+      eqData.push([
+        e.name, e.category, e.status, e.quantity, e.unitCostUsd, lifespan, age,
+        e.pctSequencing ?? 100,
+        +depreciation.toFixed(2), +maintenance.toFixed(2), +(depreciation + maintenance).toFixed(2),
+      ])
+    }
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(eqData), 'Equipment')
 
-    // Personnel sheet
-    const persData = [
+    // ── Personnel sheet ─────────────────────────────────────────────────────
+    const persData: (string | number)[][] = [
       [t('col_role'), t('col_salary'), t('col_pct_time'), t('col_annual_cost')],
       ...project.personnel.map(p => [
         p.role, p.annualSalaryUsd, p.pctTime,
-        p.annualSalaryUsd * p.pctTime / 100,
-      ]),
-      [],
-      [t('label_training'), project.trainingGroupCostUsd ?? 0],
-      ...(project.adminCostPct > 0 ? [[t('label_admin_overhead'), costs.adminCost]] : []),
+        +(p.annualSalaryUsd * p.pctTime / 100).toFixed(2),
+      ] as (string | number)[]),
     ]
+    persData.push([])
+    persData.push([t('label_training'), project.trainingGroupCostUsd ?? 0])
+    if (project.adminCostPct > 0) {
+      persData.push([`${t('label_admin_overhead')} (${project.adminCostPct}%)`, +costs.adminCost.toFixed(2)])
+    }
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(persData), 'Personnel')
+
+    // ── Consumables_B sheet (fixed annual) ──────────────────────────────────
+    const wfKeysB: ConsumableWorkflowStep[] = ['sample_receipt', 'nucleic_acid_extraction', 'pcr_testing', 'ngs_library_preparation', 'sequencing']
+    const fixedItems = (project.fixedConsumables ?? []).filter(c => c.enabled && c.quantityPerYear > 0)
+    if (fixedItems.length > 0) {
+      const cbData: (string | number)[][] = [
+        ['Item', 'Qty/yr', 'Unit cost USD', 'Annual cost USD', 'R', 'N', 'P', 'L', 'S'],
+      ]
+      let fixedSubtotal = 0
+      for (const c of fixedItems) {
+        const annual = c.quantityPerYear * c.unitCostUsd
+        fixedSubtotal += annual
+        cbData.push([
+          c.name, c.quantityPerYear, +c.unitCostUsd.toFixed(2), +annual.toFixed(2),
+          ...wfKeysB.map(k => (c.workflows?.[k] ? 'Y' : 'N') as string | number),
+        ])
+      }
+      cbData.push([])
+      cbData.push(['SUBTOTAL', '', '', +fixedSubtotal.toFixed(2)])
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(cbData), 'Consumables_B')
+    }
+
+    // ── Consumables_C sheet (per-sample) ────────────────────────────────────
+    const perSampleItems = project.consumables.filter(c => c.enabled)
+    if (perSampleItems.length > 0) {
+      const ccData: (string | number)[][] = [
+        ['Item', 'Qty/sample', 'Unit cost USD', 'Annual cost USD'],
+      ]
+      for (const c of perSampleItems) {
+        const annual = c.unitCostUsd * c.quantityPerSample * samplesPerYear
+        ccData.push([c.name, c.quantityPerSample, +c.unitCostUsd.toFixed(2), +annual.toFixed(2)])
+      }
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(ccData), 'Consumables_C')
+    }
+
+    // ── Bioinformatics sheet ────────────────────────────────────────────────
+    if (project.bioinformatics.type !== 'none') {
+      const bioData: (string | number)[][] = [
+        ['Bioinformatics type', project.bioinformatics.type],
+        [],
+      ]
+      if ((project.bioinformatics.type === 'cloud' || project.bioinformatics.type === 'hybrid') && project.bioinformatics.cloudItems?.length) {
+        bioData.push(['--- CLOUD ITEMS ---'])
+        bioData.push(['Component', 'Unit cost USD', 'Qty', 'Samples this scenario', 'Total samples all pathogens', 'Annual cost USD'])
+        for (const item of project.bioinformatics.cloudItems.filter(i => i.enabled)) {
+          const totalAll = Math.max(1, item.totalSamplesAllPathogens || samplesPerYear)
+          const annual = item.pricePerUnit * item.quantity * (item.samplesThisScenario || samplesPerYear) / totalAll
+          bioData.push([item.name, item.pricePerUnit, item.quantity, item.samplesThisScenario || samplesPerYear, item.totalSamplesAllPathogens || samplesPerYear, +annual.toFixed(2)])
+        }
+        bioData.push([])
+      }
+      if ((project.bioinformatics.type === 'inhouse' || project.bioinformatics.type === 'hybrid') && project.bioinformatics.inhouseItems?.length) {
+        bioData.push(['--- IN-HOUSE ITEMS ---'])
+        bioData.push(['Component', 'Description', 'Unit cost USD', 'Qty', '% use', 'Lifespan yr', 'Age yr', 'Remaining life yr', 'Annual depreciation USD'])
+        for (const item of project.bioinformatics.inhouseItems.filter(i => i.enabled)) {
+          const remainingLife = Math.max(1, (item.lifespanYears ?? 1) - (item.ageYears ?? 0))
+          const annual = item.pricePerUnit * item.quantity * (item.pctUse / 100) / remainingLife
+          bioData.push([item.name, item.description || '', item.pricePerUnit, item.quantity, item.pctUse, item.lifespanYears, item.ageYears, remainingLife, +annual.toFixed(2)])
+        }
+        bioData.push([])
+      }
+      bioData.push([])
+      bioData.push(['Total cloud', +costs.bioinformaticsCloud.toFixed(2)])
+      bioData.push(['Total in-house (depreciation)', +costs.bioinformaticsInhouse.toFixed(2)])
+      bioData.push(['Total bioinformatics', +costs.bioinformatics.toFixed(2)])
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(bioData), 'Bioinformatics')
+    }
+
+    // ── QMS sheet ───────────────────────────────────────────────────────────
+    if (project.qms.length > 0) {
+      const qmsData: (string | number)[][] = [
+        ['Activity', 'Cost USD', 'Quantity', '% attributed', 'Annual USD', 'Enabled'],
+      ]
+      for (const q of project.qms) {
+        const annual = q.costUsd * q.quantity * (q.pctSequencing / 100)
+        qmsData.push([q.activity, q.costUsd, q.quantity, q.pctSequencing, +annual.toFixed(2), q.enabled ? 'Y' : 'N'])
+      }
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(qmsData), 'QMS')
+    }
+
+    // ── Assumptions sheet ───────────────────────────────────────────────────
+    const assumpData: (string | number)[][] = [
+      ['Parameter', 'Value'],
+      ['Maintenance %', project.maintenancePct ?? 15],
+      ['Incidentals %', project.incidentalsPct ?? 7],
+      ['Exchange rate (1 USD)', exchangeRate],
+      ['Currency', currency],
+      ['Samples/yr', samplesPerYear],
+      ['Pathogens', project.pathogens.length],
+    ]
+    for (const p of project.pathogens) {
+      assumpData.push([`  ${p.pathogenName}`, p.samplesPerYear])
+    }
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(assumpData), 'Assumptions')
 
     XLSX.writeFile(wb, `${project.name || 'genomics-cost'}-results.xlsx`)
   }
@@ -261,25 +536,61 @@ export default function Step8() {
             </tr>
           </thead>
           <tbody>
-            {rows.map(row => (
-              <tr key={row.label} style={{ borderBottom: '1px solid var(--gx-border)' }}>
-                <td className="px-4 py-2" style={{ color: 'var(--gx-text)' }}>
-                  {row.label}
-                  {row.label === t('label_equipment') && (
-                    <div className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)', fontWeight: 400 }}>
-                      Annual depreciation + maintenance. One-off capital cost shown below as establishment cost.
-                    </div>
+            {rows.map(row => {
+              const isBio = row.label === t('label_bioinformatics')
+              const showBioSub = isBio && costs.bioinformaticsCloud > 0 && costs.bioinformaticsInhouse > 0
+              return (
+                <React.Fragment key={row.label}>
+                  <tr style={{ borderBottom: showBioSub ? 'none' : '1px solid var(--gx-border)' }}>
+                    <td className="px-4 py-2" style={{ color: 'var(--gx-text)' }}>
+                      {row.label}
+                      {row.label === t('label_equipment') && (
+                        <div className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)', fontWeight: 400 }}>
+                          Annual depreciation + maintenance. One-off capital cost shown below as establishment cost.
+                        </div>
+                      )}
+                      {isBio && !showBioSub && costs.bioinformaticsCloud > 0 && (
+                        <div className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)', fontWeight: 400 }}>Cloud (operational)</div>
+                      )}
+                      {isBio && !showBioSub && costs.bioinformaticsInhouse > 0 && (
+                        <div className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)', fontWeight: 400 }}>In-house (annual depreciation)</div>
+                      )}
+                    </td>
+                    <td className="px-4 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>${fmt(row.value)}</td>
+                    {showLocalCurrency && (
+                      <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-text-muted)' }}>
+                        {fmtCurrency(row.value * exchangeRate)}
+                      </td>
+                    )}
+                    <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-text-muted)' }}>{pct(row.value, costs.total)}%</td>
+                  </tr>
+                  {showBioSub && (
+                    <>
+                      <tr style={{ borderBottom: 'none' }}>
+                        <td className="px-4 py-1 pl-8 text-xs" style={{ color: 'var(--gx-text-muted)' }}>Cloud (operational)</td>
+                        <td className="px-4 py-1 text-right text-xs" style={{ color: 'var(--gx-text-muted)' }}>${fmt(costs.bioinformaticsCloud)}</td>
+                        {showLocalCurrency && (
+                          <td className="px-4 py-1 text-right text-xs" style={{ color: 'var(--gx-text-muted)' }}>
+                            {fmtCurrency(costs.bioinformaticsCloud * exchangeRate)}
+                          </td>
+                        )}
+                        <td className="px-4 py-1 text-right text-xs" style={{ color: 'var(--gx-text-muted)' }}></td>
+                      </tr>
+                      <tr style={{ borderBottom: '1px solid var(--gx-border)' }}>
+                        <td className="px-4 py-1 pl-8 text-xs" style={{ color: 'var(--gx-text-muted)' }}>In-house (annual depreciation)</td>
+                        <td className="px-4 py-1 text-right text-xs" style={{ color: 'var(--gx-text-muted)' }}>${fmt(costs.bioinformaticsInhouse)}</td>
+                        {showLocalCurrency && (
+                          <td className="px-4 py-1 text-right text-xs" style={{ color: 'var(--gx-text-muted)' }}>
+                            {fmtCurrency(costs.bioinformaticsInhouse * exchangeRate)}
+                          </td>
+                        )}
+                        <td className="px-4 py-1 text-right text-xs" style={{ color: 'var(--gx-text-muted)' }}></td>
+                      </tr>
+                    </>
                   )}
-                </td>
-                <td className="px-4 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>${fmt(row.value)}</td>
-                {showLocalCurrency && (
-                  <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-text-muted)' }}>
-                    {fmtCurrency(row.value * exchangeRate)}
-                  </td>
-                )}
-                <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-text-muted)' }}>{pct(row.value, costs.total)}%</td>
-              </tr>
-            ))}
+                </React.Fragment>
+              )
+            })}
             <tr style={{ borderTop: '2px solid var(--gx-border)', fontWeight: 700 }}>
               <td className="px-4 py-2" style={{ color: 'var(--gx-text)' }}>{t('label_annual_total')}</td>
               <td className="px-4 py-2 text-right" style={{ color: 'var(--gx-accent)' }}>${fmt(costs.total)}</td>
@@ -509,6 +820,29 @@ export default function Step8() {
         </div>
       )}
 
+      {/* Key assumptions card — on screen */}
+      <div className="card p-4 mb-6 no-print">
+        <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--gx-text)' }}>{t('label_key_assumptions')}</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-2 text-xs">
+          <div>
+            <span style={{ color: 'var(--gx-text-muted)' }}>Maintenance %</span>
+            <div className="font-medium" style={{ color: 'var(--gx-text)' }}>{project.maintenancePct ?? 15}%</div>
+          </div>
+          <div>
+            <span style={{ color: 'var(--gx-text-muted)' }}>Incidentals %</span>
+            <div className="font-medium" style={{ color: 'var(--gx-text)' }}>{project.incidentalsPct ?? 7}%</div>
+          </div>
+          <div>
+            <span style={{ color: 'var(--gx-text-muted)' }}>Exchange rate</span>
+            <div className="font-medium" style={{ color: 'var(--gx-text)' }}>1 USD = {exchangeRate} {currency}</div>
+          </div>
+          <div>
+            <span style={{ color: 'var(--gx-text-muted)' }}>Samples/yr</span>
+            <div className="font-medium" style={{ color: 'var(--gx-text)' }}>{samplesPerYear.toLocaleString()}</div>
+          </div>
+        </div>
+      </div>
+
       {/* Print-only shopping list */}
       <div className="gx-only-print gx-print-page-break" style={{ marginTop: 0 }}>
 
@@ -589,6 +923,14 @@ export default function Step8() {
                     1 USD = {project.exchangeRate} {project.currency}
                   </td>
                 </tr>
+                <tr>
+                  <td style={{ padding: '2px 8px 2px 0', color: '#475569' }}>Maintenance %</td>
+                  <td style={{ padding: '2px 0', color: '#0f172a', fontWeight: 500 }}>{project.maintenancePct ?? 15}%</td>
+                </tr>
+                <tr>
+                  <td style={{ padding: '2px 8px 2px 0', color: '#475569' }}>Incidentals %</td>
+                  <td style={{ padding: '2px 0', color: '#0f172a', fontWeight: 500 }}>{project.incidentalsPct ?? 7}%</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -668,6 +1010,143 @@ export default function Step8() {
                 <tr style={{ borderTop: '2px solid #e2e8f0', fontWeight: 700 }}>
                   <td colSpan={3} style={{ padding: '4px 8px', color: '#0f172a' }}>{t('label_establishment_cost')}</td>
                   <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0d9488' }}>${fmt(costs.establishmentCost)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Section B: Fixed annual reagents & consumables */}
+        {(project.fixedConsumables ?? []).filter(c => c.enabled && c.quantityPerYear > 0).length > 0 && (
+          <div style={{ marginBottom: 20 }}>
+            <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>
+              Section B — Fixed Annual Reagents &amp; Consumables
+            </h3>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem' }}>
+              <thead>
+                <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                  <th style={{ textAlign: 'left', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Item</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Qty/yr</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Unit cost (USD)</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Annual cost (USD)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(project.fixedConsumables ?? []).filter(c => c.enabled && c.quantityPerYear > 0).map((c, i) => (
+                  <tr key={i} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                    <td style={{ padding: '4px 8px', color: '#0f172a' }}>{c.name}</td>
+                    <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a' }}>{c.quantityPerYear}</td>
+                    <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a' }}>${fmtCurrency(c.unitCostUsd, 2)}</td>
+                    <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a', fontWeight: 600 }}>
+                      ${fmt(c.quantityPerYear * c.unitCostUsd)}
+                    </td>
+                  </tr>
+                ))}
+                <tr style={{ borderTop: '2px solid #e2e8f0', fontWeight: 700 }}>
+                  <td colSpan={3} style={{ padding: '4px 8px', color: '#0f172a' }}>Subtotal</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0d9488' }}>
+                    ${fmt((project.fixedConsumables ?? []).filter(c => c.enabled && c.quantityPerYear > 0).reduce((s, c) => s + c.quantityPerYear * c.unitCostUsd, 0))}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Bioinformatics (print) */}
+        {project.bioinformatics.type !== 'none' && costs.bioinformatics > 0 && (
+          <div style={{ marginBottom: 20 }}>
+            <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>
+              Bioinformatics ({project.bioinformatics.type})
+            </h3>
+            {(project.bioinformatics.type === 'inhouse' || project.bioinformatics.type === 'hybrid') &&
+              (project.bioinformatics.inhouseItems ?? []).filter(i => i.enabled).length > 0 && (
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', marginBottom: 10 }}>
+                <thead>
+                  <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                    <th style={{ textAlign: 'left', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Component (in-house)</th>
+                    <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Purchase cost (USD)</th>
+                    <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Remaining life (yr)</th>
+                    <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Depreciation/yr (USD)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(project.bioinformatics.inhouseItems ?? []).filter(i => i.enabled).map((item, i) => {
+                    const remainingLife = Math.max(1, (item.lifespanYears ?? 1) - (item.ageYears ?? 0))
+                    const annual = item.pricePerUnit * item.quantity * (item.pctUse / 100) / remainingLife
+                    return (
+                      <tr key={i} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                        <td style={{ padding: '4px 8px', color: '#0f172a' }}>{item.name}</td>
+                        <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a' }}>${fmt(item.pricePerUnit * item.quantity)}</td>
+                        <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a' }}>{remainingLife}</td>
+                        <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a', fontWeight: 600 }}>${fmt(annual)}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            )}
+            {(project.bioinformatics.type === 'cloud' || project.bioinformatics.type === 'hybrid') &&
+              (project.bioinformatics.cloudItems ?? []).filter(i => i.enabled).length > 0 && (
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', marginBottom: 10 }}>
+                <thead>
+                  <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                    <th style={{ textAlign: 'left', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Component (cloud)</th>
+                    <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Annual cost (USD)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(project.bioinformatics.cloudItems ?? []).filter(i => i.enabled).map((item, i) => {
+                    const totalAll = Math.max(1, item.totalSamplesAllPathogens || samplesPerYear)
+                    const annual = item.pricePerUnit * item.quantity * (item.samplesThisScenario || samplesPerYear) / totalAll
+                    return (
+                      <tr key={i} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                        <td style={{ padding: '4px 8px', color: '#0f172a' }}>{item.name}</td>
+                        <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a', fontWeight: 600 }}>${fmt(annual)}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            )}
+            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', textAlign: 'right', paddingRight: 8 }}>
+              Total bioinformatics: ${fmt(costs.bioinformatics)}
+            </div>
+          </div>
+        )}
+
+        {/* QMS activities (print) */}
+        {project.qms.filter(q => q.enabled).length > 0 && (
+          <div style={{ marginBottom: 20 }}>
+            <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>
+              Quality Management System (QMS)
+            </h3>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem' }}>
+              <thead>
+                <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                  <th style={{ textAlign: 'left', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Activity</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Cost (USD)</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Qty</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>% attr.</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>Annual (USD)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {project.qms.filter(q => q.enabled).map((q, i) => {
+                  const annual = q.costUsd * q.quantity * (q.pctSequencing / 100)
+                  return (
+                    <tr key={i} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                      <td style={{ padding: '4px 8px', color: '#0f172a' }}>{q.activity}</td>
+                      <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a' }}>${fmt(q.costUsd)}</td>
+                      <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a' }}>{q.quantity}</td>
+                      <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a' }}>{q.pctSequencing}%</td>
+                      <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0f172a', fontWeight: 600 }}>${fmt(annual)}</td>
+                    </tr>
+                  )
+                })}
+                <tr style={{ borderTop: '2px solid #e2e8f0', fontWeight: 700 }}>
+                  <td colSpan={4} style={{ padding: '4px 8px', color: '#0f172a' }}>Total QMS</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'right', color: '#0d9488' }}>${fmt(costs.qms)}</td>
                 </tr>
               </tbody>
             </table>
