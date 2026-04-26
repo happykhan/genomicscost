@@ -119,6 +119,8 @@ export interface SequencerConfig {
   customLibPrepBarcodesPerPack?: number
   // True when user has manually overridden coverageX; false/absent = auto from assignments
   coverageXUserSet?: boolean
+  // True when user has manually overridden bufferPct; absent = auto from pathogen type
+  bufferPctUserSet?: boolean
 }
 
 export type EquipmentStatus = 'buy' | 'have' | 'skip'

@@ -105,6 +105,15 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
     sequencer.customLibPrepMaxBarcodes,
   ])
 
+  // Auto-set bufferPct from pathogen type (30% bacteria, 20% virus, 0% capture-all) per WHO GCT
+  useEffect(() => {
+    if (sequencer.bufferPctUserSet === true) return
+    const buffer = isCaptureAll ? 0 : (assignedPathogens.length > 0 ? assignedPathogens : pathogens).some(p => p.pathogenType === 'bacterial') ? 30 : 20
+    if (buffer !== sequencer.bufferPct) {
+      updateSequencer(index, { bufferPct: buffer })
+    }
+  }, [sequencer.assignments, pathogens, sequencer.bufferPctUserSet, isCaptureAll]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Auto-fill coverageX from highest required coverage among assigned pathogens
   useEffect(() => {
     if (sequencer.coverageXUserSet) return
@@ -591,17 +600,34 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* Buffer % slider */}
           <div>
-            <label className={labelClass}>{t('field_buffer_pct')} — {sequencer.bufferPct}%<Tooltip content={t('tooltip_buffer_pct')} /></label>
+            <label className={labelClass} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              {t('field_buffer_pct')} — {sequencer.bufferPct}%
+              <Tooltip content={t('tooltip_buffer_pct')} />
+              {!sequencer.bufferPctUserSet && (
+                <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text-muted)', border: '1px solid var(--gx-border)', fontWeight: 400 }}>auto</span>
+              )}
+            </label>
             <input
               type="range"
               min={0}
               max={50}
               step={1}
               value={sequencer.bufferPct}
-              onChange={e => updateSequencer(index, { bufferPct: parseInt(e.target.value) })}
+              onChange={e => updateSequencer(index, { bufferPct: parseInt(e.target.value), bufferPctUserSet: true })}
               style={{ width: '100%', accentColor: 'var(--gx-accent)' }}
             />
-            <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>{t('note_buffer_pct_help')}</div>
+            {sequencer.bufferPctUserSet && (
+              <button
+                className="text-xs"
+                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--gx-text-muted)', textDecoration: 'underline' }}
+                onClick={() => updateSequencer(index, { bufferPctUserSet: false })}
+              >
+                reset to auto
+              </button>
+            )}
+            {!sequencer.bufferPctUserSet && (
+              <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>{t('note_buffer_pct_help')}</div>
+            )}
           </div>
 
           {/* Retest % slider */}
