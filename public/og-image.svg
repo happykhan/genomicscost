@@ -23,9 +23,9 @@
     <line x1="18.5" y1="12.5" x2="20.5" y2="8"    stroke="#2dd4bf" stroke-width="1.2" opacity="0.55" stroke-linecap="round"/>
   </g>
 
-  <!-- WHO badge -->
-  <rect x="56" y="72" width="126" height="34" rx="6" fill="#2dd4bf" opacity="0.15"/>
-  <text x="70" y="95" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="700" fill="#2dd4bf" letter-spacing="2">WHO GCT v2</text>
+  <!-- Badge -->
+  <rect x="56" y="72" width="96" height="34" rx="6" fill="#2dd4bf" opacity="0.15"/>
+  <text x="70" y="95" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="700" fill="#2dd4bf" letter-spacing="2">GCT v2</text>
 
   <!-- Main title -->
   <text x="56" y="210" font-family="system-ui, -apple-system, sans-serif" font-size="76" font-weight="800" fill="#f8fafc">Genomics</text>
