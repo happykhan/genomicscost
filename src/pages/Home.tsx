@@ -1,11 +1,30 @@
 import { useNavigate } from 'react-router-dom'
 import { useProject } from '../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
+import toast from 'react-hot-toast'
 
 export default function Home() {
   const navigate = useNavigate()
-  const { savedProjects, loadProject, deleteProject, newProject } = useProject()
+  const { savedProjects, loadProject, loadProjectFromData, deleteProject, newProject } = useProject()
   const { t } = useTranslation()
+
+  function handleLoadFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = ev => {
+      try {
+        const raw = JSON.parse(ev.target?.result as string)
+        loadProjectFromData(raw)
+        toast.success(`Loaded "${raw.name || 'project'}"`)
+        navigate('/wizard/1')
+      } catch {
+        toast.error('Could not read file — make sure it is a valid project .json')
+      }
+    }
+    reader.readAsText(file)
+    e.target.value = ''
+  }
 
   const STEP_DESCRIPTIONS = [
     { n: 1, label: t('step1_label'), desc: t('step1_desc') },
@@ -41,13 +60,22 @@ export default function Home() {
         <p className="text-sm mb-8 max-w-xl mx-auto" style={{ color: 'var(--gx-text-muted)' }}>
           {t('home_based_on')}
         </p>
-        <button
-          onClick={handleNewProject}
-          className="px-8 py-3 rounded-lg text-base font-semibold"
-          style={{ background: 'var(--gx-accent)', color: 'var(--gx-bg)', border: 'none', cursor: 'pointer' }}
-        >
-          {t('home_start')}
-        </button>
+        <div className="flex justify-center gap-3 flex-wrap">
+          <button
+            onClick={handleNewProject}
+            className="px-8 py-3 rounded-lg text-base font-semibold"
+            style={{ background: 'var(--gx-accent)', color: 'var(--gx-bg)', border: 'none', cursor: 'pointer' }}
+          >
+            {t('home_start')}
+          </button>
+          <label
+            className="px-8 py-3 rounded-lg text-base font-semibold"
+            style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer', display: 'inline-block' }}
+          >
+            Load project file
+            <input type="file" accept=".json" onChange={handleLoadFile} style={{ display: 'none' }} />
+          </label>
+        </div>
       </div>
 
       {/* Step overview */}

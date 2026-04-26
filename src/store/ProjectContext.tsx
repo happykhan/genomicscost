@@ -15,6 +15,7 @@ interface ProjectContextValue {
   savedProjects: Project[]
   saveProject: () => void
   loadProject: (id: string) => void
+  loadProjectFromData: (data: unknown) => void
   deleteProject: (id: string) => void
   newProject: () => void
 }
@@ -319,6 +320,10 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
     })
   }, [])
 
+  const loadProjectFromData = useCallback((data: unknown) => {
+    setProject(migrateProject(data))
+  }, [])
+
   const deleteProject = useCallback((id: string) => {
     setSavedProjects(prev => {
       const next = prev.filter(p => p.id !== id)
@@ -332,7 +337,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   return (
-    <ProjectContext.Provider value={{ project, updateProject, updateSequencer, costs, savedProjects, saveProject, loadProject, deleteProject, newProject }}>
+    <ProjectContext.Provider value={{ project, updateProject, updateSequencer, costs, savedProjects, saveProject, loadProject, loadProjectFromData, deleteProject, newProject }}>
       {children}
     </ProjectContext.Provider>
   )

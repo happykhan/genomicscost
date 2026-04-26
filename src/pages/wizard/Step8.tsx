@@ -23,7 +23,7 @@ function pct(part: number, total: number) {
 }
 
 export default function Step8() {
-  const { project, costs, saveProject, updateProject } = useProject()
+  const { project, costs, saveProject, loadProjectFromData } = useProject()
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [showPriceEditor, setShowPriceEditor] = useState(false)
@@ -435,7 +435,7 @@ export default function Step8() {
       try {
         const raw = JSON.parse(ev.target?.result as string)
         // Apply same migration logic as the context uses for loaded projects
-        updateProject(raw)
+        loadProjectFromData(raw)
         toast.success(`Loaded "${raw.name || 'project'}"`)
         navigate('/wizard/1')
       } catch {
