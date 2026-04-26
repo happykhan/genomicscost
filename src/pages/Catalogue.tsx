@@ -426,14 +426,14 @@ function EquipmentTab({ onRefresh }: { onRefresh: () => void }) {
                   <td className="px-3 py-2">
                     <span className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{item.category}</span>
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="px-3 py-2 text-right">
                     <EditableCell
                       value={item.unit_cost_usd}
                       type="number"
                       onChange={v => handleEdit(item.name, 'unit_cost_usd', v)}
                     />
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="px-3 py-2 text-right">
                     <EditableCell
                       value={item.recommended_quantity}
                       type="number"
