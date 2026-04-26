@@ -48,7 +48,7 @@
   "field_enrichment": "Enrichment step included",
   "field_min_reads": "Minimum reads per sample (capture-all)",
   "label_enabled": "Enabled",
-  "label_effective": "patient sample slots (controls excluded)",
+  "label_effective": "sample slots",
   "btn_add_sequencer": "+ Add sequencer",
   "label_max_reads": "Max reads",
   "label_read_length": "Read length",
