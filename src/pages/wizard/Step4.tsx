@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useProject } from '../../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
 import { getEffectiveCatalogue } from '../../lib/catalogue'
@@ -55,6 +55,7 @@ export default function Step4() {
   const { t } = useTranslation()
   const catalogue = getEffectiveCatalogue()
   const { equipment } = project
+  const [confirmClearOther, setConfirmClearOther] = useState(false)
 
   const STATUS_OPTIONS: { value: EquipmentStatus; labelKey: string }[] = [
     { value: 'buy', labelKey: 'opt_buy' },
@@ -523,6 +524,18 @@ export default function Step4() {
         >
           {t('btn_custom_item')}
         </button>
+        {otherItems.length > 0 && !confirmClearOther && (
+          <button onClick={() => setConfirmClearOther(true)} className="px-4 py-2 rounded text-sm font-medium" style={{ background: 'none', color: 'var(--gx-text-muted)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>
+            Clear all
+          </button>
+        )}
+        {confirmClearOther && (
+          <span className="flex items-center gap-2 text-sm">
+            <span style={{ color: '#92400e' }}>Remove all {otherItems.length} items?</span>
+            <button onClick={() => { updateProject({ equipment: equipment.filter(e => e.category === 'sequencing_platform') }); setConfirmClearOther(false) }} className="px-3 py-1 rounded text-xs font-medium" style={{ background: '#dc2626', color: '#fff', border: 'none', cursor: 'pointer' }}>Yes, clear</button>
+            <button onClick={() => setConfirmClearOther(false)} className="px-3 py-1 rounded text-xs font-medium" style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}>Cancel</button>
+          </span>
+        )}
       </div>
 
       {/* Totals */}
