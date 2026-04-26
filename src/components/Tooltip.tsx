@@ -6,12 +6,23 @@ interface TooltipProps {
 
 export default function Tooltip({ content }: TooltipProps) {
   const [visible, setVisible] = useState(false)
-  const ref = useRef<HTMLSpanElement>(null)
+  const [coords, setCoords] = useState({ top: 0, left: 0 })
+  const btnRef = useRef<HTMLButtonElement>(null)
+  const wrapRef = useRef<HTMLSpanElement>(null)
+
+  function updateCoords() {
+    if (!btnRef.current) return
+    const r = btnRef.current.getBoundingClientRect()
+    setCoords({
+      top: r.top - 8,
+      left: r.left + r.width / 2,
+    })
+  }
 
   useEffect(() => {
     if (!visible) return
     function handlePointerDown(e: PointerEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
         setVisible(false)
       }
     }
@@ -21,14 +32,15 @@ export default function Tooltip({ content }: TooltipProps) {
 
   return (
     <span
-      ref={ref}
-      style={{ display: 'inline-block', position: 'relative', verticalAlign: 'middle', marginLeft: 4 }}
+      ref={wrapRef}
+      style={{ display: 'inline-block', verticalAlign: 'middle', marginLeft: 4 }}
     >
       <button
+        ref={btnRef}
         type="button"
-        onMouseEnter={() => setVisible(true)}
+        onMouseEnter={() => { updateCoords(); setVisible(true) }}
         onMouseLeave={() => setVisible(false)}
-        onClick={e => { e.preventDefault(); setVisible(v => !v) }}
+        onClick={e => { e.preventDefault(); updateCoords(); setVisible(v => !v) }}
         aria-label="Help"
         aria-expanded={visible}
         style={{
@@ -55,10 +67,10 @@ export default function Tooltip({ content }: TooltipProps) {
         <span
           role="tooltip"
           style={{
-            position: 'absolute',
-            bottom: 'calc(100% + 6px)',
-            left: '50%',
-            transform: 'translateX(-50%)',
+            position: 'fixed',
+            top: coords.top,
+            left: coords.left,
+            transform: 'translate(-50%, -100%)',
             background: 'var(--gx-bg)',
             border: '1px solid var(--gx-border)',
             borderRadius: 6,
@@ -66,7 +78,7 @@ export default function Tooltip({ content }: TooltipProps) {
             fontSize: '0.73rem',
             color: 'var(--gx-text)',
             width: 250,
-            zIndex: 300,
+            zIndex: 9999,
             boxShadow: '0 4px 14px rgba(0,0,0,0.18)',
             lineHeight: 1.5,
             fontWeight: 400,

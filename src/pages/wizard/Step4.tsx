@@ -5,6 +5,7 @@ import { getEffectiveCatalogue } from '../../lib/catalogue'
 import type { EquipmentStatus, SequencerConfig } from '../../types'
 import Tooltip from '../../components/Tooltip'
 import { fmt } from '../../lib/format'
+import toast from 'react-hot-toast'
 
 function guessInstrumentName(seq: SequencerConfig): string | null {
   const kit = seq.reagentKitName.toLowerCase()
@@ -87,7 +88,10 @@ export default function Step4() {
   function addInstrumentFromCatalogue(name: string) {
     const cat = catalogue.equipment.find(e => e.name === name && e.category === 'sequencing_platform')
     if (!cat) return
-    if (equipment.some(e => e.name === name)) return
+    if (equipment.some(e => e.name === name)) {
+      toast(`"${name}" is already on the list`, { icon: 'ℹ️' })
+      return
+    }
     updateProject({
       equipment: [
         ...equipment,
@@ -126,7 +130,10 @@ export default function Step4() {
   function addFromCatalogue(name: string) {
     const cat = catalogue.equipment.find(e => e.name === name)
     if (!cat || cat.category === 'sequencing_platform') return
-    if (equipment.some(e => e.name === name)) return
+    if (equipment.some(e => e.name === name)) {
+      toast(`"${name}" is already on the list`, { icon: 'ℹ️' })
+      return
+    }
     updateProject({
       equipment: [
         ...equipment,
@@ -382,8 +389,109 @@ export default function Step4() {
         B. Other Equipment
       </div>
 
-      <div className="flex flex-col gap-2 mb-4">
-        {otherItems.map(item => renderItemCard(item))}
+      <div className="card mb-4" style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+          <thead>
+            <tr style={{ borderBottom: '1px solid var(--gx-border)', color: 'var(--gx-text-muted)', textAlign: 'left' }}>
+              <th className="px-3 py-2" style={{ fontWeight: 500, minWidth: 160 }}>Name</th>
+              <th className="px-3 py-2" style={{ fontWeight: 500 }}>Status</th>
+              <th className="px-3 py-2" style={{ fontWeight: 500, textAlign: 'center' }}>{t('col_qty')}</th>
+              <th className="px-3 py-2" style={{ fontWeight: 500, textAlign: 'right' }}>{t('col_price_each')}</th>
+              <th className="px-3 py-2" style={{ fontWeight: 500, textAlign: 'center' }}>{t('col_life_yr')}</th>
+              <th className="px-3 py-2" style={{ fontWeight: 500, textAlign: 'center' }}>{t('col_age_yr')}</th>
+              <th className="px-3 py-2" style={{ fontWeight: 500, textAlign: 'center' }}>{t('col_pct_seq')}</th>
+              <th className="px-3 py-2" style={{ fontWeight: 500, textAlign: 'right' }}>$/yr</th>
+              <th className="px-3 py-2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {otherItems.length === 0 && (
+              <tr><td colSpan={9} className="px-3 py-3 text-sm" style={{ color: 'var(--gx-text-muted)' }}>No equipment added yet.</td></tr>
+            )}
+            {otherItems.map(item => {
+              const lifespan = Math.max(1, item.lifespanYears ?? 5)
+              const age = Math.max(0, Math.min(item.ageYears ?? 0, lifespan - 1))
+              const remainingLife = Math.max(1, lifespan - age)
+              const totalCost = item.unitCostUsd * item.quantity
+              const pct = (item.pctSequencing ?? 100) / 100
+              const annual = item.status === 'buy' ? ((totalCost / remainingLife) * pct + totalCost * maintenanceRate * pct) : 0
+              return (
+                <tr key={item.idx} style={{ borderBottom: '1px solid var(--gx-border)', opacity: item.status === 'skip' ? 0.4 : 1 }}>
+                  <td className="px-3 py-1.5" style={{ minWidth: 160 }}>
+                    <input
+                      type="text"
+                      value={item.name}
+                      list={`equip-names-${item.idx}`}
+                      onChange={e => handleEquipmentNameChange(item.idx, e.target.value)}
+                      className={inputClass}
+                      style={{ width: '100%', fontWeight: 500 }}
+                      placeholder="Equipment name"
+                    />
+                    <datalist id={`equip-names-${item.idx}`}>
+                      {catalogueEquipmentNames.map(n => <option key={n} value={n} />)}
+                    </datalist>
+                  </td>
+                  <td className="px-3 py-1.5">
+                    <div className="flex rounded overflow-hidden" style={{ border: '1px solid var(--gx-border)', width: 'fit-content' }}>
+                      {STATUS_OPTIONS.map(opt => (
+                        <button
+                          key={opt.value}
+                          onClick={() => updateItem(item.idx, { status: opt.value })}
+                          className="px-2 py-0.5 text-xs font-medium"
+                          style={{
+                            background: item.status === opt.value ? 'var(--gx-accent)' : 'var(--gx-bg-alt)',
+                            color: item.status === opt.value ? 'var(--gx-bg)' : 'var(--gx-text-muted)',
+                            border: 'none',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {t(opt.labelKey)}
+                        </button>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="px-3 py-1.5" style={{ textAlign: 'center' }}>
+                    {item.status === 'buy'
+                      ? <input type="number" value={item.quantity} min={1} onChange={e => updateItem(item.idx, { quantity: (v => isNaN(v) ? 1 : v)(parseInt(e.target.value)) })} className={inputClass} style={{ width: 55, textAlign: 'center' }} />
+                      : <span style={{ color: 'var(--gx-text-muted)' }}>—</span>}
+                  </td>
+                  <td className="px-3 py-1.5" style={{ textAlign: 'right' }}>
+                    {item.status === 'buy'
+                      ? <input type="number" value={item.unitCostUsd} min={0} onChange={e => updateItem(item.idx, { unitCostUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 90, textAlign: 'right' }} />
+                      : <span style={{ color: 'var(--gx-text-muted)' }}>—</span>}
+                  </td>
+                  <td className="px-3 py-1.5" style={{ textAlign: 'center' }}>
+                    {item.status === 'buy'
+                      ? <input type="number" value={item.lifespanYears ?? 10} min={1} max={30} onChange={e => updateItem(item.idx, { lifespanYears: (v => isNaN(v) ? 10 : v)(parseInt(e.target.value)) })} className={inputClass} style={{ width: 55, textAlign: 'center' }} />
+                      : <span style={{ color: 'var(--gx-text-muted)' }}>—</span>}
+                  </td>
+                  <td className="px-3 py-1.5" style={{ textAlign: 'center' }}>
+                    {item.status === 'buy'
+                      ? <input type="number" value={item.ageYears ?? 0} min={0} max={(item.lifespanYears ?? 10) - 1} onChange={e => updateItem(item.idx, { ageYears: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 55, textAlign: 'center' }} />
+                      : <span style={{ color: 'var(--gx-text-muted)' }}>—</span>}
+                  </td>
+                  <td className="px-3 py-1.5" style={{ textAlign: 'center' }}>
+                    {item.status === 'buy'
+                      ? <input type="number" value={item.pctSequencing ?? 100} min={0} max={100} onChange={e => updateItem(item.idx, { pctSequencing: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 55, textAlign: 'center' }} />
+                      : <span style={{ color: 'var(--gx-text-muted)' }}>—</span>}
+                  </td>
+                  <td className="px-3 py-1.5" style={{ textAlign: 'right', color: item.status === 'buy' ? 'var(--gx-accent)' : 'var(--gx-text-muted)', whiteSpace: 'nowrap' }}>
+                    {item.status === 'buy' ? `$${fmt(annual)}` : '—'}
+                  </td>
+                  <td className="px-3 py-1.5">
+                    <button
+                      onClick={() => removeItem(item.idx)}
+                      className="text-xs px-2 py-0.5 rounded"
+                      style={{ color: 'var(--gx-text-muted)', background: 'none', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
+                    >
+                      ×
+                    </button>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
       </div>
 
       {/* Add from catalogue (non-instrument) */}

@@ -201,10 +201,10 @@ export default function Step6() {
                     return (
                       <tr key={idx} style={{ borderBottom: '1px solid var(--gx-border)', opacity: item.enabled ? 1 : 0.4 }}>
                         <td className="px-3 py-2">
-                          <input type="text" value={item.name} onChange={e => updateInhouseItem(idx, { name: e.target.value })} className={inputClass} style={{ width: '100%', minWidth: 120 }} />
+                          <input type="text" value={item.name} title={item.name} onChange={e => updateInhouseItem(idx, { name: e.target.value })} className={inputClass} style={{ width: '100%', minWidth: 120 }} />
                         </td>
                         <td className="px-3 py-2">
-                          <input type="text" value={item.description} onChange={e => updateInhouseItem(idx, { description: e.target.value })} className={inputClass} style={{ width: '100%', minWidth: 120 }} />
+                          <input type="text" value={item.description} title={item.description} onChange={e => updateInhouseItem(idx, { description: e.target.value })} className={inputClass} style={{ width: '100%', minWidth: 120 }} />
                         </td>
                         <td className="px-3 py-2">
                           <input type="number" value={item.pricePerUnit} min={0} step={0.01} onChange={e => updateInhouseItem(idx, { pricePerUnit: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 90, textAlign: 'right' }} />
@@ -276,24 +276,49 @@ export default function Step6() {
             {/* In-house block */}
             {showInhouse && (
               <div>
-                <div className="text-xs font-semibold mb-1" style={{ color: 'var(--gx-text)' }}>In-house</div>
-                <div className="grid grid-cols-3 gap-2">
-                  <div>
-                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total purchase cost</div>
-                    <div className="text-sm font-medium" style={{ color: 'var(--gx-text)' }}>${fmt(inhousePurchaseCost)}</div>
-                    <div className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)', fontStyle: 'italic' }}>included in establishment cost</div>
-                  </div>
-                  <div>
-                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Annual depreciation cost</div>
-                    <div className="text-sm font-medium" style={{ color: 'var(--gx-text)' }}>${fmt(inhouseTotal)}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>Total cost per sample</div>
-                    <div className="text-sm font-medium" style={{ color: 'var(--gx-text)' }}>
-                      {samplesPerYear > 0 ? `$${fmt(inhouseTotal / samplesPerYear)}` : '—'}
-                    </div>
-                  </div>
-                </div>
+                <div className="text-xs font-semibold mb-2" style={{ color: 'var(--gx-text)' }}>In-house</div>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid var(--gx-border)', color: 'var(--gx-text-muted)' }}>
+                      <th style={{ textAlign: 'left', fontWeight: 500, paddingBottom: 4 }}>Component</th>
+                      <th style={{ textAlign: 'right', fontWeight: 500, paddingBottom: 4 }}>Purchase cost</th>
+                      <th style={{ textAlign: 'right', fontWeight: 500, paddingBottom: 4 }}>Remaining life (yr)</th>
+                      <th style={{ textAlign: 'right', fontWeight: 500, paddingBottom: 4 }}>Annual depreciation</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {bioinformatics.inhouseItems.filter(i => i.enabled && (i.quantity ?? 0) > 0).map((item, idx) => {
+                      const purchaseCost = (item.pricePerUnit ?? 0) * (item.quantity ?? 1)
+                      const remainingLife = Math.max(1, (item.lifespanYears ?? 1) - (item.ageYears ?? 0))
+                      const depreciation = purchaseCost * ((item.pctUse ?? 100) / 100) / remainingLife
+                      return (
+                        <tr key={idx} style={{ borderBottom: '1px solid var(--gx-border)' }}>
+                          <td style={{ padding: '3px 0', color: 'var(--gx-text)' }}>{item.name || '—'}</td>
+                          <td style={{ textAlign: 'right', padding: '3px 0', color: 'var(--gx-text)' }}>${fmt(purchaseCost)}</td>
+                          <td style={{ textAlign: 'right', padding: '3px 0', color: 'var(--gx-text-muted)' }}>{remainingLife} yr</td>
+                          <td style={{ textAlign: 'right', padding: '3px 0', color: 'var(--gx-accent)', fontWeight: 500 }}>${fmt(depreciation)}/yr</td>
+                        </tr>
+                      )
+                    })}
+                    {bioinformatics.inhouseItems.filter(i => i.enabled && (i.quantity ?? 0) > 0).length === 0 && (
+                      <tr><td colSpan={4} style={{ color: 'var(--gx-text-muted)', padding: '4px 0' }}>No active items.</td></tr>
+                    )}
+                  </tbody>
+                  <tfoot>
+                    <tr style={{ borderTop: '1px solid var(--gx-border)' }}>
+                      <td style={{ padding: '4px 0', fontWeight: 600, color: 'var(--gx-text)', fontSize: '0.8rem' }}>Total</td>
+                      <td style={{ textAlign: 'right', fontWeight: 600, color: 'var(--gx-text)' }}>
+                        ${fmt(inhousePurchaseCost)}
+                        <div style={{ fontWeight: 400, fontStyle: 'italic', color: 'var(--gx-text-muted)', fontSize: '0.7rem' }}>included in establishment cost</div>
+                      </td>
+                      <td></td>
+                      <td style={{ textAlign: 'right', fontWeight: 600, color: 'var(--gx-accent)' }}>
+                        ${fmt(inhouseTotal)}/yr
+                        {samplesPerYear > 0 && <span style={{ fontWeight: 400, color: 'var(--gx-text-muted)' }}> (${fmt(inhouseTotal / samplesPerYear)}/sample)</span>}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
               </div>
             )}
 
