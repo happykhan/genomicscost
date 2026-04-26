@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#0f172a"/>
+
+  <!-- Subtle grid lines -->
+  <line x1="0" y1="210" x2="1200" y2="210" stroke="#1e293b" stroke-width="1"/>
+  <line x1="0" y1="420" x2="1200" y2="420" stroke="#1e293b" stroke-width="1"/>
+  <line x1="400" y1="0" x2="400" y2="630" stroke="#1e293b" stroke-width="1"/>
+  <line x1="800" y1="0" x2="800" y2="630" stroke="#1e293b" stroke-width="1"/>
+
+  <!-- Accent bar left edge -->
+  <rect x="0" y="0" width="6" height="630" fill="#2dd4bf"/>
+
+  <!-- Icon: rising bars + molecule (scaled from 32→200) -->
+  <g transform="translate(880, 140) scale(6.25)">
+    <rect x="5"  y="22" width="5" height="6"  rx="1.5" fill="#2dd4bf" opacity="0.45"/>
+    <rect x="13" y="16" width="5" height="12" rx="1.5" fill="#2dd4bf" opacity="0.70"/>
+    <rect x="21" y="9"  width="6" height="19" rx="1.5" fill="#2dd4bf"/>
+    <circle cx="7.5"  cy="20"   r="3"   fill="#2dd4bf" opacity="0.45"/>
+    <circle cx="15.5" cy="13.5" r="3"   fill="#2dd4bf" opacity="0.70"/>
+    <circle cx="24"   cy="6.5"  r="3.5" fill="#2dd4bf"/>
+    <line x1="10.5" y1="19.2" x2="12.5" y2="14.5" stroke="#2dd4bf" stroke-width="1.2" opacity="0.4" stroke-linecap="round"/>
+    <line x1="18.5" y1="12.5" x2="20.5" y2="8"    stroke="#2dd4bf" stroke-width="1.2" opacity="0.55" stroke-linecap="round"/>
+  </g>
+
+  <!-- WHO badge -->
+  <rect x="56" y="72" width="126" height="34" rx="6" fill="#2dd4bf" opacity="0.15"/>
+  <text x="70" y="95" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="700" fill="#2dd4bf" letter-spacing="2">WHO GCT v2</text>
+
+  <!-- Main title -->
+  <text x="56" y="210" font-family="system-ui, -apple-system, sans-serif" font-size="76" font-weight="800" fill="#f8fafc">Genomics</text>
+  <text x="56" y="300" font-family="system-ui, -apple-system, sans-serif" font-size="76" font-weight="800" fill="#f8fafc">Costing Tool</text>
+
+  <!-- Divider -->
+  <rect x="56" y="328" width="80" height="4" rx="2" fill="#2dd4bf"/>
+
+  <!-- Subtitle -->
+  <text x="56" y="390" font-family="system-ui, -apple-system, sans-serif" font-size="30" fill="#94a3b8">Estimate sequencing costs for</text>
+  <text x="56" y="430" font-family="system-ui, -apple-system, sans-serif" font-size="30" fill="#94a3b8">genomic surveillance laboratories</text>
+
+  <!-- Feature pills -->
+  <rect x="56"  y="480" width="210" height="40" rx="20" fill="#1e293b"/>
+  <text x="161" y="506" font-family="system-ui, -apple-system, sans-serif" font-size="20" fill="#2dd4bf" text-anchor="middle">8-step wizard</text>
+
+  <rect x="282" y="480" width="210" height="40" rx="20" fill="#1e293b"/>
+  <text x="387" y="506" font-family="system-ui, -apple-system, sans-serif" font-size="20" fill="#2dd4bf" text-anchor="middle">Instrument costs</text>
+
+  <rect x="508" y="480" width="270" height="40" rx="20" fill="#1e293b"/>
+  <text x="643" y="506" font-family="system-ui, -apple-system, sans-serif" font-size="20" fill="#2dd4bf" text-anchor="middle">Consumables &amp; staff</text>
+
+  <!-- URL -->
+  <text x="1144" y="590" font-family="system-ui, -apple-system, sans-serif" font-size="22" fill="#475569" text-anchor="end">genomicscost.vercel.app</text>
+</svg>
