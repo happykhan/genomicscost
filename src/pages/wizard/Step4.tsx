@@ -71,6 +71,20 @@ export default function Step4() {
     updateProject({ equipment: next })
   }
 
+  function handleEquipmentNameChange(index: number, newName: string) {
+    const catItem = catalogue.equipment.find(e => e.name === newName)
+    if (catItem) {
+      updateItem(index, {
+        name: newName,
+        category: catItem.category,
+        unitCostUsd: catItem.unit_cost_usd ?? equipment[index].unitCostUsd,
+        lifespanYears: equipment[index].lifespanYears,
+      })
+    } else {
+      updateItem(index, { name: newName })
+    }
+  }
+
   function removeItem(index: number) {
     updateProject({ equipment: equipment.filter((_, i) => i !== index) })
   }
@@ -221,9 +235,18 @@ export default function Step4() {
         style={{ opacity: item.status === 'skip' ? 0.4 : 1 }}
       >
         <div className="flex-1 min-w-36">
-          <div className="text-sm font-medium" style={{ color: 'var(--gx-text)' }}>
-            {item.name}
-          </div>
+          <input
+            type="text"
+            value={item.name}
+            list={`equip-names-${item.idx}`}
+            onChange={e => handleEquipmentNameChange(item.idx, e.target.value)}
+            className={inputClass}
+            style={{ width: '100%', fontWeight: 500, fontSize: '0.875rem' }}
+            placeholder="Equipment name"
+          />
+          <datalist id={`equip-names-${item.idx}`}>
+            {catalogueEquipmentNames.map(n => <option key={n} value={n} />)}
+          </datalist>
           {(() => {
             const catItem = catalogue.equipment.find(c => c.name === item.name)
             const steps = catItem?.workflow_steps as string[] | undefined
