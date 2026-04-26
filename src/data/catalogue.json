@@ -2,7 +2,7 @@
   "_meta": {
     "source": "WHO Genomics Costing Tool, second edition",
     "extracted": "2026-04-05",
-    "notes": "Costs in USD. Some prices not publicly listed (None) \u2014 user must enter."
+    "notes": "Costs in USD. Some prices not publicly listed (None) — user must enter."
   },
   "platforms": [
     {
@@ -15,7 +15,7 @@
           "read_length_bp": 300,
           "max_reads_per_flowcell": 4000000,
           "max_output_bytes": 1200000000,
-          "max_output_mb": 1200.0
+          "max_output_mb": 1200
         },
         {
           "name": "4x iSeq 100 i1 Reagent v2 (300-cycle)",
@@ -23,7 +23,7 @@
           "read_length_bp": 300,
           "max_reads_per_flowcell": 4000000,
           "max_output_bytes": 1200000000,
-          "max_output_mb": 1200.0
+          "max_output_mb": 1200
         },
         {
           "name": "8x iSeq 100 i1 Reagent v2 (300-cycle)",
@@ -31,7 +31,7 @@
           "read_length_bp": 300,
           "max_reads_per_flowcell": 4000000,
           "max_output_bytes": 1200000000,
-          "max_output_mb": 1200.0
+          "max_output_mb": 1200
         },
         {
           "name": "MiniSeq High Output Reagent Kit (150-cycles)",
@@ -39,7 +39,7 @@
           "read_length_bp": 150,
           "max_reads_per_flowcell": 25000000,
           "max_output_bytes": 3750000000,
-          "max_output_mb": 3750.0
+          "max_output_mb": 3750
         },
         {
           "name": "MiniSeq High Output Reagent Kit (300 cycles)",
@@ -47,7 +47,7 @@
           "read_length_bp": 300,
           "max_reads_per_flowcell": 25000000,
           "max_output_bytes": 7500000000,
-          "max_output_mb": 7500.0
+          "max_output_mb": 7500
         },
         {
           "name": "MiniSeq Mid Output Reagent Kit (300 cycles)",
@@ -55,7 +55,7 @@
           "read_length_bp": 300,
           "max_reads_per_flowcell": 8000000,
           "max_output_bytes": 2400000000,
-          "max_output_mb": 2400.0
+          "max_output_mb": 2400
         },
         {
           "name": "MiSeq Reagent Kit v3 (150-cycle)",
@@ -63,7 +63,7 @@
           "read_length_bp": 150,
           "max_reads_per_flowcell": 22000000,
           "max_output_bytes": 3300000000,
-          "max_output_mb": 3300.0
+          "max_output_mb": 3300
         },
         {
           "name": "MiSeq Reagent Kit v3 (600 cycle)",
@@ -71,7 +71,7 @@
           "read_length_bp": 600,
           "max_reads_per_flowcell": 22000000,
           "max_output_bytes": 13200000000,
-          "max_output_mb": 13200.0
+          "max_output_mb": 13200
         },
         {
           "name": "MiSeq Reagent Kit v2 (50-cycles)",
@@ -79,7 +79,7 @@
           "read_length_bp": 50,
           "max_reads_per_flowcell": 15000000,
           "max_output_bytes": 750000000,
-          "max_output_mb": 750.0
+          "max_output_mb": 750
         },
         {
           "name": "MiSeq Reagent Kit v2 (300 cycle)",
@@ -87,7 +87,7 @@
           "read_length_bp": 300,
           "max_reads_per_flowcell": 15000000,
           "max_output_bytes": 4500000000,
-          "max_output_mb": 4500.0
+          "max_output_mb": 4500
         },
         {
           "name": "MiSeq Reagent Kit v2 (500-cycles)",
@@ -95,7 +95,7 @@
           "read_length_bp": 500,
           "max_reads_per_flowcell": 15000000,
           "max_output_bytes": 7500000000,
-          "max_output_mb": 7500.0
+          "max_output_mb": 7500
         },
         {
           "name": "20x MiSeq Reagent Kit v2 (50-cycles)",
@@ -103,7 +103,7 @@
           "read_length_bp": 50,
           "max_reads_per_flowcell": 15000000,
           "max_output_bytes": 750000000,
-          "max_output_mb": 750.0
+          "max_output_mb": 750
         },
         {
           "name": "20x MiSeq Reagent Kit v2 (300 cycle)",
@@ -111,7 +111,7 @@
           "read_length_bp": 300,
           "max_reads_per_flowcell": 15000000,
           "max_output_bytes": 4500000000,
-          "max_output_mb": 4500.0
+          "max_output_mb": 4500
         },
         {
           "name": "20x MiSeq Reagent Kit v2 (500-cycles)",
@@ -119,7 +119,7 @@
           "read_length_bp": 500,
           "max_reads_per_flowcell": 15000000,
           "max_output_bytes": 7500000000,
-          "max_output_mb": 7500.0
+          "max_output_mb": 7500
         },
         {
           "name": "NextSeq 1000/2000 P1 XLEAP-SBS Reagent Kit (100 Cycles)",
@@ -127,7 +127,7 @@
           "read_length_bp": 100,
           "max_reads_per_flowcell": 100000000,
           "max_output_bytes": 10000000000,
-          "max_output_mb": 10000.0
+          "max_output_mb": 10000
         },
         {
           "name": "NextSeq 1000/2000 P1 XLEAP-SBS Reagent Kit (300 Cycles)",
@@ -135,7 +135,7 @@
           "read_length_bp": 300,
           "max_reads_per_flowcell": 100000000,
           "max_output_bytes": 30000000000,
-          "max_output_mb": 30000.0
+          "max_output_mb": 30000
         },
         {
           "name": "NextSeq 1000/2000 P1 XLEAP-SBS Reagent Kit (600 Cycles)",
@@ -143,7 +143,7 @@
           "read_length_bp": 600,
           "max_reads_per_flowcell": 100000000,
           "max_output_bytes": 60000000000,
-          "max_output_mb": 60000.0
+          "max_output_mb": 60000
         },
         {
           "name": "NextSeq 1000/2000 P2 XLEAP-SBS Reagent Kit (100 Cycles)",
@@ -151,7 +151,7 @@
           "read_length_bp": 100,
           "max_reads_per_flowcell": 400000000,
           "max_output_bytes": 40000000000,
-          "max_output_mb": 40000.0
+          "max_output_mb": 40000
         },
         {
           "name": "NextSeq 1000/2000 P2 XLEAP-SBS Reagent Kit (200 Cycles)",
@@ -159,7 +159,7 @@
           "read_length_bp": 200,
           "max_reads_per_flowcell": 400000000,
           "max_output_bytes": 80000000000,
-          "max_output_mb": 80000.0
+          "max_output_mb": 80000
         },
         {
           "name": "NextSeq 1000/2000 P2 XLEAP-SBS Reagent Kit (300 Cycles)",
@@ -167,7 +167,7 @@
           "read_length_bp": 300,
           "max_reads_per_flowcell": 400000000,
           "max_output_bytes": 120000000000,
-          "max_output_mb": 120000.0
+          "max_output_mb": 120000
         },
         {
           "name": "NextSeq 1000/2000 P2 XLEAP-SBS Reagent Kit (600 Cycles)",
@@ -175,7 +175,7 @@
           "read_length_bp": 600,
           "max_reads_per_flowcell": 400000000,
           "max_output_bytes": 240000000000,
-          "max_output_mb": 240000.0
+          "max_output_mb": 240000
         },
         {
           "name": "NextSeq 2000 P3 XLEAP-SBS Reagent Kit (100 Cycles)",
@@ -183,7 +183,7 @@
           "read_length_bp": 100,
           "max_reads_per_flowcell": 1200000000,
           "max_output_bytes": 120000000000,
-          "max_output_mb": 120000.0
+          "max_output_mb": 120000
         },
         {
           "name": "NextSeq 2000 P3 XLEAP-SBS Reagent Kit (200 Cycles)",
@@ -191,7 +191,7 @@
           "read_length_bp": 200,
           "max_reads_per_flowcell": 1200000000,
           "max_output_bytes": 240000000000,
-          "max_output_mb": 240000.0
+          "max_output_mb": 240000
         },
         {
           "name": "NextSeq 2000 P3 XLEAP-SBS Reagent Kit (300 Cycles)",
@@ -199,7 +199,7 @@
           "read_length_bp": 300,
           "max_reads_per_flowcell": 1200000000,
           "max_output_bytes": 360000000000,
-          "max_output_mb": 360000.0
+          "max_output_mb": 360000
         },
         {
           "name": "NextSeq 2000 P4 XLEAP-SBS Reagent Kit (100 Cycles)",
@@ -207,7 +207,7 @@
           "read_length_bp": 100,
           "max_reads_per_flowcell": 1800000000,
           "max_output_bytes": 180000000000,
-          "max_output_mb": 180000.0
+          "max_output_mb": 180000
         },
         {
           "name": "NextSeq 2000 P4 XLEAP-SBS Reagent Kit (200 Cycles)",
@@ -215,7 +215,7 @@
           "read_length_bp": 200,
           "max_reads_per_flowcell": 1800000000,
           "max_output_bytes": 360000000000,
-          "max_output_mb": 360000.0
+          "max_output_mb": 360000
         },
         {
           "name": "NextSeq 2000 P4 XLEAP-SBS Reagent Kit (300 Cycles)",
@@ -223,7 +223,7 @@
           "read_length_bp": 300,
           "max_reads_per_flowcell": 1800000000,
           "max_output_bytes": 540000000000,
-          "max_output_mb": 540000.0
+          "max_output_mb": 540000
         },
         {
           "name": "NovaSeq 6000 SP Reagent Kit v1.5 (200 cycle)",
@@ -231,7 +231,7 @@
           "read_length_bp": 200,
           "max_reads_per_flowcell": 670000000,
           "max_output_bytes": 134000000000,
-          "max_output_mb": 134000.0
+          "max_output_mb": 134000
         },
         {
           "name": "NovaSeq 6000 S4 Reagent Kit v1.5 (300 cycles)",
@@ -239,7 +239,7 @@
           "read_length_bp": 300,
           "max_reads_per_flowcell": 8000000000,
           "max_output_bytes": 2400000000000,
-          "max_output_mb": 2400000.0
+          "max_output_mb": 2400000
         },
         {
           "name": "NovaSeq 6000 S4 Reagent Kit v1.5 (200 cycles)",
@@ -247,7 +247,7 @@
           "read_length_bp": 200,
           "max_reads_per_flowcell": 8000000000,
           "max_output_bytes": 1600000000000,
-          "max_output_mb": 1600000.0
+          "max_output_mb": 1600000
         },
         {
           "name": "NovaSeq 6000 S2 Reagent Kit v1.5 (300 cycles)",
@@ -255,7 +255,7 @@
           "read_length_bp": 300,
           "max_reads_per_flowcell": 3333333333,
           "max_output_bytes": 1000000000000,
-          "max_output_mb": 1000000.0
+          "max_output_mb": 1000000
         },
         {
           "name": "NovaSeq 6000 S2 Reagent Kit v1.5 (200 cycles)",
@@ -263,7 +263,7 @@
           "read_length_bp": 200,
           "max_reads_per_flowcell": 3335000000,
           "max_output_bytes": 667000000000,
-          "max_output_mb": 667000.0
+          "max_output_mb": 667000
         },
         {
           "name": "NovaSeq 6000 S2 Reagent Kit v1.5 (100 cycles)",
@@ -271,7 +271,7 @@
           "read_length_bp": 100,
           "max_reads_per_flowcell": 3330000000,
           "max_output_bytes": 333000000000,
-          "max_output_mb": 333000.0
+          "max_output_mb": 333000
         },
         {
           "name": "NovaSeq 6000 S1 Reagent Kit v1.5 (300 cycles)",
@@ -279,7 +279,7 @@
           "read_length_bp": 300,
           "max_reads_per_flowcell": 1333333333,
           "max_output_bytes": 400000000000,
-          "max_output_mb": 400000.0
+          "max_output_mb": 400000
         },
         {
           "name": "NovaSeq 6000 S1 Reagent Kit v1.5 (200 cycles)",
@@ -287,7 +287,7 @@
           "read_length_bp": 200,
           "max_reads_per_flowcell": 1330000000,
           "max_output_bytes": 266000000000,
-          "max_output_mb": 266000.0
+          "max_output_mb": 266000
         },
         {
           "name": "NovaSeq 6000 S1 Reagent Kit v1.5 (100 cycles)",
@@ -295,7 +295,7 @@
           "read_length_bp": 100,
           "max_reads_per_flowcell": 1340000000,
           "max_output_bytes": 134000000000,
-          "max_output_mb": 134000.0
+          "max_output_mb": 134000
         },
         {
           "name": "NovaSeq 6000 SP Reagent Kit v1.5 (300 cycles)",
@@ -303,7 +303,7 @@
           "read_length_bp": 300,
           "max_reads_per_flowcell": 666666666,
           "max_output_bytes": 200000000000,
-          "max_output_mb": 200000.0
+          "max_output_mb": 200000
         },
         {
           "name": "NovaSeq 6000 SP Reagent Kit v1.5 (100 cycles)",
@@ -311,7 +311,7 @@
           "read_length_bp": 100,
           "max_reads_per_flowcell": 650000000,
           "max_output_bytes": 65000000000,
-          "max_output_mb": 65000.0
+          "max_output_mb": 65000
         },
         {
           "name": "NovaSeq 6000 SP Reagent Kit v1.5 (500 cycles)",
@@ -319,7 +319,7 @@
           "read_length_bp": 500,
           "max_reads_per_flowcell": 650000000,
           "max_output_bytes": 325000000000,
-          "max_output_mb": 325000.0
+          "max_output_mb": 325000
         }
       ]
     },
@@ -333,7 +333,7 @@
           "read_length_bp": null,
           "max_reads_per_flowcell": null,
           "max_output_bytes": 2800000000,
-          "max_output_mb": 2800.0
+          "max_output_mb": 2800
         },
         {
           "name": "1x MinION or GridION R9.4.1 or R10.4.1",
@@ -341,7 +341,7 @@
           "read_length_bp": null,
           "max_reads_per_flowcell": null,
           "max_output_bytes": 48000000000,
-          "max_output_mb": 48000.0
+          "max_output_mb": 48000
         },
         {
           "name": "12x MinION or GridION R9.4.1 or R10.4.1",
@@ -349,7 +349,7 @@
           "read_length_bp": null,
           "max_reads_per_flowcell": null,
           "max_output_bytes": 48000000000,
-          "max_output_mb": 48000.0
+          "max_output_mb": 48000
         },
         {
           "name": "24x MinION or GridION R9.4.1 or R10.4.1",
@@ -357,7 +357,7 @@
           "read_length_bp": null,
           "max_reads_per_flowcell": null,
           "max_output_bytes": 48000000000,
-          "max_output_mb": 48000.0
+          "max_output_mb": 48000
         },
         {
           "name": "48x MinION or GridION R9.4.1 or R10.4.1",
@@ -365,7 +365,7 @@
           "read_length_bp": null,
           "max_reads_per_flowcell": null,
           "max_output_bytes": 48000000000,
-          "max_output_mb": 48000.0
+          "max_output_mb": 48000
         },
         {
           "name": "96x MinION or GridION R9.4.1 or R10.4.1",
@@ -373,7 +373,7 @@
           "read_length_bp": null,
           "max_reads_per_flowcell": null,
           "max_output_bytes": 48000000000,
-          "max_output_mb": 48000.0
+          "max_output_mb": 48000
         },
         {
           "name": "1x Flow Cell (RNA)",
@@ -381,7 +381,7 @@
           "read_length_bp": null,
           "max_reads_per_flowcell": null,
           "max_output_bytes": 48000000000,
-          "max_output_mb": 48000.0
+          "max_output_mb": 48000
         },
         {
           "name": "12x Flow Cell (RNA)",
@@ -389,7 +389,7 @@
           "read_length_bp": null,
           "max_reads_per_flowcell": null,
           "max_output_bytes": 48000000000,
-          "max_output_mb": 48000.0
+          "max_output_mb": 48000
         },
         {
           "name": "24x Flow Cell (RNA)",
@@ -397,7 +397,7 @@
           "read_length_bp": null,
           "max_reads_per_flowcell": null,
           "max_output_bytes": 48000000000,
-          "max_output_mb": 48000.0
+          "max_output_mb": 48000
         },
         {
           "name": "48x Flow Cell (RNA)",
@@ -405,7 +405,7 @@
           "read_length_bp": null,
           "max_reads_per_flowcell": null,
           "max_output_bytes": 48000000000,
-          "max_output_mb": 48000.0
+          "max_output_mb": 48000
         },
         {
           "name": "96x Flow Cell (RNA)",
@@ -413,7 +413,7 @@
           "read_length_bp": null,
           "max_reads_per_flowcell": null,
           "max_output_bytes": 48000000000,
-          "max_output_mb": 48000.0
+          "max_output_mb": 48000
         },
         {
           "name": "1x PromethION Flow Cell Packs (R10.4.1; 4 flow cells)",
@@ -421,7 +421,7 @@
           "read_length_bp": null,
           "max_reads_per_flowcell": null,
           "max_output_bytes": 290000000000,
-          "max_output_mb": 290000.0
+          "max_output_mb": 290000
         },
         {
           "name": "3x PromethION Flow Cell Packs (R10.4.1; 12 flow cells)",
@@ -429,7 +429,7 @@
           "read_length_bp": null,
           "max_reads_per_flowcell": null,
           "max_output_bytes": 290000000000,
-          "max_output_mb": 290000.0
+          "max_output_mb": 290000
         },
         {
           "name": "8x PromethION Flow Cell Packs (R10.4.1; 24 flow cells)",
@@ -437,7 +437,7 @@
           "read_length_bp": null,
           "max_reads_per_flowcell": null,
           "max_output_bytes": 290000000000,
-          "max_output_mb": 290000.0
+          "max_output_mb": 290000
         },
         {
           "name": "1x PromethION Flow Cell Packs (RNA) - 1 pack (4 flow cells)",
@@ -445,7 +445,7 @@
           "read_length_bp": null,
           "max_reads_per_flowcell": null,
           "max_output_bytes": 290000000000,
-          "max_output_mb": 290000.0
+          "max_output_mb": 290000
         },
         {
           "name": "3x PromethION Flow Cell Packs (RNA; 12 flow cells)",
@@ -453,7 +453,7 @@
           "read_length_bp": null,
           "max_reads_per_flowcell": null,
           "max_output_bytes": 290000000000,
-          "max_output_mb": 290000.0
+          "max_output_mb": 290000
         },
         {
           "name": "8x PromethION Flow Cell Packs (RNA; 24 flow cells)",
@@ -461,7 +461,7 @@
           "read_length_bp": null,
           "max_reads_per_flowcell": null,
           "max_output_bytes": 290000000000,
-          "max_output_mb": 290000.0
+          "max_output_mb": 290000
         }
       ]
     },
@@ -470,28 +470,28 @@
       "name": "ThermoFisher",
       "reagent_kits": [
         {
-          "name": "Ion 510 & Ion 520 & Ion 530 Kit \u2013 Chef (2 seq runs; 8 rxns) and Ion 510 Chip Kit (8 chips)",
+          "name": "Ion 510 & Ion 520 & Ion 530 Kit – Chef (2 seq runs; 8 rxns) and Ion 510 Chip Kit (8 chips)",
           "unit_price_usd": null,
           "read_length_bp": 200,
           "max_reads_per_flowcell": 2500000,
           "max_output_bytes": 500000000,
-          "max_output_mb": 500.0
+          "max_output_mb": 500
         },
         {
-          "name": "Ion 510 & Ion 520 & Ion 530 Kit \u2013 Chef (2 seq runs; 8 rxns) and Ion 520 Chip Kit (8 chips)",
+          "name": "Ion 510 & Ion 520 & Ion 530 Kit – Chef (2 seq runs; 8 rxns) and Ion 520 Chip Kit (8 chips)",
           "unit_price_usd": null,
           "read_length_bp": 400,
           "max_reads_per_flowcell": 5000000,
           "max_output_bytes": 2000000000,
-          "max_output_mb": 2000.0
+          "max_output_mb": 2000
         },
         {
-          "name": "Ion 510 & Ion 520 & Ion 530 Kit \u2013 Chef (2 seq runs; 8 rxns) and Ion 530 Chip Kit (8 chips)",
+          "name": "Ion 510 & Ion 520 & Ion 530 Kit – Chef (2 seq runs; 8 rxns) and Ion 530 Chip Kit (8 chips)",
           "unit_price_usd": null,
           "read_length_bp": 400,
           "max_reads_per_flowcell": 20000000,
           "max_output_bytes": 8000000000,
-          "max_output_mb": 8000.0
+          "max_output_mb": 8000
         },
         {
           "name": "2 x Ion 520 & Ion 530 ExT Kit Chef (4 rxns) and 1 x  Ion 520 Chip Kit (8 chips)",
@@ -499,7 +499,7 @@
           "read_length_bp": 400,
           "max_reads_per_flowcell": 5000000,
           "max_output_bytes": 2000000000,
-          "max_output_mb": 2000.0
+          "max_output_mb": 2000
         },
         {
           "name": "2 x Ion 520 & Ion 530 ExT Kit Chef (4 rxns) and 1 x Ion 530 Chip Kit (8 chips)",
@@ -507,7 +507,7 @@
           "read_length_bp": 400,
           "max_reads_per_flowcell": 20000000,
           "max_output_bytes": 8000000000,
-          "max_output_mb": 8000.0
+          "max_output_mb": 8000
         },
         {
           "name": "Ion 540 Kit Chef  (2 seq runs; 8 rxns) and Ion 540 Chip Kit (8 chips)",
@@ -515,7 +515,7 @@
           "read_length_bp": 200,
           "max_reads_per_flowcell": 75000000,
           "max_output_bytes": 15000000000,
-          "max_output_mb": 15000.0
+          "max_output_mb": 15000
         }
       ]
     },
@@ -529,7 +529,7 @@
           "read_length_bp": 300,
           "max_reads_per_flowcell": 25000000,
           "max_output_bytes": 7500000000,
-          "max_output_mb": 7500.0
+          "max_output_mb": 7500
         },
         {
           "name": "DNBSEQ-E25RS High-throughput Sequencing Set (App-C FCL PE150)",
@@ -537,7 +537,7 @@
           "read_length_bp": 300,
           "max_reads_per_flowcell": 20000000,
           "max_output_bytes": 6000000000,
-          "max_output_mb": 6000.0
+          "max_output_mb": 6000
         },
         {
           "name": "DNBSEQ-G99RS High-throughput Sequencing Set (G99 FCL SE100/PE50)",
@@ -545,7 +545,7 @@
           "read_length_bp": 100,
           "max_reads_per_flowcell": 80000000,
           "max_output_bytes": 8000000000,
-          "max_output_mb": 8000.0
+          "max_output_mb": 8000
         },
         {
           "name": "DNBSEQ-G99RS High-throughput Sequencing Set (G99 FCL PE150)",
@@ -553,7 +553,7 @@
           "read_length_bp": 300,
           "max_reads_per_flowcell": 80000000,
           "max_output_bytes": 24000000000,
-          "max_output_mb": 24000.0
+          "max_output_mb": 24000
         },
         {
           "name": "DNBSEQ-G99RS High-throughput Sequencing Set (G99 App-D FCL PE150)",
@@ -561,7 +561,7 @@
           "read_length_bp": 300,
           "max_reads_per_flowcell": 80000000,
           "max_output_bytes": 24000000000,
-          "max_output_mb": 24000.0
+          "max_output_mb": 24000
         },
         {
           "name": "DNBSEQ-G99RS High-throughput Sequencing Set (G99 App-D FCL PE300)",
@@ -569,7 +569,7 @@
           "read_length_bp": 600,
           "max_reads_per_flowcell": 80000000,
           "max_output_bytes": 48000000000,
-          "max_output_mb": 48000.0
+          "max_output_mb": 48000
         },
         {
           "name": "DNBSEQ-G99RS High-throughput Sequencing Reagent Set (G99 App-D FCS PE150)",
@@ -577,7 +577,7 @@
           "read_length_bp": 300,
           "max_reads_per_flowcell": 40000000,
           "max_output_bytes": 12000000000,
-          "max_output_mb": 12000.0
+          "max_output_mb": 12000
         },
         {
           "name": "DNBSEQ-G50RS High-throughput Sequencing Set (FCL PE100)",
@@ -585,7 +585,7 @@
           "read_length_bp": 200,
           "max_reads_per_flowcell": 500000000,
           "max_output_bytes": 100000000000,
-          "max_output_mb": 100000.0
+          "max_output_mb": 100000
         },
         {
           "name": "DNBSEQ-G50RS High-throughput Sequencing Set (FCL PE150)",
@@ -593,7 +593,7 @@
           "read_length_bp": 300,
           "max_reads_per_flowcell": 500000000,
           "max_output_bytes": 150000000000,
-          "max_output_mb": 150000.0
+          "max_output_mb": 150000
         },
         {
           "name": "DNBSEQ-G50RS High-throughput Rapid Sequencing Set (FCS PE100)",
@@ -601,7 +601,7 @@
           "read_length_bp": 200,
           "max_reads_per_flowcell": 100000000,
           "max_output_bytes": 20000000000,
-          "max_output_mb": 20000.0
+          "max_output_mb": 20000
         },
         {
           "name": "DNBSEQ-G50RS High-throughput Rapid Sequencing Set (FCS PE150)",
@@ -609,7 +609,7 @@
           "read_length_bp": 300,
           "max_reads_per_flowcell": 100000000,
           "max_output_bytes": 30000000000,
-          "max_output_mb": 30000.0
+          "max_output_mb": 30000
         },
         {
           "name": "DNBSEQ-G400RS High-throughput Sequencing Set (FCL PE100)",
@@ -617,7 +617,7 @@
           "read_length_bp": 200,
           "max_reads_per_flowcell": 1500000000,
           "max_output_bytes": 300000000000,
-          "max_output_mb": 300000.0
+          "max_output_mb": 300000
         },
         {
           "name": "DNBSEQ-G400RS High-throughput Sequencing Set (FCL PE150)",
@@ -625,7 +625,7 @@
           "read_length_bp": 300,
           "max_reads_per_flowcell": 1500000000,
           "max_output_bytes": 450000000000,
-          "max_output_mb": 450000.0
+          "max_output_mb": 450000
         },
         {
           "name": "DNBSEQ-G400RS High-throughput Rapid Sequencing Set (SM DB FCS PE150)",
@@ -633,7 +633,7 @@
           "read_length_bp": 300,
           "max_reads_per_flowcell": 550000000,
           "max_output_bytes": 165000000000,
-          "max_output_mb": 165000.0
+          "max_output_mb": 165000
         },
         {
           "name": "DNBSEQ-G400RS High-throughput Rapid Sequencing Set  (SM DB FCS PE100)",
@@ -641,7 +641,7 @@
           "read_length_bp": 200,
           "max_reads_per_flowcell": 550000000,
           "max_output_bytes": 110000000000,
-          "max_output_mb": 110000.0
+          "max_output_mb": 110000
         },
         {
           "name": "DNBSEQ-G400RS High-throughput Sequencing Reagent Set (G400 App-D FCL PE100)",
@@ -649,7 +649,7 @@
           "read_length_bp": 200,
           "max_reads_per_flowcell": 1800000000,
           "max_output_bytes": 360000000000,
-          "max_output_mb": 360000.0
+          "max_output_mb": 360000
         },
         {
           "name": "DNBSEQ-G400RS High-throughput Sequencing Reagent Set (G400 App-D FCL PE150)",
@@ -657,7 +657,7 @@
           "read_length_bp": 300,
           "max_reads_per_flowcell": 1800000000,
           "max_output_bytes": 540000000000,
-          "max_output_mb": 540000.0
+          "max_output_mb": 540000
         },
         {
           "name": "DNBSEQ-G400RS High-throughput Rapid Sequencing Set (SM App-A DB FCS PE150)",
@@ -665,7 +665,7 @@
           "read_length_bp": 300,
           "max_reads_per_flowcell": 550000000,
           "max_output_bytes": 165000000000,
-          "max_output_mb": 165000.0
+          "max_output_mb": 165000
         },
         {
           "name": "DNBSEQ-G400RS High-throughput Rapid Sequencing Set (SM App-A DB FCS PE100)",
@@ -673,7 +673,7 @@
           "read_length_bp": 200,
           "max_reads_per_flowcell": 550000000,
           "max_output_bytes": 110000000000,
-          "max_output_mb": 110000.0
+          "max_output_mb": 110000
         }
       ]
     }
@@ -719,7 +719,7 @@
       "catalog_ref": "20043675"
     },
     {
-      "name": "Illumina Microbial Amplicon Prep\u2014Influenza A/B",
+      "name": "Illumina Microbial Amplicon Prep—Influenza A/B",
       "pathogen_type": "Influenza A and Influenza B",
       "compatible_platforms": [
         "All Illumina (up to 48 samples)"
@@ -1080,7 +1080,7 @@
         "Thermofisher S5",
         "PGM",
         "Oxford Nanopore MinIon",
-        "Gridion\u2026"
+        "Gridion…"
       ],
       "pack_size": 24,
       "barcoding_limit": 384,
@@ -1096,7 +1096,8 @@
       "pack_size": 50,
       "catalog_ref": null,
       "quantity_per_sample": 1,
-      "workflow": "sample_receipt"
+      "workflow": "sample_receipt",
+      "unit_cost_usd": 78
     },
     {
       "name": "Specimen transport packaging (ambient) (150-pck)",
@@ -1104,15 +1105,17 @@
       "pack_size": 150,
       "catalog_ref": null,
       "quantity_per_sample": 1,
-      "workflow": "sample_receipt"
+      "workflow": "sample_receipt",
+      "unit_cost_usd": 473
     },
     {
-      "name": "Specimen transport packaging (2\u20138C) (150-pck)",
+      "name": "Specimen transport packaging (2–8C) (150-pck)",
       "category": "consumable",
       "pack_size": 150,
       "catalog_ref": null,
       "quantity_per_sample": 1,
-      "workflow": "sample_receipt"
+      "workflow": "sample_receipt",
+      "unit_cost_usd": 473
     },
     {
       "name": "Specimen transport packaging (-20C) (150-pck)",
@@ -1120,7 +1123,8 @@
       "pack_size": 150,
       "catalog_ref": null,
       "quantity_per_sample": 1,
-      "workflow": "sample_receipt"
+      "workflow": "sample_receipt",
+      "unit_cost_usd": 473
     },
     {
       "name": "Cold packs (24-pck)",
@@ -1128,7 +1132,8 @@
       "pack_size": 24,
       "catalog_ref": null,
       "quantity_per_sample": null,
-      "workflow": "sample_receipt"
+      "workflow": "sample_receipt",
+      "unit_cost_usd": 180
     },
     {
       "name": "PCR plates (10/pack) 96-well reaction plate",
@@ -1140,7 +1145,8 @@
       "workflows": [
         "nucleic_acid_extraction",
         "pcr_testing"
-      ]
+      ],
+      "unit_cost_usd": 33
     },
     {
       "name": "PCR plate covers adhesive film (1 cover per plate)",
@@ -1152,7 +1158,8 @@
       "workflows": [
         "nucleic_acid_extraction",
         "pcr_testing"
-      ]
+      ],
+      "unit_cost_usd": 142
     },
     {
       "name": "Pipette filter tips 10uL (96 tips x 10 racks)",
@@ -1166,10 +1173,11 @@
         "pcr_testing",
         "ngs_library_preparation",
         "sequencing"
-      ]
+      ],
+      "unit_cost_usd": 185
     },
     {
-      "name": "Pipette filter tips 100\u00b5L, sterile (pack of 960)",
+      "name": "Pipette filter tips 100µL, sterile (pack of 960)",
       "category": "consumable",
       "pack_size": 960,
       "catalog_ref": null,
@@ -1188,7 +1196,8 @@
         "pcr_testing",
         "ngs_library_preparation",
         "sequencing"
-      ]
+      ],
+      "unit_cost_usd": 56
     },
     {
       "name": "Pipette filter tips 1000uL  (96 tips x 10 racks)",
@@ -1202,7 +1211,8 @@
         "pcr_testing",
         "ngs_library_preparation",
         "sequencing"
-      ]
+      ],
+      "unit_cost_usd": 163
     },
     {
       "name": "0.2mL PCR tubes, thin-walled (1000; strips)",
@@ -1214,7 +1224,8 @@
       "workflows": [
         "nucleic_acid_extraction",
         "pcr_testing"
-      ]
+      ],
+      "unit_cost_usd": 145
     },
     {
       "name": "1.5mL PCR tubes, LoBind (250)",
@@ -1228,7 +1239,8 @@
         "pcr_testing",
         "ngs_library_preparation",
         "sequencing"
-      ]
+      ],
+      "unit_cost_usd": 13
     },
     {
       "name": "50mL conical tubes (100)",
@@ -1240,7 +1252,8 @@
       "workflows": [
         "nucleic_acid_extraction",
         "ngs_library_preparation"
-      ]
+      ],
+      "unit_cost_usd": 161
     },
     {
       "name": "Conical centrifuge tubes 15mL (packs of 500)",
@@ -1272,7 +1285,8 @@
       "pack_size": 250,
       "catalog_ref": null,
       "quantity_per_sample": 1,
-      "workflow": "nucleic_acid_extraction"
+      "workflow": "nucleic_acid_extraction",
+      "unit_cost_usd": 723
     },
     {
       "name": "PCR testing kit (96 reactions)",
@@ -1280,7 +1294,8 @@
       "pack_size": 96,
       "catalog_ref": null,
       "quantity_per_sample": 1,
-      "workflow": "pcr_testing"
+      "workflow": "pcr_testing",
+      "unit_cost_usd": 384
     },
     {
       "name": "Primers for preamplification (500 rxns)",
@@ -1296,7 +1311,8 @@
       "pack_size": 500,
       "catalog_ref": null,
       "quantity_per_sample": 1,
-      "workflow": null
+      "workflow": null,
+      "unit_cost_usd": 211
     },
     {
       "name": "Fluorometer assay tubes (500)",
@@ -1304,7 +1320,8 @@
       "pack_size": 500,
       "catalog_ref": null,
       "quantity_per_sample": 1,
-      "workflow": null
+      "workflow": null,
+      "unit_cost_usd": 82
     },
     {
       "name": "Gel sizing DNA ladder",
@@ -1336,7 +1353,8 @@
       "pack_size": 50,
       "catalog_ref": null,
       "quantity_per_sample": null,
-      "workflow": null
+      "workflow": null,
+      "unit_cost_usd": 141
     },
     {
       "name": "NaOH, 1N 100mL",
@@ -1344,7 +1362,8 @@
       "pack_size": null,
       "catalog_ref": null,
       "quantity_per_sample": null,
-      "workflow": null
+      "workflow": null,
+      "unit_cost_usd": 133
     },
     {
       "name": "Bleach, lab grade (4-6%, 1L)",
@@ -1352,7 +1371,8 @@
       "pack_size": null,
       "catalog_ref": null,
       "quantity_per_sample": null,
-      "workflow": "general_lab"
+      "workflow": "general_lab",
+      "unit_cost_usd": 137
     },
     {
       "name": "Tween 20, 500 mL",
@@ -1360,7 +1380,8 @@
       "pack_size": 500,
       "catalog_ref": null,
       "quantity_per_sample": 0.125,
-      "workflow": null
+      "workflow": null,
+      "unit_cost_usd": 50
     },
     {
       "name": "Ethanol, 99% lab grade, 1L",
@@ -1372,7 +1393,8 @@
       "workflows": [
         "nucleic_acid_extraction",
         "ngs_library_preparation"
-      ]
+      ],
+      "unit_cost_usd": 223
     },
     {
       "name": "(Molecular grade) nuclease free H2O",
@@ -1386,7 +1408,8 @@
         "pcr_testing",
         "ngs_library_preparation",
         "sequencing"
-      ]
+      ],
+      "unit_cost_usd": 124
     },
     {
       "name": "Universal One-Step RT-qPCR Kit (200 rxns)",
@@ -1394,7 +1417,8 @@
       "pack_size": 200,
       "catalog_ref": "E3005S",
       "quantity_per_sample": null,
-      "workflow": "pcr_testing"
+      "workflow": "pcr_testing",
+      "unit_cost_usd": 345
     },
     {
       "name": "Q5 Hot Start HiFi DNA Polymerase (500 units)",
@@ -1402,7 +1426,8 @@
       "pack_size": 500,
       "catalog_ref": "M0493L",
       "quantity_per_sample": null,
-      "workflow": "pcr_testing"
+      "workflow": "pcr_testing",
+      "unit_cost_usd": 600
     },
     {
       "name": "10mM dNTP (5x1mL)",
@@ -1410,7 +1435,8 @@
       "pack_size": 3333,
       "catalog_ref": "18427089",
       "quantity_per_sample": null,
-      "workflow": "pcr_testing"
+      "workflow": "pcr_testing",
+      "unit_cost_usd": 1040
     },
     {
       "name": "dS DNA HS assay kit for fluoremeter (500)",
@@ -1418,7 +1444,8 @@
       "pack_size": 500,
       "catalog_ref": "Qubit Q32854",
       "quantity_per_sample": null,
-      "workflow": null
+      "workflow": null,
+      "unit_cost_usd": 193
     },
     {
       "name": "High sensitivity DNA assay kit for bioanalyser (110 samples)",
@@ -1426,7 +1453,8 @@
       "pack_size": 110,
       "catalog_ref": "Agilent 5067-4626",
       "quantity_per_sample": null,
-      "workflow": null
+      "workflow": null,
+      "unit_cost_usd": 824
     },
     {
       "name": "ONT Flow cell wash kit",
@@ -1756,7 +1784,7 @@
       "comment": "quantities are based on based on annual throughput ranges from GCT v1"
     },
     {
-      "name": "Magnetic rack (for 12 1.5\u20132.0 mL tubes)",
+      "name": "Magnetic rack (for 12 1.5–2.0 mL tubes)",
       "category": "lab_equipment",
       "workflow_step": null,
       "workflow_steps": [
@@ -1963,7 +1991,7 @@
       "comment": "quantities are based on based on annual throughput ranges from GCT v1"
     },
     {
-      "name": "Single channel pipette 100\u20131000\u03bcL",
+      "name": "Single channel pipette 100–1000μL",
       "category": "lab_equipment",
       "workflow_step": null,
       "workflow_steps": [
@@ -1977,7 +2005,7 @@
       "comment": "quantities are based on based on annual throughput ranges from GCT v1"
     },
     {
-      "name": "Single channel pipette 20\u2013200\u03bcL",
+      "name": "Single channel pipette 20–200μL",
       "category": "lab_equipment",
       "workflow_step": null,
       "workflow_steps": [
@@ -1991,7 +2019,7 @@
       "comment": "quantities are based on based on annual throughput ranges from GCT v1"
     },
     {
-      "name": "Single channel pipette 2\u201320\u03bcL",
+      "name": "Single channel pipette 2–20μL",
       "category": "lab_equipment",
       "workflow_step": null,
       "workflow_steps": [
@@ -2005,7 +2033,7 @@
       "comment": "quantities are based on based on annual throughput ranges from GCT v1"
     },
     {
-      "name": "Single channel pipette 0.2\u20132\u03bcL",
+      "name": "Single channel pipette 0.2–2μL",
       "category": "lab_equipment",
       "workflow_step": null,
       "workflow_steps": [
@@ -2017,7 +2045,7 @@
       "comment": "quantities are based on based on annual throughput ranges from GCT v1"
     },
     {
-      "name": "8-channel multichannel pipettes 10\u2013100\u03bcL",
+      "name": "8-channel multichannel pipettes 10–100μL",
       "category": "lab_equipment",
       "workflow_step": null,
       "workflow_steps": [
@@ -2180,7 +2208,7 @@
       "comment": "quantities are based on based on annual throughput ranges from GCT v1"
     },
     {
-      "name": "Liquid handler \u2013 library preparation",
+      "name": "Liquid handler – library preparation",
       "category": "lab_equipment",
       "workflow_step": null,
       "workflow_steps": [
@@ -2250,7 +2278,7 @@
       },
       {
         "name": "External HDD for storage",
-        "description": "External HDD \u2013 1TB for storage",
+        "description": "External HDD – 1TB for storage",
         "pricing_model": "variable"
       },
       {
@@ -2297,7 +2325,7 @@
         "description": null
       },
       {
-        "name": "HPE NS204i-p x2 Lanes NVMe PCIe3 x8 OS Boot Device (boot drives \u2013 solid state storage)",
+        "name": "HPE NS204i-p x2 Lanes NVMe PCIe3 x8 OS Boot Device (boot drives – solid state storage)",
         "description": null
       },
       {
@@ -2362,13 +2390,13 @@
       "comment": null
     },
     {
-      "activity": "External quality assessment \u2013 PCR",
+      "activity": "External quality assessment – PCR",
       "default_cost_usd": 900,
       "default_quantity": 1,
       "comment": null
     },
     {
-      "activity": "External quality assessment \u2013 NGS",
+      "activity": "External quality assessment – NGS",
       "default_cost_usd": 2300,
       "default_quantity": 1,
       "comment": "Quarterly distribution, including logistics"

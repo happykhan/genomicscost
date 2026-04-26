@@ -421,6 +421,7 @@ export default function Step4() {
                     <input
                       type="text"
                       value={item.name}
+                      title={item.name}
                       list={`equip-names-${item.idx}`}
                       onChange={e => handleEquipmentNameChange(item.idx, e.target.value)}
                       className={inputClass}
