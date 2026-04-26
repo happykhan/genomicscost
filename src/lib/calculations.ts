@@ -206,7 +206,7 @@ export function calculateCosts(project: Project): CostBreakdown {
   const zero: CostBreakdown = {
     sequencingReagents: 0, libraryPrep: 0, consumables: 0,
     equipment: 0, incidentals: 0, establishmentCost: 0, personnel: 0,
-    facility: 0, transport: 0, bioinformatics: 0, qms: 0, training: 0,
+    facility: 0, transport: 0, bioinformatics: 0, bioinformaticsCloud: 0, bioinformaticsInhouse: 0, qms: 0, training: 0,
     adminCost: 0,
     total: 0, costPerSample: 0,
     workflowBreakdown: Object.fromEntries(WORKFLOW_STEPS.map(s => [s, 0])),
@@ -336,10 +336,11 @@ export function calculateCosts(project: Project): CostBreakdown {
   }, 0)
 
   // Bioinformatics: use new cloudItems/inhouseItems structure
-  let annualBioinformatics = 0
+  let annualBioCloud = 0
+  let annualBioInhouse = 0
   if (bioinformatics.type === 'cloud' || bioinformatics.type === 'hybrid') {
     if (Array.isArray(bioinformatics.cloudItems)) {
-      annualBioinformatics += bioinformatics.cloudItems
+      annualBioCloud = bioinformatics.cloudItems
         .filter(item => item.enabled)
         .reduce((sum, item) => {
           const totalSamplesAll = Math.max(1, item.totalSamplesAllPathogens || effectiveSamplesForScaling)
@@ -347,12 +348,12 @@ export function calculateCosts(project: Project): CostBreakdown {
         }, 0)
     } else if (bioinformatics.costPerSampleUsd) {
       // Legacy fallback
-      annualBioinformatics += effectiveSamplesForScaling * (bioinformatics.costPerSampleUsd ?? 0)
+      annualBioCloud = effectiveSamplesForScaling * (bioinformatics.costPerSampleUsd ?? 0)
     }
   }
   if (bioinformatics.type === 'inhouse' || bioinformatics.type === 'hybrid') {
     if (Array.isArray(bioinformatics.inhouseItems)) {
-      annualBioinformatics += bioinformatics.inhouseItems
+      annualBioInhouse = bioinformatics.inhouseItems
         .filter(item => item.enabled)
         .reduce((sum, item) => {
           const remainingLife = Math.max(1, (item.lifespanYears ?? 1) - (item.ageYears ?? 0))
@@ -360,9 +361,10 @@ export function calculateCosts(project: Project): CostBreakdown {
         }, 0)
     } else if (bioinformatics.annualServerCostUsd) {
       // Legacy fallback
-      annualBioinformatics += bioinformatics.annualServerCostUsd ?? 0
+      annualBioInhouse = bioinformatics.annualServerCostUsd ?? 0
     }
   }
+  const annualBioinformatics = annualBioCloud + annualBioInhouse
 
   // QMS: cost × quantity × pctSequencing (% attributed to this sequencing programme)
   const annualQMS = qms
@@ -500,6 +502,8 @@ export function calculateCosts(project: Project): CostBreakdown {
     facility: annualFacility,
     transport: annualTransport,
     bioinformatics: annualBioinformatics,
+    bioinformaticsCloud: annualBioCloud,
+    bioinformaticsInhouse: annualBioInhouse,
     qms: annualQMS,
     training: annualTraining,
     adminCost,

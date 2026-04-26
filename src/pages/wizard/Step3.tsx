@@ -1,4 +1,4 @@
-import { useState, useId, useMemo } from 'react'
+import { useState, useId, useMemo, useEffect } from 'react'
 import { useProject } from '../../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
 import { getEffectiveCatalogue } from '../../lib/catalogue'
@@ -52,6 +52,9 @@ function ConsumableNameInput({ value, allNames, onChange, placeholder }: {
   const [query, setQuery] = useState(value)
   const id = useId()
 
+  // Keep local query in sync if parent value changes externally
+  useEffect(() => { setQuery(value) }, [value])
+
   const filtered = query.length >= 2
     ? allNames.filter(n => n.toLowerCase().includes(query.toLowerCase())).slice(0, 50)
     : []
@@ -64,8 +67,14 @@ function ConsumableNameInput({ value, allNames, onChange, placeholder }: {
         value={query}
         placeholder={placeholder ?? 'Type to search catalogue…'}
         onChange={e => {
-          setQuery(e.target.value)
-          onChange(e.target.value)
+          const v = e.target.value
+          setQuery(v)
+          // Propagate immediately only on exact catalogue match (datalist pick)
+          if (allNames.includes(v)) onChange(v)
+        }}
+        onBlur={e => {
+          // Propagate final value when user leaves the field
+          if (e.target.value !== value) onChange(e.target.value)
         }}
         className={inputClass}
         style={{ width: '100%', minWidth: 120 }}

@@ -16,9 +16,12 @@ export default function CostSummary() {
     { label: t('label_training'), value: costs.training },
     { label: t('label_facility'), value: costs.facility },
     { label: t('label_transport'), value: costs.transport },
-    { label: t('label_bioinformatics'), value: costs.bioinformatics },
     { label: t('label_qms'), value: costs.qms },
   ].filter(r => r.value > 0)
+
+  const showBioCloud = costs.bioinformaticsCloud > 0
+  const showBioInhouse = costs.bioinformaticsInhouse > 0
+  const showBio = costs.bioinformatics > 0
 
   return (
     <div className="flex flex-col gap-3">
@@ -41,6 +44,38 @@ export default function CostSummary() {
             <span className="font-medium">${fmt(row.value)}</span>
           </div>
         ))}
+        {showBio && (
+          <>
+            <div className="flex justify-between items-center text-sm py-1" style={{ borderBottom: showBioCloud && showBioInhouse ? 'none' : '1px solid var(--gx-border)' }}>
+              <span style={{ color: 'var(--gx-text-muted)' }}>{t('label_bioinformatics')}</span>
+              <span className="font-medium">${fmt(costs.bioinformatics)}</span>
+            </div>
+            {showBioCloud && showBioInhouse && (
+              <>
+                <div className="flex justify-between items-center text-xs py-0.5 pl-3" style={{ color: 'var(--gx-text-muted)' }}>
+                  <span>Cloud (operational)</span>
+                  <span>${fmt(costs.bioinformaticsCloud)}</span>
+                </div>
+                <div className="flex justify-between items-center text-xs py-0.5 pl-3" style={{ borderBottom: '1px solid var(--gx-border)', color: 'var(--gx-text-muted)' }}>
+                  <span>In-house (depreciation)</span>
+                  <span>${fmt(costs.bioinformaticsInhouse)}</span>
+                </div>
+              </>
+            )}
+            {!showBioCloud && showBioInhouse && (
+              <div className="flex justify-between items-center text-xs py-0.5 pl-3" style={{ borderBottom: '1px solid var(--gx-border)', color: 'var(--gx-text-muted)', fontStyle: 'italic' }}>
+                <span>Annual depreciation of hardware</span>
+                <span>${fmt(costs.bioinformaticsInhouse)}</span>
+              </div>
+            )}
+            {showBioCloud && !showBioInhouse && (
+              <div className="flex justify-between items-center text-xs py-0.5 pl-3" style={{ borderBottom: '1px solid var(--gx-border)', color: 'var(--gx-text-muted)', fontStyle: 'italic' }}>
+                <span>Cloud operational cost</span>
+                <span>${fmt(costs.bioinformaticsCloud)}</span>
+              </div>
+            )}
+          </>
+        )}
         <div className="flex justify-between items-center text-sm pt-2 font-semibold">
           <span>{t('label_total_annual')}</span>
           <span>${fmt(costs.total)}</span>

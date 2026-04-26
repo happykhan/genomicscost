@@ -272,6 +272,8 @@ export interface CostBreakdown {
   facility: number
   transport: number
   bioinformatics: number
+  bioinformaticsCloud: number
+  bioinformaticsInhouse: number
   qms: number
   training: number
   adminCost: number       // admin overhead % applied to personnel + training
