@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { WORKFLOW_STEPS, WORKFLOW_STEP_LABELS } from '../../lib/calculations'
-import LZString from 'lz-string'
 import PriceEditor from '../../components/PriceEditor'
 import { fmt, fmtCurrency } from '../../lib/format'
 import { downloadCSV } from '../../lib/download'
@@ -405,16 +404,6 @@ export default function Step8() {
     XLSX.writeFile(wb, `${project.name || 'genomics-cost'}-results.xlsx`)
   }
 
-  function handleShare() {
-    try {
-      const encoded = LZString.compressToEncodedURIComponent(JSON.stringify(project))
-      const url = `${window.location.origin}/#share=${encoded}`
-      navigator.clipboard.writeText(url)
-      toast.success(t('toast_link_copied'))
-    } catch {
-      toast.error(t('error_copy_link'))
-    }
-  }
 
   function handleDownloadProject() {
     const filename = `${(project.name || 'genomics-cost').replace(/\s+/g, '-')}-project.json`
@@ -1259,13 +1248,7 @@ export default function Step8() {
         >
           {t('btn_export_excel')}
         </button>
-        <button
-          onClick={handleShare}
-          className="px-5 py-2 rounded text-sm font-medium"
-          style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer' }}
-        >
-          {t('btn_share')}
-        </button>
+
         <button
           onClick={handleDownloadProject}
           className="px-5 py-2 rounded text-sm font-medium"
