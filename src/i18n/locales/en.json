@@ -394,6 +394,9 @@
 
   "toast_project_loaded": "Loaded \"{{name}}\"",
   "toast_project_load_error": "Could not read file — make sure it is a valid project .json",
+  "btn_import_excel": "Import WHO Excel file",
+  "toast_excel_imported": "Imported {{count}} fields from Excel file",
+  "toast_excel_import_error": "Could not read Excel file — make sure it is a valid WHO GCT .xlsx",
   "label_equip_depreciation_note": "depreciation + {{pct}}% maintenance",
   "label_cloud_operational": "Cloud (operational)",
   "label_inhouse_depreciation": "In-house (annual depreciation)",

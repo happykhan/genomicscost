@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useProject } from '../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
+import { parseGctWorkbook } from '../utils/importGct'
 
 export default function Home() {
   const navigate = useNavigate()
@@ -23,6 +24,26 @@ export default function Home() {
       }
     }
     reader.readAsText(file)
+    e.target.value = ''
+  }
+
+  async function handleImportExcel(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    try {
+      const XLSX = await import('xlsx')
+      const data = await file.arrayBuffer()
+      const wb = XLSX.read(data, { type: 'array' })
+      const imported = parseGctWorkbook(wb)
+      const fieldCount = (imported as Record<string, unknown>)._importedFieldCount ?? 0
+      delete (imported as Record<string, unknown>)._importedFieldCount
+      loadProjectFromData(imported)
+      toast.success(t('toast_excel_imported', { count: fieldCount }))
+      navigate('/wizard/1')
+    } catch (err) {
+      console.error('Excel import failed:', err)
+      toast.error(t('toast_excel_import_error'))
+    }
     e.target.value = ''
   }
 
@@ -74,6 +95,13 @@ export default function Home() {
           >
             {t('btn_load_project')}
             <input type="file" accept=".json" onChange={handleLoadFile} style={{ display: 'none' }} />
+          </label>
+          <label
+            className="px-8 py-3 rounded-lg text-base font-semibold"
+            style={{ background: 'var(--gx-bg-alt)', color: 'var(--gx-text)', border: '1px solid var(--gx-border)', cursor: 'pointer', display: 'inline-block' }}
+          >
+            {t('btn_import_excel')}
+            <input type="file" accept=".xlsx" onChange={handleImportExcel} style={{ display: 'none' }} />
           </label>
         </div>
       </div>

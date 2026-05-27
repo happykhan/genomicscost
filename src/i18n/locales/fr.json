@@ -395,6 +395,9 @@
 
   "toast_project_loaded": "Chargé « {{name}} »",
   "toast_project_load_error": "Impossible de lire le fichier — assurez-vous qu'il s'agit d'un .json de projet valide",
+  "btn_import_excel": "Importer un fichier Excel OMS",
+  "toast_excel_imported": "{{count}} champs importés depuis le fichier Excel",
+  "toast_excel_import_error": "Impossible de lire le fichier Excel — assurez-vous qu'il s'agit d'un .xlsx OMS GCT valide",
   "label_equip_depreciation_note": "amortissement + {{pct}}% maintenance",
   "label_cloud_operational": "Cloud (opérationnel)",
   "label_inhouse_depreciation": "Interne (amortissement annuel)",
