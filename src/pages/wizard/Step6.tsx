@@ -139,16 +139,16 @@ export default function Step6() {
                           <input type="text" value={item.description} onChange={e => updateCloudItem(idx, { description: e.target.value })} className={inputClass} style={{ width: '100%', minWidth: 120 }} />
                         </td>
                         <td className="px-3 py-2">
-                          <input type="number" value={item.pricePerUnit} min={0} step={0.01} onChange={e => updateCloudItem(idx, { pricePerUnit: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 90, textAlign: 'right' }} />
+                          <input type="number" onFocus={e => e.target.select()} value={item.pricePerUnit} min={0} step={0.01} onChange={e => updateCloudItem(idx, { pricePerUnit: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 90, textAlign: 'right' }} />
                         </td>
                         <td className="px-3 py-2">
-                          <input type="number" value={item.quantity} min={0} onChange={e => updateCloudItem(idx, { quantity: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 60, textAlign: 'center' }} />
+                          <input type="number" onFocus={e => e.target.select()} value={item.quantity} min={0} onChange={e => updateCloudItem(idx, { quantity: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 60, textAlign: 'center' }} />
                         </td>
                         <td className="px-3 py-2">
-                          <input type="number" value={item.samplesThisScenario} min={0} onChange={e => updateCloudItem(idx, { samplesThisScenario: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 80, textAlign: 'right' }} />
+                          <input type="number" onFocus={e => e.target.select()} value={item.samplesThisScenario} min={0} onChange={e => updateCloudItem(idx, { samplesThisScenario: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 80, textAlign: 'right' }} />
                         </td>
                         <td className="px-3 py-2">
-                          <input type="number" value={item.totalSamplesAllPathogens} min={0} onChange={e => updateCloudItem(idx, { totalSamplesAllPathogens: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 80, textAlign: 'right' }} />
+                          <input type="number" onFocus={e => e.target.select()} value={item.totalSamplesAllPathogens} min={0} onChange={e => updateCloudItem(idx, { totalSamplesAllPathogens: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 80, textAlign: 'right' }} />
                         </td>
                         <td className="px-3 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>
                           ${fmt(annualCost)}
@@ -207,19 +207,19 @@ export default function Step6() {
                           <input type="text" value={item.description} title={item.description} onChange={e => updateInhouseItem(idx, { description: e.target.value })} className={inputClass} style={{ width: '100%', minWidth: 120 }} />
                         </td>
                         <td className="px-3 py-2">
-                          <input type="number" value={item.pricePerUnit} min={0} step={0.01} onChange={e => updateInhouseItem(idx, { pricePerUnit: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 90, textAlign: 'right' }} />
+                          <input type="number" onFocus={e => e.target.select()} value={item.pricePerUnit} min={0} step={0.01} onChange={e => updateInhouseItem(idx, { pricePerUnit: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 90, textAlign: 'right' }} />
                         </td>
                         <td className="px-3 py-2">
-                          <input type="number" value={item.quantity} min={0} onChange={e => updateInhouseItem(idx, { quantity: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 60, textAlign: 'center' }} />
+                          <input type="number" onFocus={e => e.target.select()} value={item.quantity} min={0} onChange={e => updateInhouseItem(idx, { quantity: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 60, textAlign: 'center' }} />
                         </td>
                         <td className="px-3 py-2">
-                          <input type="number" value={item.pctUse} min={0} max={100} onChange={e => updateInhouseItem(idx, { pctUse: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 60, textAlign: 'right' }} />
+                          <input type="number" onFocus={e => e.target.select()} value={item.pctUse} min={0} max={100} onChange={e => updateInhouseItem(idx, { pctUse: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 60, textAlign: 'right' }} />
                         </td>
                         <td className="px-3 py-2">
-                          <input type="number" value={item.lifespanYears} min={1} max={30} onChange={e => updateInhouseItem(idx, { lifespanYears: (v => isNaN(v) ? 1 : v)(parseInt(e.target.value)) })} className={inputClass} style={{ width: 60, textAlign: 'center' }} />
+                          <input type="number" onFocus={e => e.target.select()} value={item.lifespanYears} min={1} max={30} onChange={e => updateInhouseItem(idx, { lifespanYears: (v => isNaN(v) ? 1 : v)(parseInt(e.target.value)) })} className={inputClass} style={{ width: 60, textAlign: 'center' }} />
                         </td>
                         <td className="px-3 py-2">
-                          <input type="number" value={item.ageYears} min={0} max={Math.max(0, (item.lifespanYears ?? 1) - 1)} onChange={e => updateInhouseItem(idx, { ageYears: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 60, textAlign: 'center' }} />
+                          <input type="number" onFocus={e => e.target.select()} value={item.ageYears} min={0} max={Math.max(0, (item.lifespanYears ?? 1) - 1)} onChange={e => updateInhouseItem(idx, { ageYears: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 60, textAlign: 'center' }} />
                         </td>
                         <td className="px-3 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>
                           ${fmt(annualCost)}

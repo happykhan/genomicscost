@@ -65,7 +65,7 @@ export default function Step5() {
                 <div style={{ width: 140 }}>
                   <label className={labelClass}>{t('col_salary')}<Tooltip content={t('tooltip_annual_salary')} /></label>
                   <input
-                    type="number"
+                    type="number" onFocus={e => e.target.select()}
                     value={person.annualSalaryUsd}
                     min={0}
                     onChange={e => updatePerson(idx, { annualSalaryUsd: parseInt(e.target.value) || 0 })}
@@ -132,7 +132,7 @@ export default function Step5() {
           <div style={{ width: 200 }}>
             <label className={labelClass}>Annual training cost (USD)<Tooltip content="Total annual training budget for the entire sequencing team. Covers wet-lab and bioinformatics training." /></label>
             <input
-              type="number"
+              type="number" onFocus={e => e.target.select()}
               value={project.trainingGroupCostUsd ?? 5000}
               min={0}
               onChange={e => updateProject({ trainingGroupCostUsd: parseInt(e.target.value) || 0 })}
@@ -143,7 +143,7 @@ export default function Step5() {
           <div style={{ width: 180 }}>
             <label className={labelClass}>Additional admin cost %<Tooltip content="Administrative overhead percentage applied to the combined personnel and training cost. E.g. 10% adds 10% of (salaries + training) as an admin line item." /></label>
             <input
-              type="number"
+              type="number" onFocus={e => e.target.select()}
               value={project.adminCostPct ?? 0}
               min={0}
               max={50}

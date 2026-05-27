@@ -325,8 +325,10 @@
   "catalogue_add_title": "Ajouter un élément personnalisé",
 
   "label_section_a_seq_reagents": "A. Réactifs de séquençage et préparation de bibliothèque",
-  "label_section_b_reagents": "B. Réactifs et consommables",
-  "label_section_c_per_sample": "C. Utilisation de réactifs par échantillon (calculé à partir de la configuration de séquençage)",
+  "label_section_b_reagents": "B. Réactifs et consommables annuels fixes",
+  "label_section_b_desc": "Articles achetés en quantités annuelles fixes, indépendamment du volume d'échantillons (ex. standards de calibration, contrats de service annuels, EPI en vrac). Saisissez la quantité totale nécessaire par an.",
+  "label_section_c_per_sample": "C. Consommables supplémentaires par échantillon",
+  "label_section_c_desc": "Articles consommés proportionnellement au volume d'échantillons (ex. embouts, tubes, réactifs d'extraction utilisés par échantillon). Saisissez la quantité par échantillon et le coût unitaire. Le coût annuel est calculé automatiquement à partir de votre nombre total d'échantillons. Les réactifs de séquençage et kits de préparation de bibliothèques sont déjà comptabilisés dans la Section A ci-dessus.",
   "col_type": "Type",
   "col_qty_yr": "Qté/an",
   "col_cost_per_wf_step": "Coût/étape de travail",

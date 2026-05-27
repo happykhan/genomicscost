@@ -400,7 +400,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
               </div>
               <div>
                 <label className={labelClass}>{t('label_max_flowcell_output')}</label>
-                <input type="number" min={0} className={inputClass}
+                <input type="number" onFocus={e => e.target.select()} min={0} className={inputClass}
                   value={sequencer.customKitMaxOutputMb != null ? Math.round(sequencer.customKitMaxOutputMb * 1e6) : ''}
                   placeholder={t('placeholder_max_output_bytes')}
                   onChange={e => { const bytes = parseFloat(e.target.value); updateSequencer(index, { customKitMaxOutputMb: isNaN(bytes) ? undefined : bytes / 1e6 }) }}
@@ -411,7 +411,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
               </div>
               <div>
                 <label className={labelClass}>{t('label_read_length_bp')}</label>
-                <input type="number" min={0} className={inputClass}
+                <input type="number" onFocus={e => e.target.select()} min={0} className={inputClass}
                   value={sequencer.customKitReadLengthBp ?? ''}
                   placeholder={t('placeholder_read_length')}
                   onChange={e => { const v = parseInt(e.target.value); updateSequencer(index, { customKitReadLengthBp: isNaN(v) ? undefined : v }) }}
@@ -419,7 +419,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
               </div>
               <div>
                 <label className={labelClass}>{t('label_kit_packs_per_run')}</label>
-                <input type="number" min={0} step={0.1} className={inputClass}
+                <input type="number" onFocus={e => e.target.select()} min={0} step={0.1} className={inputClass}
                   value={sequencer.customKitPacksPerRun ?? ''}
                   placeholder={t('placeholder_kit_packs')}
                   onChange={e => { const v = parseFloat(e.target.value); updateSequencer(index, { customKitPacksPerRun: isNaN(v) ? undefined : v }) }}
@@ -435,7 +435,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
           <div>
             <label className={labelClass}>{t('field_kit_price')}</label>
             <input
-              type="number"
+              type="number" onFocus={e => e.target.select()}
               className={inputClass}
               value={sequencer.reagentKitPrice}
               min={0}
@@ -458,7 +458,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
           <div>
             <label className={labelClass}>{t('field_min_reads')}<Tooltip content={t('tooltip_min_reads')} /></label>
             <input
-              type="number"
+              type="number" onFocus={e => e.target.select()}
               className={inputClass}
               value={sequencer.minReadsPerSample ?? 100_000}
               min={1000}
@@ -479,7 +479,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
                 )}
               </label>
               <input
-                type="number"
+                type="number" onFocus={e => e.target.select()}
                 className={inputClass}
                 value={coverageXText}
                 min={1}
@@ -602,7 +602,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
                 </div>
                 <div className="text-right">
                   <input
-                    type="number"
+                    type="number" onFocus={e => e.target.select()}
                     min={1}
                     max={maxSPR}
                     value={storedAvg ?? ''}
@@ -679,7 +679,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
           <div>
             <label className={labelClass}>{t('field_controls_per_run')}<Tooltip content={t('tooltip_controls_per_run')} /></label>
             <input
-              type="number"
+              type="number" onFocus={e => e.target.select()}
               className={inputClass}
               value={sequencer.controlsPerRun ?? 2}
               min={0}
@@ -730,7 +730,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
               </div>
               <div>
                 <label className={labelClass}>{t('label_max_barcodes')}</label>
-                <input type="number" min={1} className={inputClass}
+                <input type="number" onFocus={e => e.target.select()} min={1} className={inputClass}
                   value={sequencer.customLibPrepMaxBarcodes ?? ''}
                   placeholder={t('placeholder_barcodes_total')}
                   onChange={e => { const v = parseInt(e.target.value); updateSequencer(index, { customLibPrepMaxBarcodes: isNaN(v) ? undefined : v }) }}
@@ -739,7 +739,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
               </div>
               <div>
                 <label className={labelClass}>{t('label_barcodes_per_pack')}</label>
-                <input type="number" min={1} className={inputClass}
+                <input type="number" onFocus={e => e.target.select()} min={1} className={inputClass}
                   value={sequencer.customLibPrepBarcodesPerPack ?? ''}
                   placeholder={t('placeholder_barcodes_per_pack')}
                   onChange={e => { const v = parseInt(e.target.value); updateSequencer(index, { customLibPrepBarcodesPerPack: isNaN(v) ? undefined : v }) }}
@@ -761,7 +761,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
               <div>
                 <label className={labelClass}>{t('label_lib_prep_kit_price')}</label>
                 <input
-                  type="number"
+                  type="number" onFocus={e => e.target.select()}
                   className={inputClass}
                   value={packSize > 0 ? parseFloat(kitPrice.toFixed(2)) : ''}
                   min={0}
@@ -778,7 +778,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
               <div>
                 <label className={labelClass}>{t('field_lib_prep_cost')}</label>
                 <input
-                  type="number"
+                  type="number" onFocus={e => e.target.select()}
                   className={inputClass}
                   value={sequencer.libPrepCostPerSample}
                   min={0}
@@ -975,7 +975,7 @@ function AssignmentMatrix({ pathogens, sequencers, onUpdate }: AssignmentMatrixP
                   {enabledSeqs.map(({ idx }) => (
                     <td key={idx} className="px-2 py-2 text-center">
                       <input
-                        type="number"
+                        type="number" onFocus={e => e.target.select()}
                         min={0}
                         value={getAssignedSamples(sequencers, idx, pi)}
                         onChange={e => handleCellChange(idx, pi, e.target.value)}

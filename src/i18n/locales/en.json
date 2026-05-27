@@ -324,8 +324,10 @@
   "label_bio_total": "Total bioinformatics",
 
   "label_section_a_seq_reagents": "A. Sequencing & Library Prep Reagents",
-  "label_section_b_reagents": "B. Reagents & Consumables",
-  "label_section_c_per_sample": "C. Per-Sample Reagent Usage (calculated from sequencing setup)",
+  "label_section_b_reagents": "B. Fixed Annual Reagents & Consumables",
+  "label_section_b_desc": "Items purchased in fixed annual quantities regardless of sample volume (e.g. calibration standards, annual service contracts, bulk PPE). Enter the total quantity needed per year.",
+  "label_section_c_per_sample": "C. Additional Per-Sample Consumables",
+  "label_section_c_desc": "Items consumed in proportion to sample volume (e.g. tips, tubes, extraction reagents used per sample). Enter the quantity per sample and the unit cost. Annual cost is calculated automatically from your total sample count. Sequencing reagents and library prep kits are already accounted for in Section A above.",
   "col_type": "Type",
   "col_qty_yr": "Qty/yr",
   "col_cost_per_wf_step": "Cost/workflow step",

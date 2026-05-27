@@ -77,7 +77,7 @@ export default function Step7() {
             </span>
           </label>
           <input
-            type="number"
+            type="number" onFocus={e => e.target.select()}
             value={project.facilityPctSequencing ?? 100}
             min={0}
             max={100}
@@ -115,7 +115,7 @@ export default function Step7() {
                     <input type="text" value={f.label} onChange={e => updateFacilityRow(idx, { label: e.target.value })} className={inputClass} style={{ width: '100%' }} />
                   </td>
                   <td className="px-3 py-2 text-right">
-                    <input type="number" value={f.monthlyCostUsd} min={0} onChange={e => updateFacilityRow(idx, { monthlyCostUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: '100%', textAlign: 'right' }} />
+                    <input type="number" onFocus={e => e.target.select()} value={f.monthlyCostUsd} min={0} onChange={e => updateFacilityRow(idx, { monthlyCostUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: '100%', textAlign: 'right' }} />
                   </td>
                   <td className="px-3 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>
                     ${fmt(f.monthlyCostUsd * 12 * facilityPct)}
@@ -181,10 +181,10 @@ export default function Step7() {
                       <input type="text" value={tr.shipmentMethod ?? ''} placeholder="e.g. Courier" onChange={e => updateTransportRow(idx, { shipmentMethod: e.target.value })} className={inputClass} style={{ width: 110 }} />
                     </td>
                     <td className="px-3 py-2">
-                      <input type="number" value={tr.annualCostUsd} min={0} onChange={e => updateTransportRow(idx, { annualCostUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 110, textAlign: 'right' }} />
+                      <input type="number" onFocus={e => e.target.select()} value={tr.annualCostUsd} min={0} onChange={e => updateTransportRow(idx, { annualCostUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 110, textAlign: 'right' }} />
                     </td>
                     <td className="px-3 py-2">
-                      <input type="number" value={tr.pctSequencing ?? 100} min={0} max={100} onChange={e => updateTransportRow(idx, { pctSequencing: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 70, textAlign: 'right' }} />
+                      <input type="number" onFocus={e => e.target.select()} value={tr.pctSequencing ?? 100} min={0} max={100} onChange={e => updateTransportRow(idx, { pctSequencing: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 70, textAlign: 'right' }} />
                     </td>
                     <td className="px-3 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>
                       ${fmt(costPerSample)}
@@ -284,13 +284,13 @@ export default function Step7() {
                         <input type="text" value={q.activity} onChange={e => updateQMS(idx, { activity: e.target.value })} className={inputClass} style={{ width: '100%' }} />
                       </td>
                       <td className="px-3 py-2">
-                        <input type="number" value={q.costUsd} min={0} onChange={e => updateQMS(idx, { costUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: '100%', textAlign: 'right' }} />
+                        <input type="number" onFocus={e => e.target.select()} value={q.costUsd} min={0} onChange={e => updateQMS(idx, { costUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: '100%', textAlign: 'right' }} />
                       </td>
                       <td className="px-3 py-2">
-                        <input type="number" value={q.quantity} min={0} onChange={e => updateQMS(idx, { quantity: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: '100%', textAlign: 'center' }} />
+                        <input type="number" onFocus={e => e.target.select()} value={q.quantity} min={0} onChange={e => updateQMS(idx, { quantity: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: '100%', textAlign: 'center' }} />
                       </td>
                       <td className="px-3 py-2">
-                        <input type="number" value={q.pctSequencing ?? 85} min={0} max={100} onChange={e => updateQMS(idx, { pctSequencing: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: '100%', textAlign: 'right' }} />
+                        <input type="number" onFocus={e => e.target.select()} value={q.pctSequencing ?? 85} min={0} max={100} onChange={e => updateQMS(idx, { pctSequencing: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: '100%', textAlign: 'right' }} />
                       </td>
                       <td className="px-3 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>
                         {q.enabled ? fmt(q.costUsd * q.quantity * (q.pctSequencing ?? 85) / 100) : '—'}

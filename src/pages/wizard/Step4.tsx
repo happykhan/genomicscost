@@ -233,18 +233,22 @@ export default function Step4() {
         style={{ opacity: item.status === 'skip' ? 0.4 : 1 }}
       >
         <div className="flex-1 min-w-36">
-          <input
-            type="text"
-            value={item.name}
-            list={`equip-names-${item.idx}`}
-            onChange={e => handleEquipmentNameChange(item.idx, e.target.value)}
+          <select
+            value={catalogueInstrumentNames.includes(item.name) ? item.name : '__custom__'}
+            onChange={e => {
+              if (e.target.value === '__custom__') return
+              handleEquipmentNameChange(item.idx, e.target.value)
+            }}
             className={inputClass}
             style={{ width: '100%', fontWeight: 500, fontSize: '0.875rem' }}
-            placeholder="Equipment name"
-          />
-          <datalist id={`equip-names-${item.idx}`}>
-            {catalogueEquipmentNames.map(n => <option key={n} value={n} />)}
-          </datalist>
+          >
+            {catalogueInstrumentNames.map(n => (
+              <option key={n} value={n}>{n}</option>
+            ))}
+            {!catalogueInstrumentNames.includes(item.name) && (
+              <option value="__custom__">{item.name}</option>
+            )}
+          </select>
           {(() => {
             const catItem = catalogue.equipment.find(c => c.name === item.name)
             const steps = catItem?.workflow_steps as string[] | undefined
@@ -300,31 +304,31 @@ export default function Step4() {
           <>
             <div className="flex items-center gap-1">
               <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_qty')}</label>
-              <input type="number" value={item.quantity} min={1}
+              <input type="number" onFocus={e => e.target.select()} value={item.quantity} min={1}
                 onChange={e => updateItem(item.idx, { quantity: (v => isNaN(v) ? 1 : v)(parseInt(e.target.value)) })}
                 className={inputClass} style={{ width: 60, textAlign: 'center' }} />
             </div>
             <div className="flex items-center gap-1">
               <label className="text-xs" style={{ color: 'var(--gx-text-muted)', display: 'flex', alignItems: 'center' }}>{t('col_price_each')}<Tooltip content={t('tooltip_unit_cost_equip')} /></label>
-              <input type="number" value={item.unitCostUsd} min={0}
+              <input type="number" onFocus={e => e.target.select()} value={item.unitCostUsd} min={0}
                 onChange={e => updateItem(item.idx, { unitCostUsd: parseFloat(e.target.value) || 0 })}
                 className={inputClass} style={{ width: 100, textAlign: 'right' }} />
             </div>
             <div className="flex items-center gap-1">
               <label className="text-xs" style={{ color: 'var(--gx-text-muted)', display: 'flex', alignItems: 'center' }}>{t('col_life_yr')}<Tooltip content={t('tooltip_life_yr')} /></label>
-              <input type="number" value={item.lifespanYears ?? 10} min={1} max={30}
+              <input type="number" onFocus={e => e.target.select()} value={item.lifespanYears ?? 10} min={1} max={30}
                 onChange={e => updateItem(item.idx, { lifespanYears: (v => isNaN(v) ? 10 : v)(parseInt(e.target.value)) })}
                 className={inputClass} style={{ width: 60, textAlign: 'center' }} />
             </div>
             <div className="flex items-center gap-1">
               <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_age_yr')}</label>
-              <input type="number" value={item.ageYears ?? 0} min={0} max={item.lifespanYears ? item.lifespanYears - 1 : 29}
+              <input type="number" onFocus={e => e.target.select()} value={item.ageYears ?? 0} min={0} max={item.lifespanYears ? item.lifespanYears - 1 : 29}
                 onChange={e => updateItem(item.idx, { ageYears: parseInt(e.target.value) || 0 })}
                 className={inputClass} style={{ width: 60, textAlign: 'center' }} />
             </div>
             <div className="flex items-center gap-1">
               <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_pct_seq')}</label>
-              <input type="number" value={item.pctSequencing ?? 100} min={0} max={100}
+              <input type="number" onFocus={e => e.target.select()} value={item.pctSequencing ?? 100} min={0} max={100}
                 onChange={e => updateItem(item.idx, { pctSequencing: parseInt(e.target.value) || 0 })}
                 className={inputClass} style={{ width: 60, textAlign: 'center' }} />
             </div>
@@ -450,23 +454,23 @@ export default function Step4() {
                   <div className="flex flex-wrap gap-2">
                     <div className="flex flex-col gap-0.5">
                       <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_qty')}</label>
-                      <input type="number" value={item.quantity} min={1} onChange={e => updateItem(item.idx, { quantity: (v => isNaN(v) ? 1 : v)(parseInt(e.target.value)) })} className={inputClass} style={{ width: 70, textAlign: 'center' }} />
+                      <input type="number" onFocus={e => e.target.select()} value={item.quantity} min={1} onChange={e => updateItem(item.idx, { quantity: (v => isNaN(v) ? 1 : v)(parseInt(e.target.value)) })} className={inputClass} style={{ width: 70, textAlign: 'center' }} />
                     </div>
                     <div className="flex flex-col gap-0.5">
                       <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_price_each')}</label>
-                      <input type="number" value={item.unitCostUsd} min={0} onChange={e => updateItem(item.idx, { unitCostUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 100, textAlign: 'right' }} />
+                      <input type="number" onFocus={e => e.target.select()} value={item.unitCostUsd} min={0} onChange={e => updateItem(item.idx, { unitCostUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 100, textAlign: 'right' }} />
                     </div>
                     <div className="flex flex-col gap-0.5">
                       <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_life_yr')}</label>
-                      <input type="number" value={item.lifespanYears ?? 10} min={1} max={30} onChange={e => updateItem(item.idx, { lifespanYears: (v => isNaN(v) ? 10 : v)(parseInt(e.target.value)) })} className={inputClass} style={{ width: 70, textAlign: 'center' }} />
+                      <input type="number" onFocus={e => e.target.select()} value={item.lifespanYears ?? 10} min={1} max={30} onChange={e => updateItem(item.idx, { lifespanYears: (v => isNaN(v) ? 10 : v)(parseInt(e.target.value)) })} className={inputClass} style={{ width: 70, textAlign: 'center' }} />
                     </div>
                     <div className="flex flex-col gap-0.5">
                       <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_age_yr')}</label>
-                      <input type="number" value={item.ageYears ?? 0} min={0} max={(item.lifespanYears ?? 10) - 1} onChange={e => updateItem(item.idx, { ageYears: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 70, textAlign: 'center' }} />
+                      <input type="number" onFocus={e => e.target.select()} value={item.ageYears ?? 0} min={0} max={(item.lifespanYears ?? 10) - 1} onChange={e => updateItem(item.idx, { ageYears: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 70, textAlign: 'center' }} />
                     </div>
                     <div className="flex flex-col gap-0.5">
                       <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_pct_seq')}</label>
-                      <input type="number" value={item.pctSequencing ?? 100} min={0} max={100} onChange={e => updateItem(item.idx, { pctSequencing: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 70, textAlign: 'center' }} />
+                      <input type="number" onFocus={e => e.target.select()} value={item.pctSequencing ?? 100} min={0} max={100} onChange={e => updateItem(item.idx, { pctSequencing: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 70, textAlign: 'center' }} />
                     </div>
                   </div>
                   <div className="text-sm font-semibold" style={{ color: 'var(--gx-accent)' }}>
@@ -544,27 +548,27 @@ export default function Step4() {
                   </td>
                   <td className="px-3 py-1.5" style={{ textAlign: 'center' }}>
                     {item.status === 'buy'
-                      ? <input type="number" value={item.quantity} min={1} onChange={e => updateItem(item.idx, { quantity: (v => isNaN(v) ? 1 : v)(parseInt(e.target.value)) })} className={inputClass} style={{ width: 55, textAlign: 'center' }} />
+                      ? <input type="number" onFocus={e => e.target.select()} value={item.quantity} min={1} onChange={e => updateItem(item.idx, { quantity: (v => isNaN(v) ? 1 : v)(parseInt(e.target.value)) })} className={inputClass} style={{ width: 55, textAlign: 'center' }} />
                       : <span style={{ color: 'var(--gx-text-muted)' }}>—</span>}
                   </td>
                   <td className="px-3 py-1.5" style={{ textAlign: 'right' }}>
                     {item.status === 'buy'
-                      ? <input type="number" value={item.unitCostUsd} min={0} onChange={e => updateItem(item.idx, { unitCostUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 90, textAlign: 'right' }} />
+                      ? <input type="number" onFocus={e => e.target.select()} value={item.unitCostUsd} min={0} onChange={e => updateItem(item.idx, { unitCostUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 90, textAlign: 'right' }} />
                       : <span style={{ color: 'var(--gx-text-muted)' }}>—</span>}
                   </td>
                   <td className="px-3 py-1.5" style={{ textAlign: 'center' }}>
                     {item.status === 'buy'
-                      ? <input type="number" value={item.lifespanYears ?? 10} min={1} max={30} onChange={e => updateItem(item.idx, { lifespanYears: (v => isNaN(v) ? 10 : v)(parseInt(e.target.value)) })} className={inputClass} style={{ width: 55, textAlign: 'center' }} />
+                      ? <input type="number" onFocus={e => e.target.select()} value={item.lifespanYears ?? 10} min={1} max={30} onChange={e => updateItem(item.idx, { lifespanYears: (v => isNaN(v) ? 10 : v)(parseInt(e.target.value)) })} className={inputClass} style={{ width: 55, textAlign: 'center' }} />
                       : <span style={{ color: 'var(--gx-text-muted)' }}>—</span>}
                   </td>
                   <td className="px-3 py-1.5" style={{ textAlign: 'center' }}>
                     {item.status === 'buy'
-                      ? <input type="number" value={item.ageYears ?? 0} min={0} max={(item.lifespanYears ?? 10) - 1} onChange={e => updateItem(item.idx, { ageYears: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 55, textAlign: 'center' }} />
+                      ? <input type="number" onFocus={e => e.target.select()} value={item.ageYears ?? 0} min={0} max={(item.lifespanYears ?? 10) - 1} onChange={e => updateItem(item.idx, { ageYears: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 55, textAlign: 'center' }} />
                       : <span style={{ color: 'var(--gx-text-muted)' }}>—</span>}
                   </td>
                   <td className="px-3 py-1.5" style={{ textAlign: 'center' }}>
                     {item.status === 'buy'
-                      ? <input type="number" value={item.pctSequencing ?? 100} min={0} max={100} onChange={e => updateItem(item.idx, { pctSequencing: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 55, textAlign: 'center' }} />
+                      ? <input type="number" onFocus={e => e.target.select()} value={item.pctSequencing ?? 100} min={0} max={100} onChange={e => updateItem(item.idx, { pctSequencing: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 55, textAlign: 'center' }} />
                       : <span style={{ color: 'var(--gx-text-muted)' }}>—</span>}
                   </td>
                   <td className="px-3 py-1.5" style={{ textAlign: 'right', color: item.status === 'buy' ? 'var(--gx-accent)' : 'var(--gx-text-muted)', whiteSpace: 'nowrap' }}>

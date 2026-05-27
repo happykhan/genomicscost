@@ -121,6 +121,7 @@ export default function Step1() {
               value={project.year}
               min={2020}
               max={2035}
+              onFocus={e => e.target.select()}
               onChange={e => updateProject({ year: (v => isNaN(v) ? 2025 : v)(parseInt(e.target.value)) })}
             />
           </div>
@@ -189,6 +190,7 @@ export default function Step1() {
                         value={entry.genomeSizeMb}
                         step={0.001}
                         min={0}
+                        onFocus={e => e.target.select()}
                         onChange={e => updatePathogenEntry(index, { genomeSizeMb: parseFloat(e.target.value) || 0 })}
                         style={{ textAlign: 'right' }}
                       />
@@ -199,6 +201,7 @@ export default function Step1() {
                         className={inputClass}
                         value={entry.samplesPerYear}
                         min={1}
+                        onFocus={e => e.target.select()}
                         onChange={e => updatePathogenEntry(index, { samplesPerYear: (v => isNaN(v) ? 1 : v)(parseInt(e.target.value)) })}
                         style={{ textAlign: 'right' }}
                       />

@@ -326,8 +326,10 @@
   "matrix_title": "Matriz de asignación de muestras",
 
   "label_section_a_seq_reagents": "A. Reactivos de secuenciación y preparación de biblioteca",
-  "label_section_b_reagents": "B. Reactivos y consumibles",
-  "label_section_c_per_sample": "C. Uso de reactivos por muestra (calculado a partir de la configuración de secuenciación)",
+  "label_section_b_reagents": "B. Reactivos y consumibles anuales fijos",
+  "label_section_b_desc": "Artículos comprados en cantidades anuales fijas independientemente del volumen de muestras (ej. estándares de calibración, contratos de servicio anuales, EPP al por mayor). Ingrese la cantidad total necesaria por año.",
+  "label_section_c_per_sample": "C. Consumibles adicionales por muestra",
+  "label_section_c_desc": "Artículos consumidos en proporción al volumen de muestras (ej. puntas, tubos, reactivos de extracción usados por muestra). Ingrese la cantidad por muestra y el costo unitario. El costo anual se calcula automáticamente a partir del recuento total de muestras. Los reactivos de secuenciación y kits de preparación de bibliotecas ya están contabilizados en la Sección A anterior.",
   "col_type": "Tipo",
   "col_qty_yr": "Cant./año",
   "col_cost_per_wf_step": "Costo/etapa de trabajo",
