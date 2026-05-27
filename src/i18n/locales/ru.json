@@ -393,6 +393,9 @@
 
   "toast_project_loaded": "Загружен «{{name}}»",
   "toast_project_load_error": "Не удалось прочитать файл — убедитесь, что это корректный .json проекта",
+  "btn_import_excel": "Импорт файла Excel ВОЗ",
+  "toast_excel_imported": "Импортировано {{count}} полей из файла Excel",
+  "toast_excel_import_error": "Не удалось прочитать файл Excel — убедитесь, что это корректный .xlsx ВОЗ GCT",
   "label_equip_depreciation_note": "амортизация + {{pct}}% обслуживание",
   "label_cloud_operational": "Облако (операционные)",
   "label_inhouse_depreciation": "Собственная инфраструктура (годовая амортизация)",

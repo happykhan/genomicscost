@@ -394,6 +394,9 @@
 
   "toast_project_loaded": "Cargado \"{{name}}\"",
   "toast_project_load_error": "No se pudo leer el archivo — asegúrese de que sea un .json de proyecto válido",
+  "btn_import_excel": "Importar archivo Excel de la OMS",
+  "toast_excel_imported": "{{count}} campos importados del archivo Excel",
+  "toast_excel_import_error": "No se pudo leer el archivo Excel — asegúrese de que sea un .xlsx OMS GCT válido",
   "label_equip_depreciation_note": "depreciación + {{pct}}% mantenimiento",
   "label_cloud_operational": "Nube (operacional)",
   "label_inhouse_depreciation": "Interno (depreciación anual)",
