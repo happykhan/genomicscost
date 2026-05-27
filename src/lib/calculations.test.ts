@@ -384,8 +384,10 @@ describe('calculateCosts', () => {
         // Thermal cycler: $5,000, lifespan 5yr, age 2yr → remaining 3yr, pct 100%
         //   depreciation = 5000/3 ≈ 1666.67; maintenance = 5000*0.15 = 750; total ≈ 2416.67
         { name: 'Thermal cycler', category: 'lab_equipment', status: 'buy' as const, quantity: 1, unitCostUsd: 5_000, lifespanYears: 5, ageYears: 2, pctSequencing: 100 },
-        // Already owned — no cost
+        // Already owned with purchase cost — contributes depreciation (Issue #4)
         { name: 'Already owned', category: 'lab_equipment', status: 'have' as const, quantity: 1, unitCostUsd: 999, lifespanYears: 5, ageYears: 0, pctSequencing: 100 },
+        // Already owned without purchase cost — no depreciation
+        { name: 'No cost item', category: 'lab_equipment', status: 'have' as const, quantity: 1, unitCostUsd: 0, lifespanYears: 5, ageYears: 0, pctSequencing: 100 },
       ],
       personnel: [],
       facility: [],
@@ -398,11 +400,13 @@ describe('calculateCosts', () => {
     const costs = calculateCosts(project)
     // iSeq: 19900/10 + 19900*0.15 = 1990 + 2985 = 4975
     // Thermal cycler (age=2, remaining=3): 5000/3 + 5000*0.15 ≈ 1666.67 + 750 = 2416.67
-    // 'have' items: 0
-    expect(costs.equipment).toBeCloseTo(4975 + 5000 / 3 + 750, 1)
+    // 'have' with cost=999, life=5, age=0: 999/5 + 999*0.15 = 199.8 + 149.85 = 349.65
+    // 'have' with cost=0: 0
+    const haveDepreciation = 999 / 5 + 999 * 0.15
+    expect(costs.equipment).toBeCloseTo(4975 + 5000 / 3 + 750 + haveDepreciation, 1)
     // Equipment IS now included in total (WHO methodology)
     expect(costs.total).toBeCloseTo(costs.equipment + costs.incidentals, 5)
-    // Establishment = 19900 + 5000 = 24900
+    // Establishment = 19900 + 5000 = 24900 (only 'buy' items)
     expect(costs.establishmentCost).toBe(24_900)
   })
 

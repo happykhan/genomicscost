@@ -497,5 +497,22 @@
   "hint_mul_reactions_kit": "× {{count}} réactions = prix du kit",
   "label_total_reactions": "Total des réactions sur tous les séquenceurs (incl. retests)",
   "label_total_samples_sequenced": "Total des échantillons séquencés sur tous les séquenceurs",
-  "label_auto": "auto"
+  "label_auto": "auto",
+
+  "field_ont_avg_read_length": "Longueur moyenne de lecture (pb)",
+  "tooltip_ont_avg_read_length": "Longueur moyenne de lecture pour le séquençage long-read ONT. Nécessaire pour les organismes non standard afin de calculer le nombre d'échantillons par run.",
+  "placeholder_ont_avg_read_length": "ex. 5000",
+  "hint_ont_avg_read_length": "Saisir si votre organisme n'est pas dans le catalogue. Utilisé pour convertir le débit de la cellule en lectures.",
+
+  "field_barcode_pack_cost": "Coût du pack de codes-barres (USD)",
+  "hint_barcode_pack_cost": "Coût par pack d'expansion de codes-barres ONT.",
+  "field_barcode_packs_per_run": "Packs de codes-barres par run",
+  "hint_barcode_packs_per_run": "Nombre de packs de codes-barres consommés par run de séquençage. Ajouté au coût des réactifs de séquençage.",
+
+  "label_purchase_cost": "Coût d'achat ($)",
+  "tooltip_have_purchase_cost": "Coût d'achat initial de cet équipement. Saisir pour calculer l'amortissement restant des équipements déjà possédés.",
+  "warn_no_depreciation_data": "Saisir le coût d'achat et l'âge pour calculer l'amortissement",
+  "warn_no_depreciation_short": "pas de coût",
+  "warn_insufficient_qty": "Vous pourriez avoir besoin de {{needed}} unités pour atteindre votre débit cible",
+  "label_depreciation": "Amortissement"
 }

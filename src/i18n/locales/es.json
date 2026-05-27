@@ -498,5 +498,22 @@
   "hint_mul_reactions_kit": "× {{count}} reacciones = precio del kit",
   "label_total_reactions": "Total de reacciones en todos los secuenciadores (incl. repeticiones)",
   "label_total_samples_sequenced": "Total de muestras secuenciadas en todos los secuenciadores",
-  "label_auto": "auto"
+  "label_auto": "auto",
+
+  "field_ont_avg_read_length": "Longitud promedio de lectura (pb)",
+  "tooltip_ont_avg_read_length": "Longitud promedio de lectura para secuenciación de lectura larga ONT. Necesaria para organismos no estándar para calcular con precisión el número de muestras por corrida.",
+  "placeholder_ont_avg_read_length": "p. ej. 5000",
+  "hint_ont_avg_read_length": "Ingrese si su organismo no está en el catálogo. Se usa para convertir la salida de la celda de flujo en lecturas.",
+
+  "field_barcode_pack_cost": "Costo del paquete de códigos de barras (USD)",
+  "hint_barcode_pack_cost": "Costo por paquete de expansión de códigos de barras ONT.",
+  "field_barcode_packs_per_run": "Paquetes de códigos de barras por corrida",
+  "hint_barcode_packs_per_run": "Paquetes de códigos de barras consumidos por corrida de secuenciación. Se añade al costo de reactivos de secuenciación.",
+
+  "label_purchase_cost": "Costo de compra ($)",
+  "tooltip_have_purchase_cost": "Costo de compra original de este equipo. Ingrese para calcular la depreciación restante de los equipos que ya posee.",
+  "warn_no_depreciation_data": "Ingrese el costo de compra y la antigüedad para calcular la depreciación",
+  "warn_no_depreciation_short": "sin costo",
+  "warn_insufficient_qty": "Puede necesitar {{needed}} unidades para alcanzar su rendimiento objetivo",
+  "label_depreciation": "Depreciación"
 }

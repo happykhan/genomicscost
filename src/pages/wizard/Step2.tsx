@@ -82,12 +82,18 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
   useEffect(() => {
     const isCustomKit = sequencer.reagentKitName === 'Other sequencing kit'
     if (!selectedKit && !isCustomKit) return
-    const readLengthBp = isCustomKit ? (sequencer.customKitReadLengthBp ?? 0) : (selectedKit?.read_length_bp ?? 0)
+    let readLengthBp = isCustomKit ? (sequencer.customKitReadLengthBp ?? 0) : (selectedKit?.read_length_bp ?? 0)
     const maxOutputMb = isCustomKit ? (sequencer.customKitMaxOutputMb ?? 0) : (selectedKit?.max_output_mb ?? 0)
+    // ONT: use user-entered average read length if the kit has no read_length_bp (Issue #5)
+    if (readLengthBp === 0 && sequencer.platformId === 'ont' && (sequencer.ontAvgReadLengthBp ?? 0) > 0) {
+      readLengthBp = sequencer.ontAvgReadLengthBp!
+    }
     // For custom kits derive read count from output÷readLength so the min-reads floor applies (matches Excel Annex 4)
     const maxReadsPfc = isCustomKit
       ? (readLengthBp > 0 && maxOutputMb > 0 ? Math.floor((maxOutputMb * 1e6) / readLengthBp) : 0)
-      : (selectedKit?.max_reads_per_flowcell ?? 0)
+      : (readLengthBp > 0 && maxOutputMb > 0 && !(selectedKit?.max_reads_per_flowcell)
+          ? Math.floor((maxOutputMb * 1e6) / readLengthBp)
+          : (selectedKit?.max_reads_per_flowcell ?? 0))
     const calculated = calculateSamplesPerRunMulti(
       assignedPathogens.length > 0 ? assignedPathogens : pathogens,
       sequencer.coverageX,
@@ -106,7 +112,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
     sequencer.controlsPerRun, isCaptureAll, sequencer.minReadsPerSample,
     sequencer.libPrepKitName, sequencer.assignments,
     sequencer.customKitMaxOutputMb, sequencer.customKitReadLengthBp,
-    sequencer.customLibPrepMaxBarcodes,
+    sequencer.customLibPrepMaxBarcodes, sequencer.ontAvgReadLengthBp,
   ])
 
   // Auto-set bufferPct from pathogen type (30% bacteria, 20% virus, 0% capture-all) per WHO GCT
@@ -575,6 +581,33 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
           </div>
         )}
 
+        {/* ONT average read length — needed for non-standard organisms (Issue #5) */}
+        {sequencer.platformId === 'ont' && !isCaptureAll && (
+          <div>
+            <label className={labelClass}>
+              {t('field_ont_avg_read_length')}
+              <Tooltip content={t('tooltip_ont_avg_read_length')} />
+            </label>
+            <input
+              type="number"
+              onFocus={e => e.target.select()}
+              className={inputClass}
+              value={sequencer.ontAvgReadLengthBp ?? ''}
+              min={100}
+              step={100}
+              placeholder={t('placeholder_ont_avg_read_length')}
+              onChange={e => {
+                const v = parseInt(e.target.value)
+                updateSequencer(index, { ontAvgReadLengthBp: isNaN(v) ? undefined : v })
+              }}
+              style={{ maxWidth: 200 }}
+            />
+            <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>
+              {t('hint_ont_avg_read_length')}
+            </div>
+          </div>
+        )}
+
         {/* WHO GCT rows 25–29: run capacity stats */}
         {sequencer.samplesPerRun > 0 && (() => {
           const hasAssignments = Array.isArray(sequencer.assignments) && sequencer.assignments.length > 0
@@ -790,6 +823,50 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
             </div>
           )
         })()}
+
+        {/* ONT barcode pack costs (Issue #6) */}
+        {sequencer.platformId === 'ont' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>{t('field_barcode_pack_cost')}</label>
+              <input
+                type="number"
+                onFocus={e => e.target.select()}
+                className={inputClass}
+                value={sequencer.barcodePackCostUsd ?? ''}
+                min={0}
+                step={1}
+                placeholder="0"
+                onChange={e => {
+                  const v = parseFloat(e.target.value)
+                  updateSequencer(index, { barcodePackCostUsd: isNaN(v) ? undefined : v })
+                }}
+              />
+              <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>
+                {t('hint_barcode_pack_cost')}
+              </div>
+            </div>
+            <div>
+              <label className={labelClass}>{t('field_barcode_packs_per_run')}</label>
+              <input
+                type="number"
+                onFocus={e => e.target.select()}
+                className={inputClass}
+                value={sequencer.barcodePacksPerRun ?? ''}
+                min={0}
+                step={0.1}
+                placeholder="1"
+                onChange={e => {
+                  const v = parseFloat(e.target.value)
+                  updateSequencer(index, { barcodePacksPerRun: isNaN(v) ? undefined : v })
+                }}
+              />
+              <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>
+                {t('hint_barcode_packs_per_run')}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Enrichment toggle */}
         <div>

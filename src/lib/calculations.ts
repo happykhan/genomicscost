@@ -190,8 +190,11 @@ function calcSequencerCosts(
     ? libKitsNeeded * kitPrice
     : samplesIncludingRetests * (seq.libPrepCostPerSample ?? 0)
 
+  // Include ONT barcode pack costs per run (Issue #6)
+  const barcodePackCost = (seq.barcodePackCostUsd ?? 0) * (seq.barcodePacksPerRun ?? 0)
+
   return {
-    sequencingReagents: runsNeeded * (seq.reagentKitPrice ?? 0),
+    sequencingReagents: runsNeeded * ((seq.reagentKitPrice ?? 0) + barcodePackCost),
     libraryPrep,
   }
 }
@@ -278,9 +281,9 @@ export function calculateCosts(project: Project): CostBreakdown {
   const incidentalsRate = (project.incidentalsPct ?? 7) / 100
 
   // WHO GCT: depreciation (age-adjusted) + maintenance % × pctSequencing
-  // Only 'buy' items contribute — 'have' are sunk costs excluded from programme budget
+  // 'buy' items always contribute; 'have' items contribute when purchase cost & age are provided
   const annualEquipment = equipment
-    .filter(e => e.status === 'buy')
+    .filter(e => e.status === 'buy' || (e.status === 'have' && (e.unitCostUsd ?? 0) > 0))
     .reduce((sum, e) => {
       const lifespan = Math.max(1, e.lifespanYears ?? 5)
       const age = Math.max(0, Math.min(e.ageYears ?? 0, lifespan - 1))

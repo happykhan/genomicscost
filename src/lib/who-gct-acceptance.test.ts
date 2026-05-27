@@ -272,11 +272,25 @@ describe('WHO GCT — Equipment', () => {
     expect(costs.equipment).toBeCloseTo((10_000 / 10 + 10_000 * 0.15) * 0.85, 2)
   })
 
-  it('existing equipment does not add to establishment cost or annual cost', () => {
+  it('existing equipment with purchase cost contributes depreciation but not establishment cost (Issue #4)', () => {
     const project = makeProject({
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral', genomeSizeMb: 0.03, samplesPerYear: 100 }],
       equipment: [
         { name: 'Thermal cycler', category: 'lab_equipment', status: 'have' as const, unitCostUsd: 9_000, quantity: 1, lifespanYears: 10 },
+      ],
+    })
+    const costs = calculateCosts(project)
+    // Establishment cost excludes 'have' items
+    expect(costs.establishmentCost).toBe(0)
+    // Depreciation: 9000/10 + 9000*0.15 = 900 + 1350 = 2250
+    expect(costs.equipment).toBeCloseTo(9_000 / 10 + 9_000 * 0.15, 2)
+  })
+
+  it('existing equipment without purchase cost contributes zero annual cost', () => {
+    const project = makeProject({
+      pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral', genomeSizeMb: 0.03, samplesPerYear: 100 }],
+      equipment: [
+        { name: 'Thermal cycler', category: 'lab_equipment', status: 'have' as const, unitCostUsd: 0, quantity: 1, lifespanYears: 10 },
       ],
     })
     const costs = calculateCosts(project)

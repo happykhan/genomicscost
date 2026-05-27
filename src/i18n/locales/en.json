@@ -496,5 +496,22 @@
   "hint_mul_reactions_kit": "× {{count}} reactions = kit price",
   "label_total_reactions": "Total reactions across all sequencers (incl. retests)",
   "label_total_samples_sequenced": "Total samples sequenced across all sequencers",
-  "label_auto": "auto"
+  "label_auto": "auto",
+
+  "field_ont_avg_read_length": "Average read length (bp)",
+  "tooltip_ont_avg_read_length": "Average read length for ONT long-read sequencing. Required for non-standard organisms to accurately calculate the number of samples per run based on coverage, read length and flow cell output.",
+  "placeholder_ont_avg_read_length": "e.g. 5000",
+  "hint_ont_avg_read_length": "Enter if your organism is not in the catalogue. Used to convert flow cell output into reads for the samples-per-run calculation.",
+
+  "field_barcode_pack_cost": "Barcode pack cost (USD)",
+  "hint_barcode_pack_cost": "Cost per ONT barcode expansion pack.",
+  "field_barcode_packs_per_run": "Barcode packs per run",
+  "hint_barcode_packs_per_run": "Number of barcode packs consumed per sequencing run. Added to sequencing reagent cost.",
+
+  "label_purchase_cost": "Purchase cost ($)",
+  "tooltip_have_purchase_cost": "Original purchase cost of this equipment. Enter to calculate remaining depreciation for items you already own.",
+  "warn_no_depreciation_data": "Enter purchase cost and age to calculate depreciation",
+  "warn_no_depreciation_short": "no cost",
+  "warn_insufficient_qty": "You may need {{needed}} units to meet your target throughput",
+  "label_depreciation": "Depreciation"
 }
