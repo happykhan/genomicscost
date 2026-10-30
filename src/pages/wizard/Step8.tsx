@@ -139,16 +139,16 @@ export default function Step8() {
     // Section 6: Equipment
     if (project.equipment.length > 0) {
       lines.push('--- EQUIPMENT ---')
-      lines.push(row('Item', 'Category', 'Status', 'Qty', 'Unit cost USD', 'Lifespan yr', 'Age yr', '% seq', 'Annual depreciation USD'))
+      lines.push(row('Item', 'Category', 'Status', 'Qty', 'Unit cost USD', 'Lifespan yr', 'Age yr', '% seq', 'Annual equipment operational cost USD'))
       const maintenanceRate = (project.maintenancePct ?? 15) / 100
       for (const e of project.equipment) {
         const lifespan = Math.max(1, e.lifespanYears ?? 5)
         const age = Math.max(0, Math.min(e.ageYears ?? 0, lifespan - 1))
-        const remainingLife = Math.max(1, lifespan - age)
+        const remainingLife = lifespan
         const totalCost = (e.unitCostUsd ?? 0) * (e.quantity ?? 1)
         const pctSeq = (e.pctSequencing ?? 100) / 100
-        const depreciation = e.status === 'buy' ? (totalCost / remainingLife) * pctSeq : 0
-        const maintenance = e.status === 'buy' ? totalCost * maintenanceRate * pctSeq : 0
+        const depreciation = e.status !== 'skip' ? (totalCost / remainingLife) * pctSeq : 0
+        const maintenance = e.status !== 'skip' ? totalCost * maintenanceRate * pctSeq : 0
         lines.push(row(e.name, e.category, e.status, e.quantity, e.unitCostUsd, lifespan, age, e.pctSequencing ?? 100, (depreciation + maintenance).toFixed(2)))
       }
       lines.push('')
@@ -183,9 +183,9 @@ export default function Step8() {
         }
       }
       if ((project.bioinformatics.type === 'inhouse' || project.bioinformatics.type === 'hybrid') && project.bioinformatics.inhouseItems?.length) {
-        lines.push(row('Component', 'Price/unit USD', 'Qty', '% use', 'Lifespan yr', 'Age yr', 'Annual depreciation USD'))
+        lines.push(row('Component', 'Price/unit USD', 'Qty', '% use', 'Lifespan yr', 'Age yr', 'Annual equipment operational cost USD'))
         for (const item of project.bioinformatics.inhouseItems.filter(i => i.enabled)) {
-          const remainingLife = Math.max(1, (item.lifespanYears ?? 1) - (item.ageYears ?? 0))
+          const remainingLife = Math.max(1, item.lifespanYears ?? 1)
           const annual = item.pricePerUnit * item.quantity * (item.pctUse / 100) / remainingLife
           lines.push(row(item.name, item.pricePerUnit, item.quantity, item.pctUse, item.lifespanYears, item.ageYears, annual.toFixed(2)))
         }
@@ -279,11 +279,11 @@ export default function Step8() {
     for (const e of project.equipment) {
       const lifespan = Math.max(1, e.lifespanYears ?? 5)
       const age = Math.max(0, Math.min(e.ageYears ?? 0, lifespan - 1))
-      const remainingLife = Math.max(1, lifespan - age)
+      const remainingLife = lifespan
       const totalCost = (e.unitCostUsd ?? 0) * (e.quantity ?? 1)
       const pctSeq = (e.pctSequencing ?? 100) / 100
-      const depreciation = e.status === 'buy' ? (totalCost / remainingLife) * pctSeq : 0
-      const maintenance = e.status === 'buy' ? totalCost * maintenanceRate * pctSeq : 0
+      const depreciation = e.status !== 'skip' ? (totalCost / remainingLife) * pctSeq : 0
+      const maintenance = e.status !== 'skip' ? totalCost * maintenanceRate * pctSeq : 0
       eqData.push([
         e.name, e.category, e.status, e.quantity, e.unitCostUsd, lifespan, age,
         e.pctSequencing ?? 100,
@@ -359,9 +359,9 @@ export default function Step8() {
       }
       if ((project.bioinformatics.type === 'inhouse' || project.bioinformatics.type === 'hybrid') && project.bioinformatics.inhouseItems?.length) {
         bioData.push(['--- IN-HOUSE ITEMS ---'])
-        bioData.push(['Component', 'Description', 'Unit cost USD', 'Qty', '% use', 'Lifespan yr', 'Age yr', 'Remaining life yr', 'Annual depreciation USD'])
+        bioData.push(['Component', 'Description', 'Unit cost USD', 'Qty', '% use', 'Lifespan yr', 'Age yr', 'Depreciation lifetime yr', 'Annual depreciation USD'])
         for (const item of project.bioinformatics.inhouseItems.filter(i => i.enabled)) {
-          const remainingLife = Math.max(1, (item.lifespanYears ?? 1) - (item.ageYears ?? 0))
+          const remainingLife = Math.max(1, item.lifespanYears ?? 1)
           const annual = item.pricePerUnit * item.quantity * (item.pctUse / 100) / remainingLife
           bioData.push([item.name, item.description || '', item.pricePerUnit, item.quantity, item.pctUse, item.lifespanYears, item.ageYears, remainingLife, +annual.toFixed(2)])
         }
@@ -437,6 +437,7 @@ export default function Step8() {
 
   return (
     <div className="gx-print-region">
+      {project.sequencers.some(seq => seq.enabled && (!seq.reagentKitPrice || !seq.libPrepCostPerSample)) && <p role="status" className="card p-3 mb-4 text-sm">{t('note_partial_estimate')}</p>}
       {/* Screen header */}
       <div className="no-print">
         <div className="flex items-start justify-between mb-1 flex-wrap gap-3">
@@ -1085,13 +1086,13 @@ export default function Step8() {
                   <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
                     <th style={{ textAlign: 'left', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_component_inhouse')}</th>
                     <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_purchase_cost_usd')}</th>
-                    <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_remaining_life_yr')}</th>
+                    <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_lifetime_yr')}</th>
                     <th style={{ textAlign: 'right', padding: '4px 8px', color: '#475569', fontWeight: 500 }}>{t('col_depreciation_yr_usd')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {(project.bioinformatics.inhouseItems ?? []).filter(i => i.enabled).map((item, i) => {
-                    const remainingLife = Math.max(1, (item.lifespanYears ?? 1) - (item.ageYears ?? 0))
+                    const remainingLife = Math.max(1, item.lifespanYears ?? 1)
                     const annual = item.pricePerUnit * item.quantity * (item.pctUse / 100) / remainingLife
                     return (
                       <tr key={i} style={{ borderBottom: '1px solid #e2e8f0' }}>

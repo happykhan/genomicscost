@@ -38,33 +38,33 @@ app. When in doubt about methodology, consult this workbook.
 - Default coverage for SARS-CoV-2 = 10× (Table A3.1) — doesn't affect run sizing since
   min reads (100 000) always dominates for genome ≤ 0.03 Mb
 
-### Known gaps between web app and Excel (as of 2026-04-19)
+### Verified depreciation method
 
-| # | Gap | Excel behaviour | Our behaviour |
-|---|---|---|---|
-| GAP-1 | Equipment maintenance cost | 15% of unit cost/yr × pct_sequencing added as annual operational cost | Not implemented — annual equipment cost underestimated by ~40% |
-| GAP-2 | Equipment age in depreciation | remaining_life = lifespan − age; depreciation = total_cost / remaining_life | Always depreciate from new (ignores age field) |
-| GAP-3 | Equipment % use for sequencing | Per-item scaling factor (e.g. 85%) applied to both depreciation and maintenance | 100% always attributed to sequencing |
-| GAP-4 | Transport % use for sequencing | Per-item % of transport cost attributed to sequencing programme | 100% always attributed — no pct field in TransportItem |
-| GAP-5 | Incidental consumable costs | 7% of total reagent/consumable costs auto-added (gloves, lab coat, PPE, etc.) | Not implemented |
-| GAP-6 | Toggle misaligns with WHO | Excel ALWAYS includes equipment operational cost (depreciation + maintenance) in annual total. "Running cost" in WHO = operational including equipment | Our "Running cost" toggle *excludes* equipment depreciation — this is not a WHO concept |
+The workbook is the canonical reference. Absolute cell `Equipment!N5` uses
+`IFERROR(K5/L5,0)`: total purchase cost divided by recommended lifetime.
+`Q5=N5*P5` applies the sequencing share; `O5=(I5*J5)*0.15` and `R5=O5*P5`
+apply annual maintenance. Age is retained as planning information, and does not
+shorten the depreciation denominator. In-house bioinformatics follows the same
+straight-line method (`Bioinformatics!I43=IFERROR(F43/G43,0)`).
 
-### Equipment operational cost formula (from manual Fig. 6 + Annex 2)
+Previous documentation incorrectly described a remaining-life denominator.
+For MiSeq cost $99,000, lifetime 8 years, age 5 and 100% sequencing use,
+depreciation is $12,375 and maintenance $14,850, totalling $27,225/year.
 
-```
-remaining_life    = lifespan_years − age_years
-depreciation/yr   = (unit_cost × qty) / remaining_life × (pct_sequencing / 100)
-maintenance/yr    = (unit_cost × qty) × 0.15 × (pct_sequencing / 100)
-annual_op_cost    = depreciation/yr + maintenance/yr
-```
+### Import and calculation limitations
 
-Example from manual (Illumina MiSeq, qty=1, cost=$99 000, lifespan=10, age=2, pct=85%):
-- depreciation = 99,000 / 8 × 0.85 = $10,519/yr
-- maintenance  = 99,000 × 0.15 × 0.85 = $12,623/yr
-- annual_op    = $23,142/yr
+The importer reads cached formula values; it does not recalculate Excel formulas.
+Save/recalculate the workbook in Excel or LibreOffice before import. Primary
+sequencing and library preparation prices are imported into their native fields.
+Additional library preparation reagents retain explicit annual quantities in
+Step 3 and must be reviewed when throughput changes. Missing prices remain zero.
+
+The web app is a planning model, not a complete replica of every spreadsheet
+formula: workflow overhead is shared evenly across six steps, and shared costs
+are allocated to pathogens by sample volume. Native workbook totals and per-category
+comparisons must be checked separately; a matching sum does not establish parity.
 
 ### Acceptance tests
 
-See `src/lib/who-gct-acceptance.test.ts` for the test suite that verifies
-web app calculations match this Excel. Tests are annotated with GAP comments
-where known divergences exist.
+`src/utils/importGct.real.test.ts` reads the bundled completed workbook directly.
+`src/lib/who-gct-acceptance.test.ts` and calculation tests cover model assumptions.

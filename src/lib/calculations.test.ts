@@ -370,7 +370,7 @@ describe('calculateCosts', () => {
     expect(costs.sequencingReagents).toBe(0)
   })
 
-  it('equipment uses WHO formula: depreciation (age-adjusted) + 15% maintenance × pctSequencing', () => {
+  it('equipment uses WHO workbook straight-line depreciation + 15% maintenance × pctSequencing', () => {
     const project = {
       ...createDefaultProject(),
       fixedConsumables: [],
@@ -399,11 +399,11 @@ describe('calculateCosts', () => {
     }
     const costs = calculateCosts(project)
     // iSeq: 19900/10 + 19900*0.15 = 1990 + 2985 = 4975
-    // Thermal cycler (age=2, remaining=3): 5000/3 + 5000*0.15 ≈ 1666.67 + 750 = 2416.67
+    // Thermal cycler: 5000/5 + 5000*0.15 = 1750; age does not inflate depreciation.
     // 'have' with cost=999, life=5, age=0: 999/5 + 999*0.15 = 199.8 + 149.85 = 349.65
     // 'have' with cost=0: 0
     const haveDepreciation = 999 / 5 + 999 * 0.15
-    expect(costs.equipment).toBeCloseTo(4975 + 5000 / 3 + 750 + haveDepreciation, 1)
+    expect(costs.equipment).toBeCloseTo(4975 + 5000 / 5 + 750 + haveDepreciation, 1)
     // Equipment IS now included in total (WHO methodology)
     expect(costs.total).toBeCloseTo(costs.equipment + costs.incidentals, 5)
     // Establishment = 19900 + 5000 = 24900 (only 'buy' items)
@@ -848,5 +848,34 @@ describe('calculateCosts', () => {
     // total samples = 150; cloud bio = 450 * 1 * 150/150 = $450
     expect(costs.bioinformatics).toBe(450)
     expect(costs.costPerSample).toBeCloseTo(450 / 150, 10)
+  })
+})
+
+describe('review regressions: complete cost allocation and ONT barcode pricing', () => {
+  it('allocates a shared sequencing run once across two pathogens, including fixed consumables', () => {
+    const p = createDefaultProject()
+    p.pathogens = [
+      { pathogenName: 'A', pathogenType: 'bacterial', genomeSizeMb: 5, samplesPerYear: 5 },
+      { pathogenName: 'B', pathogenType: 'bacterial', genomeSizeMb: 5, samplesPerYear: 5 },
+    ]
+    p.sequencers = [{ ...p.sequencers[0], samplesPerRun: 10, avgSamplesPerRun: 10, retestPct: 0, reagentKitPrice: 100, libPrepCostPerSample: 0, assignments: [{ pathogenIndex: 0, samples: 5 }, { pathogenIndex: 1, samples: 5 }] }]
+    p.fixedConsumables = [{ name: 'Fixed receipt cost', unitCostUsd: 40, quantityPerYear: 2, enabled: true, workflows: { sample_receipt: true } }]
+    const c = calculateCosts(p)
+    expect(c.sequencingReagents).toBe(100)
+    expect(c.perPathogenBreakdown.map(v => v.sequencingReagents)).toEqual([50, 50])
+    expect(c.perPathogenBreakdown.reduce((s, v) => s + v.total, 0)).toBeCloseTo(c.total, 8)
+    expect(Object.values(c.workflowBreakdown).reduce((s, v) => s + v, 0)).toBeCloseTo(c.total, 8)
+  })
+  it('uses one barcode pack by default only for ONT, with explicit zero respected', () => {
+    const p = createDefaultProject(), seq = p.sequencers[0]
+    seq.platformId = 'ont'
+    seq.barcodePackCostUsd = 100
+    const base = calculateCosts(p).sequencingReagents
+    seq.barcodePacksPerRun = 0
+    const without = calculateCosts(p).sequencingReagents
+    expect(base).toBeGreaterThan(without)
+    seq.barcodePacksPerRun = 1
+    seq.platformId = 'illumina'
+    expect(calculateCosts(p).sequencingReagents).toBe(without)
   })
 })

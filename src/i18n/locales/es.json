@@ -515,5 +515,7 @@
   "warn_no_depreciation_data": "Ingrese el costo de compra y la antigüedad para calcular la depreciación",
   "warn_no_depreciation_short": "sin costo",
   "warn_insufficient_qty": "Puede necesitar {{needed}} unidades para alcanzar su rendimiento objetivo",
-  "label_depreciation": "Depreciación"
+  "label_depreciation": "Depreciación",
+  "note_import_review": "Revise los valores importados. Los reactivos adicionales de preparación de bibliotecas conservan las cantidades anuales del archivo; ajústelas en el paso 3 si cambia el volumen. Los precios sin especificar permanecen en cero.",
+  "note_partial_estimate": "Estimación provisional: algunos secuenciadores activos tienen precios de secuenciación o preparación de bibliotecas de cero. Revise estos datos antes de usar los resultados."
 }

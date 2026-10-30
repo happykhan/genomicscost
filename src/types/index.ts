@@ -219,6 +219,7 @@ export interface TransportItem {
 }
 
 export interface Project {
+  importedFromWho?: boolean
   id: string
   name: string
   country: string

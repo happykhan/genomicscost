@@ -154,14 +154,13 @@ export default function Step4() {
 
   const maintenanceRate = (project.maintenancePct ?? 15) / 100
 
-  // WHO GCT: depreciation (age-adjusted) + maintenance % × pctSequencing
+  // WHO workbook: straight-line depreciation + maintenance % × pctSequencing
   // 'buy' items always contribute; 'have' items contribute when purchase cost is provided
   const annualTotal = equipment
     .filter(e => e.status === 'buy' || (e.status === 'have' && (e.unitCostUsd ?? 0) > 0))
     .reduce((sum, e) => {
       const lifespan = Math.max(1, e.lifespanYears ?? 5)
-      const age = Math.max(0, Math.min(e.ageYears ?? 0, lifespan - 1))
-      const remainingLife = Math.max(1, lifespan - age)
+      const remainingLife = lifespan
       const totalCost = e.unitCostUsd * e.quantity
       const pct = (e.pctSequencing ?? 100) / 100
       return sum + (totalCost / remainingLife) * pct + totalCost * maintenanceRate * pct
@@ -222,11 +221,10 @@ export default function Step4() {
 
   function renderItemCard(item: typeof instrumentItems[0]) {
     const lifespan = Math.max(1, item.lifespanYears ?? 5)
-    const age = Math.max(0, Math.min(item.ageYears ?? 0, lifespan - 1))
-    const remainingLife = Math.max(1, lifespan - age)
+    const remainingLife = lifespan
     const totalCost = item.unitCostUsd * item.quantity
     const pct = (item.pctSequencing ?? 100) / 100
-    const annual = item.status === 'buy' ? ((totalCost / remainingLife) * pct + totalCost * maintenanceRate * pct) : 0
+    const annual = item.status !== 'skip' ? ((totalCost / remainingLife) * pct + totalCost * maintenanceRate * pct) : 0
     return (
       <div
         key={item.idx}
@@ -457,8 +455,7 @@ export default function Step4() {
         )}
         {otherItems.map(item => {
           const lifespan = Math.max(1, item.lifespanYears ?? 5)
-          const age = Math.max(0, Math.min(item.ageYears ?? 0, lifespan - 1))
-          const remainingLife = Math.max(1, lifespan - age)
+          const remainingLife = lifespan
           const totalCost = item.unitCostUsd * item.quantity
           const pct = (item.pctSequencing ?? 100) / 100
           const showFields = item.status === 'buy' || item.status === 'have'
@@ -584,8 +581,7 @@ export default function Step4() {
             )}
             {otherItems.map(item => {
               const lifespan = Math.max(1, item.lifespanYears ?? 5)
-              const age = Math.max(0, Math.min(item.ageYears ?? 0, lifespan - 1))
-              const remainingLife = Math.max(1, lifespan - age)
+              const remainingLife = lifespan
               const totalCost = item.unitCostUsd * item.quantity
               const pct = (item.pctSequencing ?? 100) / 100
               const showFields = item.status === 'buy' || item.status === 'have'

@@ -191,7 +191,9 @@ function calcSequencerCosts(
     : samplesIncludingRetests * (seq.libPrepCostPerSample ?? 0)
 
   // Include ONT barcode pack costs per run (Issue #6)
-  const barcodePackCost = (seq.barcodePackCostUsd ?? 0) * (seq.barcodePacksPerRun ?? 0)
+  const barcodePackCost = seq.platformId === 'ont'
+    ? (seq.barcodePackCostUsd ?? 0) * (seq.barcodePacksPerRun ?? 1)
+    : 0
 
   return {
     sequencingReagents: runsNeeded * ((seq.reagentKitPrice ?? 0) + barcodePackCost),
@@ -280,17 +282,16 @@ export function calculateCosts(project: Project): CostBreakdown {
   const maintenanceRate = (project.maintenancePct ?? 15) / 100
   const incidentalsRate = (project.incidentalsPct ?? 7) / 100
 
-  // WHO GCT: depreciation (age-adjusted) + maintenance % × pctSequencing
-  // 'buy' items always contribute; 'have' items contribute when purchase cost & age are provided
+  // WHO workbook: straight-line depreciation over recommended lifetime + maintenance.
+  // 'buy' items always contribute; 'have' items contribute when purchase cost is provided
   const annualEquipment = equipment
     .filter(e => e.status === 'buy' || (e.status === 'have' && (e.unitCostUsd ?? 0) > 0))
     .reduce((sum, e) => {
       const lifespan = Math.max(1, e.lifespanYears ?? 5)
-      const age = Math.max(0, Math.min(e.ageYears ?? 0, lifespan - 1))
-      const remainingLife = Math.max(1, lifespan - age)
+
       const totalCost = (e.unitCostUsd ?? 0) * (e.quantity ?? 1)
       const pct = (e.pctSequencing ?? 100) / 100
-      const depreciation = (totalCost / remainingLife) * pct
+      const depreciation = (totalCost / lifespan) * pct
       const maintenance = totalCost * maintenanceRate * pct
       return sum + depreciation + maintenance
     }, 0)
@@ -359,8 +360,8 @@ export function calculateCosts(project: Project): CostBreakdown {
       annualBioInhouse = bioinformatics.inhouseItems
         .filter(item => item.enabled)
         .reduce((sum, item) => {
-          const remainingLife = Math.max(1, (item.lifespanYears ?? 1) - (item.ageYears ?? 0))
-          return sum + (item.pricePerUnit ?? 0) * (item.quantity ?? 1) * ((item.pctUse ?? 100) / 100) / remainingLife
+          const lifetime = Math.max(1, item.lifespanYears ?? 1)
+          return sum + (item.pricePerUnit ?? 0) * (item.quantity ?? 1) * ((item.pctUse ?? 100) / 100) / lifetime
         }, 0)
     } else if (bioinformatics.annualServerCostUsd) {
       // Legacy fallback
@@ -404,9 +405,12 @@ export function calculateCosts(project: Project): CostBreakdown {
     sequencing: 'sequencing',
   }
 
-  consumables.filter(c => c.enabled).forEach(c => {
-    const qty = Math.ceil(effectiveSamplesForScaling * (c.quantityPerSample ?? 0))
-    const cost = qty * (c.unitCostUsd ?? 0)
+  const allocatedConsumables = [
+    ...consumables.filter(c => c.enabled).map(c => ({ workflows: c.workflows, cost: Math.ceil(effectiveSamplesForScaling * (c.quantityPerSample ?? 0)) * (c.unitCostUsd ?? 0) })),
+    ...(project.fixedConsumables ?? []).filter(c => c.enabled).map(c => ({ workflows: c.workflows, cost: (c.quantityPerYear ?? 0) * (c.unitCostUsd ?? 0) })),
+  ]
+  allocatedConsumables.forEach(c => {
+    const cost = c.cost
 
     // Collect the checked workflow steps for this consumable
     const checkedSteps: string[] = []
@@ -452,8 +456,8 @@ export function calculateCosts(project: Project): CostBreakdown {
     annualBioinformatics + annualQMS + annualTraining + adminCost
 
   const perPathogenBreakdown: PathogenCostBreakdown[] = pathogens.map((pathogen, idx) => {
-    const proportion = effectiveSamplesForScaling > 0
-      ? pathogen.samplesPerYear / effectiveSamplesForScaling
+    const proportion = samplesPerYear > 0
+      ? pathogen.samplesPerYear / samplesPerYear
       : 1 / pathogens.length
 
     // Sequencing reagents + library prep from explicit assignments
@@ -464,9 +468,11 @@ export function calculateCosts(project: Project): CostBreakdown {
         if (!seq.enabled || !Array.isArray(seq.assignments)) continue
         const asgn = seq.assignments.find(a => a.pathogenIndex === idx)
         if (asgn && asgn.samples > 0) {
-          const c = calcSequencerCosts(seq, asgn.samples)
-          pathReagents += c.sequencingReagents
-          pathLibPrep += c.libraryPrep
+          const assignedTotal = seq.assignments.reduce((sum, a) => sum + a.samples, 0)
+          const c = calcSequencerCosts(seq, assignedTotal)
+          const fraction = asgn.samples / assignedTotal
+          pathReagents += c.sequencingReagents * fraction
+          pathLibPrep += c.libraryPrep * fraction
         }
       }
     } else {
@@ -475,7 +481,7 @@ export function calculateCosts(project: Project): CostBreakdown {
       pathLibPrep = seqCosts.libraryPrep * proportion
     }
 
-    const pathConsumables = annualConsumables * proportion
+    const pathConsumables = totalConsumables * proportion
     const pathIncidentals = (pathReagents + pathLibPrep + pathConsumables) * incidentalsRate
     const pathShared = fixedTotal * proportion
     const pathTotal = pathReagents + pathLibPrep + pathConsumables + pathIncidentals + pathShared

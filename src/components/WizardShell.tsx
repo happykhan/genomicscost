@@ -43,6 +43,7 @@ export default function WizardShell({ step, children }: WizardShellProps) {
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Wizard content */}
         <div className="flex-1 min-w-0">
+          {project.importedFromWho && <p role="note" className="card p-3 mb-4 text-sm">{t('note_import_review')}</p>}
           {children}
 
           {/* Navigation buttons */}

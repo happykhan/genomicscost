@@ -131,3 +131,7 @@ describe('isConsumablesAtDefaults', () => {
     expect(isConsumablesAtDefaults(filtered)).toBe(true)
   })
 })
+
+it('starts a new estimate in the current year', () => {
+  expect(createDefaultProject().year).toBe(new Date().getFullYear())
+})

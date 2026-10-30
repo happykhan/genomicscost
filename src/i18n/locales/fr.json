@@ -514,5 +514,7 @@
   "warn_no_depreciation_data": "Saisir le coût d'achat et l'âge pour calculer l'amortissement",
   "warn_no_depreciation_short": "pas de coût",
   "warn_insufficient_qty": "Vous pourriez avoir besoin de {{needed}} unités pour atteindre votre débit cible",
-  "label_depreciation": "Amortissement"
+  "label_depreciation": "Amortissement",
+  "note_import_review": "Les valeurs importées doivent être vérifiées. Les réactifs supplémentaires de préparation des bibliothèques conservent les quantités annuelles du classeur ; modifiez-les à l’étape 3 si le volume change. Les prix non renseignés restent à zéro.",
+  "note_partial_estimate": "Estimation provisoire : certains séquenceurs activés ont un prix nul pour le séquençage ou la préparation des bibliothèques. Vérifiez ces données avant d’utiliser les résultats."
 }

@@ -1,15 +1,15 @@
 /**
  * WHO GCT Acceptance Tests
  *
- * These tests verify that our web app calculations match the WHO Genomics
- * Costing Tool second edition Excel workbook (B09722-eng).
+ * These tests cover selected WHO formulas and adapted planning scenarios.
+ * They do not establish complete workbook parity; see the real import tests.
  *
  * Reference: WHO GCT User Manual 2nd ed. 2026
  * Excel: B09722-eng (1).xlsx — the canonical reference tool.
  *
- * All 6 GAPs identified in the original review have been fixed:
+ * Historical implementation assumptions (not a complete parity checklist):
  *   GAP-1 FIXED: Equipment maintenance cost (15%/yr of unit cost now included)
- *   GAP-2 FIXED: Equipment age field (depreciation uses remaining_life = lifespan - age)
+ *   GAP-2 CORRECTED: Annual depreciation uses full lifetime, matching Equipment!N5
  *   GAP-3 FIXED: Equipment "% use for sequencing" per item (pctSequencing field added)
  *   GAP-4 FIXED: Transport "% use for sequencing" per item (pctSequencing field added)
  *   GAP-5 FIXED: Incidental consumable costs (7% of reagent/consumable costs)
@@ -208,8 +208,7 @@ describe('WHO GCT — Consumables', () => {
 
 // ── Section 5: Equipment ─────────────────────────────────────────────────────
 // WHO Excel formula (annual operational cost):
-//   depreciation = (unit_cost × qty) / remaining_life_years
-//   remaining_life = max(1, lifespan - age)
+//   depreciation = (unit_cost × qty) / lifespan_years
 //   maintenance  = (unit_cost × qty) × 0.15
 //   annual_cost  = (depreciation + maintenance) × pct_sequencing / 100
 // Establishment cost = unit_cost × qty (purchase price; same in Excel)
@@ -243,19 +242,19 @@ describe('WHO GCT — Equipment', () => {
     expect(costs.equipment).toBeCloseTo(19_900 / 8 + 19_900 * 0.15, 2)
   })
 
-  it('age adjustment: remaining life = lifespan - age', () => {
+  it('age is retained without inflating straight-line annual depreciation', () => {
     const project = makeProject({
       pathogens: [{ pathogenName: 'SARS-CoV-2', pathogenType: 'viral', genomeSizeMb: 0.03, samplesPerYear: 100 }],
       equipment: [
-        // Equipment 3 years old with 8yr lifespan → remaining = 5yr
+        // Age remains planning information; WHO N5 divides by lifetime.
         { name: 'iSeq 100', category: 'sequencing_platform', status: 'buy' as const, unitCostUsd: 19_900, quantity: 1, lifespanYears: 8, ageYears: 3 },
       ],
     })
     const costs = calculateCosts(project)
-    // depreciation = 19,900 / (8-3) = 19,900 / 5 = 3,980
+    // depreciation = 19,900 / 8 = 2,487.50
     // maintenance = 19,900 × 0.15 = 2,985
-    // total = 6,965
-    expect(costs.equipment).toBeCloseTo(19_900 / 5 + 19_900 * 0.15, 2)
+    // total = 5,472.50
+    expect(costs.equipment).toBeCloseTo(19_900 / 8 + 19_900 * 0.15, 2)
   })
 
   it('pctSequencing scales both depreciation and maintenance', () => {
@@ -652,8 +651,7 @@ describe('WHO GCT — end-to-end scenario', () => {
 //   3. Incidentals: workbook shows $12,134.88 (~8.6% of reagent base). Our model
 //      applies a flat 7%. This is a calculation gap documented in the fixture.
 //   4. Equipment depreciation: workbook uses full lifespan for depreciation (cost/lifespan)
-//      even when age > 0. Our GAP-2 fix uses remaining life (cost/(lifespan-age)).
-//      We set age=0 in the test to align; the difference is documented.
+//      even when age > 0. The app now uses this same straight-line formula.
 //   5. Personnel admin: workbook applies a 10% overhead to salary costs. Our model
 //      doesn't have this field, so we bake it into training to match the total.
 //   6. Establishment cost: workbook = all equipment purchase + bioinformatics purchase +
@@ -692,7 +690,7 @@ describe('WHO GCT — full demo workbook scenario', () => {
     // structural note #4), we pick lifespan and costs to match.
     //
     // Approach: use the actual workbook equipment list with age=0 so our
-    // remaining-life formula (lifespan - age = lifespan) matches the workbook's
+    // straight-line formula matches the workbook's
     // formula (cost / lifespan). We consolidate into 3 items for simplicity.
     //
     // Item 1: Sequencing platforms (MiSeq + GridION)

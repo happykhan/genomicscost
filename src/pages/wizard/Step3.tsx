@@ -279,7 +279,8 @@ export default function Step3() {
               const runsPerYear = Math.ceil(samplesWithRetests / effectiveSPR)
               const packsPerRun = seq.customKitPacksPerRun ?? 1
               const kitsPerYear = Math.ceil(runsPerYear * packsPerRun)
-              const reagentCostAnnual = runsPerYear * (seq.reagentKitPrice ?? 0)
+              const barcodeCost = seq.platformId === 'ont' ? (seq.barcodePackCostUsd ?? 0) * (seq.barcodePacksPerRun ?? 1) : 0
+              const reagentCostAnnual = runsPerYear * ((seq.reagentKitPrice ?? 0) + barcodeCost)
 
               const platform = catalogue.platforms.find(p => p.id === seq.platformId)
               const platformName = platform?.name ?? seq.platformId

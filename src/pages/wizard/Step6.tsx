@@ -70,7 +70,7 @@ export default function Step6() {
   // In-house: annual depreciation cost
   const inhouseTotal = showInhouse
     ? bioinformatics.inhouseItems.filter(i => i.enabled).reduce((sum, item) => {
-        const remainingLife = Math.max(1, (item.lifespanYears ?? 1) - (item.ageYears ?? 0))
+        const remainingLife = Math.max(1, item.lifespanYears ?? 1)
         return sum + (item.pricePerUnit ?? 0) * (item.quantity ?? 1) * ((item.pctUse ?? 100) / 100) / remainingLife
       }, 0)
     : 0
@@ -194,7 +194,7 @@ export default function Step6() {
                 </thead>
                 <tbody>
                   {bioinformatics.inhouseItems.map((item, idx) => {
-                    const remainingLife = Math.max(1, (item.lifespanYears ?? 1) - (item.ageYears ?? 0))
+                    const remainingLife = Math.max(1, item.lifespanYears ?? 1)
                     const annualCost = item.enabled
                       ? (item.pricePerUnit ?? 0) * (item.quantity ?? 1) * ((item.pctUse ?? 100) / 100) / remainingLife
                       : 0
@@ -282,14 +282,14 @@ export default function Step6() {
                     <tr style={{ borderBottom: '1px solid var(--gx-border)', color: 'var(--gx-text-muted)' }}>
                       <th style={{ textAlign: 'left', fontWeight: 500, paddingBottom: 4 }}>{t('col_component')}</th>
                       <th style={{ textAlign: 'right', fontWeight: 500, paddingBottom: 4 }}>{t('col_purchase_cost')}</th>
-                      <th style={{ textAlign: 'right', fontWeight: 500, paddingBottom: 4 }}>{t('col_remaining_life')}</th>
+                      <th style={{ textAlign: 'right', fontWeight: 500, paddingBottom: 4 }}>{t('col_lifetime_yr')}</th>
                       <th style={{ textAlign: 'right', fontWeight: 500, paddingBottom: 4 }}>{t('col_annual_depreciation')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {bioinformatics.inhouseItems.filter(i => i.enabled && (i.quantity ?? 0) > 0).map((item, idx) => {
                       const purchaseCost = (item.pricePerUnit ?? 0) * (item.quantity ?? 1)
-                      const remainingLife = Math.max(1, (item.lifespanYears ?? 1) - (item.ageYears ?? 0))
+                      const remainingLife = Math.max(1, item.lifespanYears ?? 1)
                       const depreciation = purchaseCost * ((item.pctUse ?? 100) / 100) / remainingLife
                       return (
                         <tr key={idx} style={{ borderBottom: '1px solid var(--gx-border)' }}>

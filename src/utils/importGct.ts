@@ -7,6 +7,7 @@
  * length sections are scanned until the name cell is empty.
  */
 import type XLSX from 'xlsx'
+import { getEffectiveCatalogue } from '../lib/catalogue'
 import type {
   Project,
   SequencerConfig,
@@ -46,7 +47,7 @@ function num(ws: XLSX.WorkSheet, addr: string, fallback = 0): number {
   const v = cell(ws, addr)
   if (v === undefined) return fallback
   const n = Number(v)
-  return isNaN(n) ? fallback : n
+  return Number.isFinite(n) ? n : fallback
 }
 
 /**
@@ -182,18 +183,18 @@ function parseDataEntry(wb: XLSX.WorkBook): {
         pathogenName: pathogenName || 'Unknown',
         pathogenType: pathogenType.includes('viral') ? 'viral' : 'bacterial',
         genomeSizeMb: genomeSizeMb || 5,
-        samplesPerYear: samplesPerYear || 100,
+        samplesPerYear,
       })
     }
 
     const platformName = str(ws, seq.colType + '17')
     const reagentKitName = str(ws, seq.colType + '18')
     const coverageX = num(ws, seq.colType + '19')
-    const bufferRaw = num(ws, seq.colType + '20')
+    const bufferRaw = num(ws, seq.colType + '20', 0.2)
     const bufferPct = pctToInt(bufferRaw)
     const libPrepKitName = str(ws, seq.colType + '21')
     const enrichment = yesNo(ws, seq.colType + '22')
-    const retestRaw = num(ws, seq.colType + '23')
+    const retestRaw = num(ws, seq.colType + '23', 0.05)
     const retestPct = pctToInt(retestRaw)
     const controlsPerRun = num(ws, seq.colType + '27', 2)
     const avgSamplesPerRun = num(ws, seq.colType + '26')
@@ -209,10 +210,12 @@ function parseDataEntry(wb: XLSX.WorkBook): {
     const seqConfig: Partial<SequencerConfig> = {
       platformId: mapPlatformId(platformName),
       reagentKitName: reagentKitName || 'Other sequencing kit',
-      reagentKitPrice: 0, // not stored in Data entry sheet; resolved by catalogue
+      reagentKitPrice: 0, // imported later from the Reagents and consumables sheet
       coverageX: coverageX || 50,
-      bufferPct: bufferPct || 20,
-      retestPct: retestPct || 5,
+      coverageXUserSet: true,
+      bufferPctUserSet: true,
+      bufferPct,
+      retestPct,
       libPrepKitName: libPrepKitName || 'Other library preparation kit',
       libPrepCostPerSample: 0,
       enrichment,
@@ -263,7 +266,7 @@ function parseReagentsAndConsumables(wb: XLSX.WorkBook): FixedConsumableItem[] {
   // Header row is 27 (0-indexed), data starts at row 29 (0-indexed: 28)
   const items: FixedConsumableItem[] = []
 
-  for (let r = 28; r <= 120; r++) {
+  for (let r = 28; r <= 105; r++) {
     const itemName = str(ws, encodeCell(r, 7)) // col H (index 7) = name
     if (!itemName) continue // sentinel: stop at empty name
 
@@ -335,7 +338,7 @@ function parseEquipment(wb: XLSX.WorkBook): EquipmentItem[] {
       unitCostUsd: unitCost,
       lifespanYears: lifespanYears || 10,
       ageYears,
-      pctSequencing: pctSequencing || 100,
+      pctSequencing,
     })
   }
 
@@ -416,7 +419,7 @@ function parseFacilityAndTransport(wb: XLSX.WorkBook): {
       label,
       shipmentMethod: shipmentMethod || undefined,
       annualCostUsd: annualCost,
-      pctSequencing: pctSequencing || 100,
+      pctSequencing,
     })
   }
 
@@ -467,7 +470,7 @@ function parseBioinformatics(
     const pricePerUnit = num(ws, encodeCell(r, 2)) // col C
     const quantity = num(ws, encodeCell(r, 3)) // col D
     const pctUseRaw = num(ws, encodeCell(r, 4), 1) // col E — decimal or integer
-    const pctUse = pctUseRaw <= 1 && pctUseRaw > 0 ? pctToInt(pctUseRaw) : (pctUseRaw > 1 ? Math.round(pctUseRaw) : 100)
+    const pctUse = pctUseRaw <= 1 && pctUseRaw > 0 ? pctToInt(pctUseRaw) : (pctUseRaw > 1 ? Math.round(pctUseRaw) : 0)
     const lifespanYears = num(ws, encodeCell(r, 6), 5) // col G
     const ageYears = num(ws, encodeCell(r, 7)) // col H
 
@@ -502,7 +505,7 @@ function parseQualityManagement(wb: XLSX.WorkBook): QMSItem[] {
     const costUsd = num(ws, encodeCell(r, 2)) // col C
     const quantity = num(ws, encodeCell(r, 3)) // col D
     const pctSeqRaw = num(ws, encodeCell(r, 4)) // col E — stored as decimal
-    const pctSequencing = pctSeqRaw > 0 ? pctToInt(pctSeqRaw) : 85 // default 85%
+    const pctSequencing = pctToInt(pctSeqRaw) // blank or zero allocation contributes no QMS cost
 
     items.push({
       activity,
@@ -524,6 +527,7 @@ function parseQualityManagement(wb: XLSX.WorkBook): QMSItem[] {
  * fields are backfilled with defaults.
  */
 export function parseGctWorkbook(wb: XLSX.WorkBook): Partial<Project> {
+  if (!wb.Sheets['Data entry']) throw new Error('Expected a WHO GCT second-edition workbook')
   const dataEntry = parseDataEntry(wb)
   const fixedConsumables = parseReagentsAndConsumables(wb)
   const equipment = parseEquipment(wb)
@@ -539,8 +543,10 @@ export function parseGctWorkbook(wb: XLSX.WorkBook): Partial<Project> {
     reagentKitPrice: partial.reagentKitPrice || 0,
     samplesPerRun: partial.samplesPerRun || 0,
     coverageX: partial.coverageX || 50,
-    bufferPct: partial.bufferPct || 20,
-    retestPct: partial.retestPct || 5,
+    coverageXUserSet: true,
+    bufferPctUserSet: true,
+    bufferPct: partial.bufferPct ?? 20,
+    retestPct: partial.retestPct ?? 5,
     libPrepKitName: partial.libPrepKitName || 'Other library preparation kit',
     libPrepCostPerSample: partial.libPrepCostPerSample || 0,
     enrichment: partial.enrichment || false,
@@ -557,6 +563,27 @@ export function parseGctWorkbook(wb: XLSX.WorkBook): Partial<Project> {
     ...(partial.customLibPrepMaxBarcodes ? { customLibPrepMaxBarcodes: partial.customLibPrepMaxBarcodes } : {}),
     ...(partial.customLibPrepBarcodesPerPack ? { customLibPrepBarcodesPerPack: partial.customLibPrepBarcodesPerPack } : {}),
   }))
+
+  const reagents = wb.Sheets['Reagents and consumables']
+  if (reagents) {
+    sequencers.forEach(seq => {
+      const row = seq.label === 'Sequencer 2' ? 15 : 5
+      seq.reagentKitPrice = num(reagents, `J${row}`)
+      const prepRow = row + 1
+      const packSize = seq.libPrepKitName === 'Other library preparation kit'
+        ? seq.customLibPrepBarcodesPerPack
+        : getEffectiveCatalogue().library_prep_kits.find(k => k.name === seq.libPrepKitName)?.pack_size
+      const prepPrice = num(reagents, `J${prepRow}`)
+      if (packSize && packSize > 0) seq.libPrepCostPerSample = prepPrice / packSize
+      else if (prepPrice > 0) throw new Error('Library preparation pack size is missing')
+      // Extra library-preparation reagents retain their explicit workbook annual
+      // quantities and prices. These remain editable in Step 3 Section B.
+      for (let r = prepRow + 1; r <= row + 9; r++) {
+        const name = str(reagents, `H${r}`)
+        if (name) fixedConsumables.push({ name, unitCostUsd: num(reagents, `J${r}`), quantityPerYear: num(reagents, `I${r}`), enabled: true, workflows: { ngs_library_preparation: true } })
+      }
+    })
+  }
 
   // Wire up assignments: each sequencer gets its corresponding pathogen
   for (let i = 0; i < sequencers.length && i < dataEntry.pathogens.length; i++) {
@@ -582,6 +609,7 @@ export function parseGctWorkbook(wb: XLSX.WorkBook): Partial<Project> {
   fieldCount += qms.length
 
   return {
+    importedFromWho: true,
     id: randomId(),
     name: dataEntry.name || 'Imported WHO GCT project',
     country: dataEntry.country,
@@ -596,8 +624,8 @@ export function parseGctWorkbook(wb: XLSX.WorkBook): Partial<Project> {
     transport,
     bioinformatics,
     qms,
-    exchangeRate: 1,
-    currency: 'USD',
+    exchangeRate: reagents && num(reagents, 'O2', 1) > 0 ? num(reagents, 'O2', 1) : 1,
+    currency: reagents && num(reagents, 'O2', 1) > 0 && num(reagents, 'O2', 1) !== 1 ? 'LOCAL' : 'USD',
     trainingGroupCostUsd,
     adminCostPct,
     facilityPctSequencing,

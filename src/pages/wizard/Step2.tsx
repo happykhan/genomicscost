@@ -124,13 +124,6 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
     }
   }, [sequencer.assignments, pathogens, sequencer.bufferPctUserSet, isCaptureAll]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Keep coverageXText in sync when auto-fill changes coverageX externally
-  useEffect(() => {
-    if (!sequencer.coverageXUserSet) {
-      setCoverageXText(String(sequencer.coverageX))
-    }
-  }, [sequencer.coverageX, sequencer.coverageXUserSet]) // eslint-disable-line react-hooks/exhaustive-deps
-
   // Auto-fill coverageX from highest required coverage among assigned pathogens
   useEffect(() => {
     if (sequencer.coverageXUserSet) return
@@ -487,7 +480,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
               <input
                 type="number" onFocus={e => e.target.select()}
                 className={inputClass}
-                value={coverageXText}
+                value={sequencer.coverageXUserSet ? coverageXText : String(sequencer.coverageX)}
                 min={1}
                 onChange={e => {
                   setCoverageXText(e.target.value)
@@ -852,7 +845,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
                 type="number"
                 onFocus={e => e.target.select()}
                 className={inputClass}
-                value={sequencer.barcodePacksPerRun ?? ''}
+                value={sequencer.barcodePacksPerRun ?? 1}
                 min={0}
                 step={0.1}
                 placeholder="1"

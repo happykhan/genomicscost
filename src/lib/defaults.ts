@@ -314,7 +314,7 @@ export function createDefaultProject(): Project {
     id: randomId(),
     name: '',
     country: '',
-    year: 2025,
+    year: new Date().getFullYear(),
     pathogens: defaultPathogens,
     sequencers: defaultSequencers,
     consumables: defaultConsumables,

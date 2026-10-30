@@ -513,5 +513,7 @@
   "warn_no_depreciation_data": "Enter purchase cost and age to calculate depreciation",
   "warn_no_depreciation_short": "no cost",
   "warn_insufficient_qty": "You may need {{needed}} units to meet your target throughput",
-  "label_depreciation": "Depreciation"
+  "label_depreciation": "Depreciation",
+  "note_import_review": "Imported values need review. Additional library preparation reagents keep their annual workbook quantities; revise these in Step 3 when throughput changes. Unpriced inputs stay at zero.",
+  "note_partial_estimate": "Draft estimate: some enabled sequencers have zero sequencing or library preparation prices. Review these inputs before using the results."
 }
