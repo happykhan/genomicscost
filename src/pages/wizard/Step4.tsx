@@ -229,7 +229,7 @@ export default function Step4() {
       <div
         key={item.idx}
         className="card p-3 flex flex-wrap gap-3 items-center"
-        style={{ opacity: item.status === 'skip' ? 0.4 : 1 }}
+        style={{ opacity: 1 }}
       >
         <div className="flex-1 min-w-36">
           <select
@@ -373,7 +373,7 @@ export default function Step4() {
             {item.unitCostUsd > 0 ? (
               <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>${fmt(annual)}/yr</div>
             ) : (
-              <div className="text-xs" style={{ color: '#b45309' }}>{t('warn_no_depreciation_data')}</div>
+              <div className="text-xs" style={{ color: 'var(--cost-warning)' }}>{t('warn_no_depreciation_data')}</div>
             )}
             {(() => {
               const catItem = catalogue.equipment.find(c => c.name === item.name)
@@ -463,7 +463,7 @@ export default function Step4() {
             ? ((totalCost / remainingLife) * pct + totalCost * maintenanceRate * pct)
             : 0
           return (
-            <div key={item.idx} className="card p-3 flex flex-col gap-2" style={{ opacity: item.status === 'skip' ? 0.4 : 1 }}>
+            <div key={item.idx} className="card p-3 flex flex-col gap-2" style={{ opacity: 1 }}>
               <div className="flex gap-2 items-start">
                 <div className="flex-1">
                   <input
@@ -540,7 +540,7 @@ export default function Step4() {
                     </div>
                   )}
                   {item.status === 'have' && !item.unitCostUsd && (
-                    <div className="text-xs" style={{ color: '#b45309' }}>
+                    <div className="text-xs" style={{ color: 'var(--cost-warning)' }}>
                       {t('warn_no_depreciation_data')}
                     </div>
                   )}
@@ -548,7 +548,7 @@ export default function Step4() {
                     const catI = catalogue.equipment.find(c => c.name === item.name)
                     const rec = catI?.recommended_quantity ?? 0
                     if (rec > 0 && item.quantity < rec) {
-                      return <div className="text-xs" style={{ color: '#b45309' }}>{t('warn_insufficient_qty', { needed: rec })}</div>
+                      return <div className="text-xs" style={{ color: 'var(--cost-warning)' }}>{t('warn_insufficient_qty', { needed: rec })}</div>
                     }
                     return null
                   })()}
@@ -591,7 +591,7 @@ export default function Step4() {
               const catItem = catalogue.equipment.find(c => c.name === item.name)
               const recommended = catItem?.recommended_quantity ?? 0
               return (
-                <tr key={item.idx} style={{ borderBottom: '1px solid var(--gx-border)', opacity: item.status === 'skip' ? 0.4 : 1 }}>
+                <tr key={item.idx} style={{ borderBottom: '1px solid var(--gx-border)', opacity: 1 }}>
                   <td className="px-3 py-1.5" style={{ minWidth: 160 }}>
                     <input
                       type="text"
@@ -607,7 +607,7 @@ export default function Step4() {
                       {catalogueEquipmentNames.map(n => <option key={n} value={n} />)}
                     </datalist>
                     {item.status === 'have' && recommended > 0 && item.quantity < recommended && (
-                      <div className="text-xs mt-0.5" style={{ color: '#b45309' }}>
+                      <div className="text-xs mt-0.5" style={{ color: 'var(--cost-warning)' }}>
                         {t('warn_insufficient_qty', { needed: recommended })}
                       </div>
                     )}
@@ -662,7 +662,7 @@ export default function Step4() {
                     ) : item.status === 'have' && item.unitCostUsd > 0 ? (
                       <span style={{ color: 'var(--gx-text-muted)' }}>${fmt(annual)}</span>
                     ) : item.status === 'have' ? (
-                      <span className="text-xs" style={{ color: '#b45309' }}>{t('warn_no_depreciation_short')}</span>
+                      <span className="text-xs" style={{ color: 'var(--cost-warning)' }}>{t('warn_no_depreciation_short')}</span>
                     ) : (
                       <span style={{ color: 'var(--gx-text-muted)' }}>—</span>
                     )}

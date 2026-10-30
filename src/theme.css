@@ -1,0 +1,118 @@
+/* Local identity for Genomics Costing Tool; shared @genomicx/ui stays unchanged. */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  src: url('/fonts/ibm-plex-sans.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 100 700;
+  font-display: swap;
+}
+
+:root {
+  --gx-font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --gx-font-mono: var(--gx-font-sans);
+  --gx-bg: #faf9f6;
+  --gx-bg-alt: #f0f0ec;
+  --gx-surface: #ffffff;
+  --gx-surface-hover: #e9eae5;
+  --gx-bg-elevated: #ffffff;
+  --gx-text: #292c2e;
+  --gx-text-bright: #202426;
+  --gx-text-muted: #5c6265;
+  --gx-text-inverted: #faf9f6;
+  --gx-border: #cccfca;
+  --gx-accent: #285e88;
+  --gx-accent-hover: #204e72;
+  --gx-accent-dim: #e1eaf0;
+  --gx-nav-bg: #faf9f6;
+  --gx-code-bg: #f0f0ec;
+  --gx-gradient: linear-gradient(#285e88, #285e88);
+  --gx-tag-bg: #e1eaf0;
+  --gx-tag-border: #b4c6d4;
+  --gx-tag-text: #285e88;
+  --cost-control-border: #858c8c;
+  --cost-disabled-bg: #e5e6e1;
+  --cost-warning: #88511d;
+  --cost-chart-1: #35668d;
+  --cost-chart-2: #627883;
+  --cost-chart-3: #796483;
+  --cost-chart-4: #957448;
+  --cost-chart-5: #5b7a68;
+  --cost-chart-6: #9e665e;
+  --cost-chart-7: #537c89;
+  --cost-chart-8: #876c83;
+  --cost-chart-9: #5e7297;
+  --cost-chart-10: #737b7e;
+}
+
+[data-theme='dark'] {
+  --gx-bg: #222629;
+  --gx-bg-alt: #2c3135;
+  --gx-surface: #2c3135;
+  --gx-surface-hover: #373d41;
+  --gx-bg-elevated: #30363a;
+  --gx-text: #e9eae6;
+  --gx-text-bright: #f5f5f0;
+  --gx-text-muted: #b1b9bd;
+  --gx-text-inverted: #222629;
+  --gx-border: #50595e;
+  --gx-accent: #91bbda;
+  --gx-accent-hover: #b0cfe5;
+  --gx-accent-dim: #344550;
+  --gx-nav-bg: #222629;
+  --gx-code-bg: #2c3135;
+  --gx-gradient: linear-gradient(#91bbda, #91bbda);
+  --gx-tag-bg: #344550;
+  --gx-tag-border: #607d90;
+  --gx-tag-text: #b0cfe5;
+  --cost-control-border: #8b989f;
+  --cost-disabled-bg: #373e43;
+  --cost-warning: #efc38e;
+  --cost-chart-1: #8bb0ce;
+  --cost-chart-2: #9faeb6;
+  --cost-chart-3: #b1a0bf;
+  --cost-chart-4: #c2ab84;
+  --cost-chart-5: #9cb6a8;
+  --cost-chart-6: #c6a09a;
+  --cost-chart-7: #93b2bd;
+  --cost-chart-8: #b4a3ba;
+  --cost-chart-9: #92a2bd;
+  --cost-chart-10: #a6adb1;
+}
+
+body, button, input, select, textarea, svg text {
+  font-family: var(--gx-font-sans);
+}
+input[type='number'], table, .gx-cost-number { font-variant-numeric: tabular-nums; }
+input, textarea { caret-color: var(--gx-accent); }
+input:not(:focus), select:not(:focus), textarea:not(:focus) { border-color: var(--cost-control-border); }
+input::placeholder, textarea::placeholder { color: var(--gx-text-muted); opacity: 1; }
+:focus-visible { outline: 2px solid var(--gx-accent) !important; outline-offset: 3px; }
+::selection { background: var(--gx-accent); color: var(--gx-bg); }
+html { scrollbar-color: var(--cost-control-border) var(--gx-bg); }
+a { text-underline-offset: 0.18em; }
+.gx-nav { backdrop-filter: none; -webkit-backdrop-filter: none; }
+.card:hover { border-color: var(--gx-border); }
+button:disabled, input:disabled, select:disabled {
+  opacity: 1 !important;
+  color: var(--gx-text-muted) !important;
+  background: var(--cost-disabled-bg) !important;
+  cursor: not-allowed;
+}
+.gx-cost-hero { background: var(--gx-bg-alt) !important; color: var(--gx-text) !important; }
+.gx-cost-hero > * { opacity: 1 !important; }
+.gx-cost-number { color: var(--gx-accent); }
+
+@media print {
+  :root, [data-theme='dark'] {
+    --cost-chart-1: #35668d;
+    --cost-chart-2: #627883;
+    --cost-chart-3: #796483;
+    --cost-chart-4: #957448;
+    --cost-chart-5: #5b7a68;
+    --cost-chart-6: #9e665e;
+    --cost-chart-7: #537c89;
+    --cost-chart-8: #876c83;
+    --cost-chart-9: #5e7297;
+    --cost-chart-10: #737b7e;
+  }
+}

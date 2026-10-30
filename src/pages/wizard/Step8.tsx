@@ -13,8 +13,8 @@ import ThroughputCurve from '../../components/ThroughputCurve'
 import BreakevenChart from '../../components/BreakevenChart'
 import SequencerCompare from '../../components/SequencerCompare'
 
-const CAT_COLORS = ['#0d9488', '#4f8ef7', '#f97316', '#8b5cf6', '#22c55e', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#64748b']
-const WF_COLORS  = ['#0d9488', '#3b82f6', '#f97316', '#8b5cf6', '#22c55e', '#ec4899']
+const CAT_COLORS = Array.from({ length: 10 }, (_, index) => `var(--cost-chart-${index + 1})`)
+const WF_COLORS = CAT_COLORS.slice(0, 6)
 
 function pct(part: number, total: number) {
   if (!total) return 0
@@ -451,7 +451,7 @@ export default function Step8() {
       {/* Print-only report header */}
       <div className="gx-only-print" style={{ marginBottom: 24 }}>
         <div style={{
-          background: '#0d9488',
+          background: '#344e61',
           color: '#ffffff',
           padding: '14px 20px',
           borderRadius: '6px 6px 0 0',
@@ -463,7 +463,7 @@ export default function Step8() {
           <span style={{ fontSize: '0.72rem', opacity: 0.85 }}>{t('label_print_generated')}</span>
         </div>
         <div style={{
-          border: '1px solid #0d9488',
+          border: '1px solid #344e61',
           borderTop: 'none',
           borderRadius: '0 0 6px 6px',
           padding: '16px 20px 14px',
@@ -566,7 +566,7 @@ export default function Step8() {
                       {row.label}
                       {row.label === t('label_equipment') && (
                         <div className="text-xs mt-0.5" style={{ color: 'var(--gx-text-muted)', fontWeight: 400 }}>
-                          {t('label_equip_depreciation_note')}
+                          {t('label_equip_depreciation_note', { pct: project.maintenancePct ?? 15 })}
                         </div>
                       )}
                       {isBio && !showBioSub && costs.bioinformaticsCloud > 0 && (
@@ -711,7 +711,7 @@ export default function Step8() {
           { label: t('label_equipment'),             value: costs.equipment,            color: CAT_COLORS[3] },
           { label: t('label_personnel'),             value: costs.personnel,            color: CAT_COLORS[4] },
           { label: t('label_training'),              value: costs.training,             color: CAT_COLORS[5] },
-          { label: t('label_admin_overhead'),        value: costs.adminCost,            color: '#94a3b8' },
+          { label: t('label_admin_overhead'),        value: costs.adminCost,            color: 'var(--cost-chart-10)' },
           { label: t('label_facility'),              value: costs.facility,             color: CAT_COLORS[6] },
           { label: t('label_transport'),             value: costs.transport,            color: CAT_COLORS[7] },
           { label: t('label_bioinformatics'),        value: costs.bioinformatics,       color: CAT_COLORS[8] },
@@ -1211,7 +1211,7 @@ export default function Step8() {
         </div>
 
         {/* Print footer */}
-        <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid #e2e8f0', fontSize: '0.7rem', color: '#94a3b8', display: 'flex', justifyContent: 'space-between' }}>
+        <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid #e2e8f0', fontSize: '0.7rem', color: 'var(--cost-chart-10)', display: 'flex', justifyContent: 'space-between' }}>
           <span>{t('label_print_generated')}</span>
           <span>{new Date().toLocaleDateString()}</span>
         </div>

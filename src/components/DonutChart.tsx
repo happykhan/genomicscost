@@ -85,7 +85,7 @@ export default function DonutChart({ title, data, centerText, formatValue }: Don
         {/* Legend */}
         <div style={{ flex: 1, minWidth: 120, display: 'flex', flexDirection: 'column', gap: 4, paddingTop: 2 }}>
           {slices.map((s, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.6rem' }}>
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.6875rem' }}>
               <div style={{ width: 8, height: 8, borderRadius: 1, background: s.color, flexShrink: 0 }} />
               <span style={{ flex: 1, color: 'var(--gx-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {s.label}

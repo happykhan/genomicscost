@@ -20,15 +20,15 @@ import Step8 from './pages/wizard/Step8'
 
 const AppIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="28" height="28">
-    <rect width="32" height="32" rx="7" fill="#0f172a"/>
-    <rect x="5"  y="22" width="5" height="6"  rx="1.5" fill="#2dd4bf" opacity="0.45"/>
-    <rect x="13" y="16" width="5" height="12" rx="1.5" fill="#2dd4bf" opacity="0.70"/>
-    <rect x="21" y="9"  width="6" height="19" rx="1.5" fill="#2dd4bf"/>
-    <circle cx="7.5"   cy="20"   r="3"   fill="#2dd4bf" opacity="0.45"/>
-    <circle cx="15.5"  cy="13.5" r="3"   fill="#2dd4bf" opacity="0.70"/>
-    <circle cx="24"    cy="6.5"  r="3.5" fill="#2dd4bf"/>
-    <line x1="10.5" y1="19.2" x2="12.5" y2="14.5" stroke="#2dd4bf" strokeWidth="1.2" opacity="0.4" strokeLinecap="round"/>
-    <line x1="18.5" y1="12.5" x2="20.5" y2="8"    stroke="#2dd4bf" strokeWidth="1.2" opacity="0.55" strokeLinecap="round"/>
+    <rect width="32" height="32" rx="7" fill="#222629"/>
+    <rect x="5"  y="22" width="5" height="6"  rx="1.5" fill="#91bbda" opacity="0.45"/>
+    <rect x="13" y="16" width="5" height="12" rx="1.5" fill="#91bbda" opacity="0.70"/>
+    <rect x="21" y="9"  width="6" height="19" rx="1.5" fill="#91bbda"/>
+    <circle cx="7.5"   cy="20"   r="3"   fill="#91bbda" opacity="0.45"/>
+    <circle cx="15.5"  cy="13.5" r="3"   fill="#91bbda" opacity="0.70"/>
+    <circle cx="24"    cy="6.5"  r="3.5" fill="#91bbda"/>
+    <line x1="10.5" y1="19.2" x2="12.5" y2="14.5" stroke="#91bbda" strokeWidth="1.2" opacity="0.4" strokeLinecap="round"/>
+    <line x1="18.5" y1="12.5" x2="20.5" y2="8"    stroke="#91bbda" strokeWidth="1.2" opacity="0.55" strokeLinecap="round"/>
   </svg>
 )
 
@@ -212,7 +212,7 @@ function WizardTabBar() {
                 {isDone ? '✓' : s.n}
               </div>
               <span style={{
-                fontSize: '0.68rem',
+                fontSize: '0.6875rem',
                 color: isActive ? 'var(--gx-accent)' : isDone ? 'var(--gx-text)' : 'var(--gx-text-muted)',
                 fontWeight: isActive ? 600 : 400,
                 whiteSpace: 'nowrap',
