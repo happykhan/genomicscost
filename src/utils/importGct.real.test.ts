@@ -60,3 +60,20 @@ it('retains a populated exchange rate while marking the unspecified currency cod
   expect(p.exchangeRate).toBe(143.5)
   expect(p.currency).toBe('LOCAL')
 })
+
+it('keeps source-slot prices and supplements when only sequencer slot 2 is populated', () => {
+  const wb = XLSX.readFile('reference/fixtures/GCTv2_DEMO_COMPLETED.xlsx')
+  delete wb.Sheets['Data entry'].C13
+  delete wb.Sheets['Data entry'].C14
+  const reagents = wb.Sheets['Reagents and consumables']
+  reagents.J15 = { t: 'n', v: 125 }
+  reagents.J16 = { t: 'n', v: 960 }
+  reagents.H17 = { t: 's', v: 'Slot two supplement' }
+  reagents.I17 = { t: 'n', v: 2 }
+  reagents.J17 = { t: 'n', v: 200 }
+  const p = parseGctWorkbook(wb)
+  expect(p.sequencers).toHaveLength(1)
+  expect(p.sequencers![0]).toMatchObject({ label: 'Sequencer 2', platformId: 'ont', reagentKitPrice: 125, libPrepCostPerSample: 10, assignments: [{ pathogenIndex: 0, samples: 300 }] })
+  expect(p.fixedConsumables!.find(c => c.name === 'Slot two supplement')).toMatchObject({ quantityPerYear: 2, unitCostUsd: 200 })
+  expect(p.fixedConsumables!.some(c => c.name.includes('Unique Dual Indexes'))).toBe(false)
+})
