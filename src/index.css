@@ -1,6 +1,7 @@
 @import '@genomicx/ui/styles/tokens.css';
 @import '@genomicx/ui/styles/components.css';
 @import "tailwindcss";
+@import "./theme.css";
 
 /* Show only when printing */
 .gx-only-print { display: none !important; }
@@ -18,7 +19,7 @@
     --gx-text-muted: #475569;
     --gx-text-bright: #0f172a;
     --gx-border: #e2e8f0;
-    --gx-accent: #0d9488;
+    --gx-accent: #285e88;
     --gx-nav-bg: #ffffff;
   }
 
@@ -54,14 +55,14 @@
 
   /* Hero cost card — compact in print */
   .gx-cost-hero {
-    background: #0d9488 !important;
-    color: #ffffff !important;
+    background: #f0f0ec !important;
+    color: #292c2e !important;
     padding: 12px 20px !important;
     margin-bottom: 12px !important;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
-  .gx-cost-hero * { color: #ffffff !important; font-size: 0.78rem !important; }
+  .gx-cost-hero * { color: #292c2e !important; font-size: 0.78rem !important; }
   .gx-cost-number { font-size: 1.6rem !important; line-height: 1.2 !important; }
 
   /* Compact tables */

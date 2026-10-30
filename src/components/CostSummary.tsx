@@ -29,7 +29,7 @@ export default function CostSummary() {
         className="rounded-lg p-4 text-center"
         style={{ background: 'var(--gx-accent)', color: 'var(--gx-bg)' }}
       >
-        <div className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ opacity: 0.8 }}>
+        <div className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ opacity: 1 }}>
           {t('label_cost_per_sample')}
         </div>
         <div className="text-3xl font-bold">

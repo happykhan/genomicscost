@@ -238,7 +238,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
   }
 
   return (
-    <div className="card p-5 mb-6" style={{ borderLeft: '3px solid var(--gx-accent)' }}>
+    <div className="card p-5 mb-6" style={{ borderLeft: '1px solid var(--gx-accent)' }}>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-semibold" style={{ color: 'var(--gx-text)' }}>{sequencer.label}</h3>
         <div className="flex items-center gap-3">
@@ -531,7 +531,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
                     : (p.genomeSizeMb <= 0.03 ? 100_000 : 150_000)
                   const binding = readsFromCoverage >= minReads ? 'coverage' : 'min-reads'
                   return (
-                    <div className="text-xs mt-1" style={{ color: binding === 'min-reads' ? '#b45309' : 'var(--gx-text-muted)' }}>
+                    <div className="text-xs mt-1" style={{ color: binding === 'min-reads' ? 'var(--cost-warning)' : 'var(--gx-text-muted)' }}>
                       {t('label_binding_constraint')}: {binding === 'coverage'
                         ? t('label_binding_coverage', { reads: Math.round(readsFromCoverage).toLocaleString() })
                         : t('label_binding_min_reads', { minReads: minReads.toLocaleString(), coverageReads: Math.round(readsFromCoverage).toLocaleString() })
@@ -644,10 +644,10 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
                 <div className="text-right font-medium" style={{ color: loadingPct < 50 ? '#f59e0b' : 'var(--gx-accent)' }}>{loadingPct}%</div>
               </div>
               {loadingPct < 50 && (
-                <div className="text-xs mt-2" style={{ color: '#b45309' }}>{t('warn_high_wastage')}</div>
+                <div className="text-xs mt-2" style={{ color: 'var(--cost-warning)' }}>{t('warn_high_wastage')}</div>
               )}
               {runsAvg > 52 && (
-                <div className="text-xs mt-2" style={{ color: '#b45309' }}>{t('warn_high_throughput')}</div>
+                <div className="text-xs mt-2" style={{ color: 'var(--cost-warning)' }}>{t('warn_high_throughput')}</div>
               )}
             </div>
           )
@@ -963,7 +963,7 @@ function AssignmentMatrix({ pathogens, sequencers, onUpdate }: AssignmentMatrixP
   const grandDelta = totalAssigned - totalDefined
 
   return (
-    <div className="card p-5 mb-6" style={{ borderLeft: '3px solid var(--gx-accent)' }}>
+    <div className="card p-5 mb-6" style={{ borderLeft: '1px solid var(--gx-accent)' }}>
       <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--gx-text)' }}>
         {t('matrix_title')}
       </h3>
