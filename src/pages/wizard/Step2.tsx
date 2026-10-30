@@ -82,12 +82,18 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
   useEffect(() => {
     const isCustomKit = sequencer.reagentKitName === 'Other sequencing kit'
     if (!selectedKit && !isCustomKit) return
-    const readLengthBp = isCustomKit ? (sequencer.customKitReadLengthBp ?? 0) : (selectedKit?.read_length_bp ?? 0)
+    let readLengthBp = isCustomKit ? (sequencer.customKitReadLengthBp ?? 0) : (selectedKit?.read_length_bp ?? 0)
     const maxOutputMb = isCustomKit ? (sequencer.customKitMaxOutputMb ?? 0) : (selectedKit?.max_output_mb ?? 0)
+    // ONT: use user-entered average read length if the kit has no read_length_bp (Issue #5)
+    if (readLengthBp === 0 && sequencer.platformId === 'ont' && (sequencer.ontAvgReadLengthBp ?? 0) > 0) {
+      readLengthBp = sequencer.ontAvgReadLengthBp!
+    }
     // For custom kits derive read count from output÷readLength so the min-reads floor applies (matches Excel Annex 4)
     const maxReadsPfc = isCustomKit
       ? (readLengthBp > 0 && maxOutputMb > 0 ? Math.floor((maxOutputMb * 1e6) / readLengthBp) : 0)
-      : (selectedKit?.max_reads_per_flowcell ?? 0)
+      : (readLengthBp > 0 && maxOutputMb > 0 && !(selectedKit?.max_reads_per_flowcell)
+          ? Math.floor((maxOutputMb * 1e6) / readLengthBp)
+          : (selectedKit?.max_reads_per_flowcell ?? 0))
     const calculated = calculateSamplesPerRunMulti(
       assignedPathogens.length > 0 ? assignedPathogens : pathogens,
       sequencer.coverageX,
@@ -106,7 +112,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
     sequencer.controlsPerRun, isCaptureAll, sequencer.minReadsPerSample,
     sequencer.libPrepKitName, sequencer.assignments,
     sequencer.customKitMaxOutputMb, sequencer.customKitReadLengthBp,
-    sequencer.customLibPrepMaxBarcodes,
+    sequencer.customLibPrepMaxBarcodes, sequencer.ontAvgReadLengthBp,
   ])
 
   // Auto-set bufferPct from pathogen type (30% bacteria, 20% virus, 0% capture-all) per WHO GCT
@@ -117,13 +123,6 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
       updateSequencer(index, { bufferPct: buffer })
     }
   }, [sequencer.assignments, pathogens, sequencer.bufferPctUserSet, isCaptureAll]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Keep coverageXText in sync when auto-fill changes coverageX externally
-  useEffect(() => {
-    if (!sequencer.coverageXUserSet) {
-      setCoverageXText(String(sequencer.coverageX))
-    }
-  }, [sequencer.coverageX, sequencer.coverageXUserSet]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-fill coverageX from highest required coverage among assigned pathogens
   useEffect(() => {
@@ -400,7 +399,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
               </div>
               <div>
                 <label className={labelClass}>{t('label_max_flowcell_output')}</label>
-                <input type="number" min={0} className={inputClass}
+                <input type="number" onFocus={e => e.target.select()} min={0} className={inputClass}
                   value={sequencer.customKitMaxOutputMb != null ? Math.round(sequencer.customKitMaxOutputMb * 1e6) : ''}
                   placeholder={t('placeholder_max_output_bytes')}
                   onChange={e => { const bytes = parseFloat(e.target.value); updateSequencer(index, { customKitMaxOutputMb: isNaN(bytes) ? undefined : bytes / 1e6 }) }}
@@ -411,7 +410,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
               </div>
               <div>
                 <label className={labelClass}>{t('label_read_length_bp')}</label>
-                <input type="number" min={0} className={inputClass}
+                <input type="number" onFocus={e => e.target.select()} min={0} className={inputClass}
                   value={sequencer.customKitReadLengthBp ?? ''}
                   placeholder={t('placeholder_read_length')}
                   onChange={e => { const v = parseInt(e.target.value); updateSequencer(index, { customKitReadLengthBp: isNaN(v) ? undefined : v }) }}
@@ -419,7 +418,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
               </div>
               <div>
                 <label className={labelClass}>{t('label_kit_packs_per_run')}</label>
-                <input type="number" min={0} step={0.1} className={inputClass}
+                <input type="number" onFocus={e => e.target.select()} min={0} step={0.1} className={inputClass}
                   value={sequencer.customKitPacksPerRun ?? ''}
                   placeholder={t('placeholder_kit_packs')}
                   onChange={e => { const v = parseFloat(e.target.value); updateSequencer(index, { customKitPacksPerRun: isNaN(v) ? undefined : v }) }}
@@ -435,7 +434,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
           <div>
             <label className={labelClass}>{t('field_kit_price')}</label>
             <input
-              type="number"
+              type="number" onFocus={e => e.target.select()}
               className={inputClass}
               value={sequencer.reagentKitPrice}
               min={0}
@@ -458,7 +457,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
           <div>
             <label className={labelClass}>{t('field_min_reads')}<Tooltip content={t('tooltip_min_reads')} /></label>
             <input
-              type="number"
+              type="number" onFocus={e => e.target.select()}
               className={inputClass}
               value={sequencer.minReadsPerSample ?? 100_000}
               min={1000}
@@ -479,9 +478,9 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
                 )}
               </label>
               <input
-                type="number"
+                type="number" onFocus={e => e.target.select()}
                 className={inputClass}
-                value={coverageXText}
+                value={sequencer.coverageXUserSet ? coverageXText : String(sequencer.coverageX)}
                 min={1}
                 onChange={e => {
                   setCoverageXText(e.target.value)
@@ -575,6 +574,33 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
           </div>
         )}
 
+        {/* ONT average read length — needed for non-standard organisms (Issue #5) */}
+        {sequencer.platformId === 'ont' && !isCaptureAll && (
+          <div>
+            <label className={labelClass}>
+              {t('field_ont_avg_read_length')}
+              <Tooltip content={t('tooltip_ont_avg_read_length')} />
+            </label>
+            <input
+              type="number"
+              onFocus={e => e.target.select()}
+              className={inputClass}
+              value={sequencer.ontAvgReadLengthBp ?? ''}
+              min={100}
+              step={100}
+              placeholder={t('placeholder_ont_avg_read_length')}
+              onChange={e => {
+                const v = parseInt(e.target.value)
+                updateSequencer(index, { ontAvgReadLengthBp: isNaN(v) ? undefined : v })
+              }}
+              style={{ maxWidth: 200 }}
+            />
+            <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>
+              {t('hint_ont_avg_read_length')}
+            </div>
+          </div>
+        )}
+
         {/* WHO GCT rows 25–29: run capacity stats */}
         {sequencer.samplesPerRun > 0 && (() => {
           const hasAssignments = Array.isArray(sequencer.assignments) && sequencer.assignments.length > 0
@@ -602,7 +628,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
                 </div>
                 <div className="text-right">
                   <input
-                    type="number"
+                    type="number" onFocus={e => e.target.select()}
                     min={1}
                     max={maxSPR}
                     value={storedAvg ?? ''}
@@ -679,7 +705,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
           <div>
             <label className={labelClass}>{t('field_controls_per_run')}<Tooltip content={t('tooltip_controls_per_run')} /></label>
             <input
-              type="number"
+              type="number" onFocus={e => e.target.select()}
               className={inputClass}
               value={sequencer.controlsPerRun ?? 2}
               min={0}
@@ -730,7 +756,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
               </div>
               <div>
                 <label className={labelClass}>{t('label_max_barcodes')}</label>
-                <input type="number" min={1} className={inputClass}
+                <input type="number" onFocus={e => e.target.select()} min={1} className={inputClass}
                   value={sequencer.customLibPrepMaxBarcodes ?? ''}
                   placeholder={t('placeholder_barcodes_total')}
                   onChange={e => { const v = parseInt(e.target.value); updateSequencer(index, { customLibPrepMaxBarcodes: isNaN(v) ? undefined : v }) }}
@@ -739,7 +765,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
               </div>
               <div>
                 <label className={labelClass}>{t('label_barcodes_per_pack')}</label>
-                <input type="number" min={1} className={inputClass}
+                <input type="number" onFocus={e => e.target.select()} min={1} className={inputClass}
                   value={sequencer.customLibPrepBarcodesPerPack ?? ''}
                   placeholder={t('placeholder_barcodes_per_pack')}
                   onChange={e => { const v = parseInt(e.target.value); updateSequencer(index, { customLibPrepBarcodesPerPack: isNaN(v) ? undefined : v }) }}
@@ -761,7 +787,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
               <div>
                 <label className={labelClass}>{t('label_lib_prep_kit_price')}</label>
                 <input
-                  type="number"
+                  type="number" onFocus={e => e.target.select()}
                   className={inputClass}
                   value={packSize > 0 ? parseFloat(kitPrice.toFixed(2)) : ''}
                   min={0}
@@ -778,7 +804,7 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
               <div>
                 <label className={labelClass}>{t('field_lib_prep_cost')}</label>
                 <input
-                  type="number"
+                  type="number" onFocus={e => e.target.select()}
                   className={inputClass}
                   value={sequencer.libPrepCostPerSample}
                   min={0}
@@ -790,6 +816,50 @@ function SequencerPanel({ index, sequencer, pathogens, canRemove }: SequencerPan
             </div>
           )
         })()}
+
+        {/* ONT barcode pack costs (Issue #6) */}
+        {sequencer.platformId === 'ont' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>{t('field_barcode_pack_cost')}</label>
+              <input
+                type="number"
+                onFocus={e => e.target.select()}
+                className={inputClass}
+                value={sequencer.barcodePackCostUsd ?? ''}
+                min={0}
+                step={1}
+                placeholder="0"
+                onChange={e => {
+                  const v = parseFloat(e.target.value)
+                  updateSequencer(index, { barcodePackCostUsd: isNaN(v) ? undefined : v })
+                }}
+              />
+              <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>
+                {t('hint_barcode_pack_cost')}
+              </div>
+            </div>
+            <div>
+              <label className={labelClass}>{t('field_barcode_packs_per_run')}</label>
+              <input
+                type="number"
+                onFocus={e => e.target.select()}
+                className={inputClass}
+                value={sequencer.barcodePacksPerRun ?? 1}
+                min={0}
+                step={0.1}
+                placeholder="1"
+                onChange={e => {
+                  const v = parseFloat(e.target.value)
+                  updateSequencer(index, { barcodePacksPerRun: isNaN(v) ? undefined : v })
+                }}
+              />
+              <div className="text-xs mt-1" style={{ color: 'var(--gx-text-muted)' }}>
+                {t('hint_barcode_packs_per_run')}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Enrichment toggle */}
         <div>
@@ -975,7 +1045,7 @@ function AssignmentMatrix({ pathogens, sequencers, onUpdate }: AssignmentMatrixP
                   {enabledSeqs.map(({ idx }) => (
                     <td key={idx} className="px-2 py-2 text-center">
                       <input
-                        type="number"
+                        type="number" onFocus={e => e.target.select()}
                         min={0}
                         value={getAssignedSamples(sequencers, idx, pi)}
                         onChange={e => handleCellChange(idx, pi, e.target.value)}

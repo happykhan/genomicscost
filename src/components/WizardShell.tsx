@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import CostSummary from './CostSummary'
 import { useProject } from '../store/ProjectContext'
 import { useTranslation } from 'react-i18next'
+import toast from 'react-hot-toast'
 
 interface WizardShellProps {
   step: number
@@ -16,8 +17,25 @@ function MobileCostPerSample() {
 export default function WizardShell({ step, children }: WizardShellProps) {
   const navigate = useNavigate()
   const { t } = useTranslation()
+  const { project, saveProject } = useProject()
   const canBack = step > 1
   const canNext = step < 8
+
+  function handleSave() {
+    saveProject()
+    toast.success(t('toast_project_saved'))
+  }
+
+  function handleDownloadProject() {
+    const filename = `${(project.name || 'genomics-cost').replace(/\s+/g, '-')}-project.json`
+    const blob = new Blob([JSON.stringify(project, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    a.click()
+    URL.revokeObjectURL(url)
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6 pb-20 lg:pb-6">
@@ -25,10 +43,11 @@ export default function WizardShell({ step, children }: WizardShellProps) {
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Wizard content */}
         <div className="flex-1 min-w-0">
+          {project.importedFromWho && <p role="note" className="card p-3 mb-4 text-sm">{t('note_import_review')}</p>}
           {children}
 
           {/* Navigation buttons */}
-          <div className="flex justify-between mt-8 pt-4" style={{ borderTop: '1px solid var(--gx-border)' }}>
+          <div className="flex justify-between items-center mt-8 pt-4" style={{ borderTop: '1px solid var(--gx-border)' }}>
             <button
               onClick={() => navigate(`/wizard/${step - 1}`)}
               disabled={!canBack}
@@ -43,6 +62,35 @@ export default function WizardShell({ step, children }: WizardShellProps) {
             >
               {t('btn_back')}
             </button>
+
+            {/* Save controls — visible on every step */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleSave}
+                className="px-3 py-1.5 rounded text-xs font-medium"
+                style={{
+                  background: 'var(--gx-bg-alt)',
+                  color: 'var(--gx-text)',
+                  border: '1px solid var(--gx-border)',
+                  cursor: 'pointer',
+                }}
+              >
+                {t('btn_save')}
+              </button>
+              <button
+                onClick={handleDownloadProject}
+                className="px-3 py-1.5 rounded text-xs font-medium"
+                style={{
+                  background: 'none',
+                  color: 'var(--gx-text-muted)',
+                  border: '1px solid var(--gx-border)',
+                  cursor: 'pointer',
+                }}
+                title={t('btn_download_project')}
+              >
+                {t('btn_download_project')}
+              </button>
+            </div>
 
             {canNext && (
               <button

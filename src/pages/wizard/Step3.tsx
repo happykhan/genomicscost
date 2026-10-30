@@ -279,7 +279,8 @@ export default function Step3() {
               const runsPerYear = Math.ceil(samplesWithRetests / effectiveSPR)
               const packsPerRun = seq.customKitPacksPerRun ?? 1
               const kitsPerYear = Math.ceil(runsPerYear * packsPerRun)
-              const reagentCostAnnual = runsPerYear * (seq.reagentKitPrice ?? 0)
+              const barcodeCost = seq.platformId === 'ont' ? (seq.barcodePackCostUsd ?? 0) * (seq.barcodePacksPerRun ?? 1) : 0
+              const reagentCostAnnual = runsPerYear * ((seq.reagentKitPrice ?? 0) + barcodeCost)
 
               const platform = catalogue.platforms.find(p => p.id === seq.platformId)
               const platformName = platform?.name ?? seq.platformId
@@ -324,9 +325,12 @@ export default function Step3() {
 
       {/* Section B: Fixed-Quantity Reagents & Consumables (shopping list, absolute annual qty) */}
       <div className="mb-6">
-        <div className="text-xs uppercase tracking-wider mb-2 font-semibold" style={{ color: 'var(--gx-text-muted)' }}>
+        <div className="text-xs uppercase tracking-wider mb-1 font-semibold" style={{ color: 'var(--gx-text-muted)' }}>
           {t('label_section_b_reagents')}
         </div>
+        <p className="text-xs mb-2" style={{ color: 'var(--gx-text-muted)' }}>
+          {t('label_section_b_desc')}
+        </p>
         <div className="card" style={{ overflowX: 'auto' }}>
           <table className="w-full text-sm" style={{ minWidth: 680 }}>
             <thead>
@@ -378,7 +382,7 @@ export default function Step3() {
                     </td>
                     <td className="px-3 py-2">
                       <input
-                        type="number"
+                        type="number" onFocus={e => e.target.select()}
                         value={item.quantityPerYear ?? 0}
                         min={0}
                         step={1}
@@ -389,7 +393,7 @@ export default function Step3() {
                     </td>
                     <td className="px-3 py-2">
                       <input
-                        type="number"
+                        type="number" onFocus={e => e.target.select()}
                         value={item.unitCostUsd}
                         min={0}
                         step={0.01}
@@ -440,9 +444,12 @@ export default function Step3() {
 
       {/* Section C: Per-Sample Reagents & Consumables (volume-dependent, starts blank) */}
       <div className="mb-6">
-        <div className="text-xs uppercase tracking-wider mb-2 font-semibold" style={{ color: 'var(--gx-text-muted)' }}>
+        <div className="text-xs uppercase tracking-wider mb-1 font-semibold" style={{ color: 'var(--gx-text-muted)' }}>
           {t('label_section_c_per_sample')}
         </div>
+        <p className="text-xs mb-2" style={{ color: 'var(--gx-text-muted)' }}>
+          {t('label_section_c_desc')}
+        </p>
         <div className="card" style={{ overflowX: 'auto' }}>
           <table className="w-full text-sm" style={{ minWidth: 700 }}>
             <thead>
@@ -552,7 +559,7 @@ export default function Step3() {
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-1">
                           <input
-                            type="number"
+                            type="number" onFocus={e => e.target.select()}
                             value={item.quantityPerSample}
                             min={0}
                             step={0.001}
@@ -565,7 +572,7 @@ export default function Step3() {
                         </div>
                         <div className="flex items-center gap-1">
                           <input
-                            type="number"
+                            type="number" onFocus={e => e.target.select()}
                             value={item.quantityPerSample > 0 ? Math.round(1 / item.quantityPerSample) : ''}
                             min={1}
                             step={1}
@@ -590,7 +597,7 @@ export default function Step3() {
                     {/* Unit cost */}
                     <td className="px-3 py-2">
                       <input
-                        type="number"
+                        type="number" onFocus={e => e.target.select()}
                         value={item.unitCostUsd}
                         min={0}
                         step={0.01}

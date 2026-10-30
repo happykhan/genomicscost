@@ -154,13 +154,13 @@ export default function Step4() {
 
   const maintenanceRate = (project.maintenancePct ?? 15) / 100
 
-  // WHO GCT: depreciation (age-adjusted) + maintenance % × pctSequencing
+  // WHO workbook: straight-line depreciation + maintenance % × pctSequencing
+  // 'buy' items always contribute; 'have' items contribute when purchase cost is provided
   const annualTotal = equipment
-    .filter(e => e.status === 'buy')
+    .filter(e => e.status === 'buy' || (e.status === 'have' && (e.unitCostUsd ?? 0) > 0))
     .reduce((sum, e) => {
       const lifespan = Math.max(1, e.lifespanYears ?? 5)
-      const age = Math.max(0, Math.min(e.ageYears ?? 0, lifespan - 1))
-      const remainingLife = Math.max(1, lifespan - age)
+      const remainingLife = lifespan
       const totalCost = e.unitCostUsd * e.quantity
       const pct = (e.pctSequencing ?? 100) / 100
       return sum + (totalCost / remainingLife) * pct + totalCost * maintenanceRate * pct
@@ -221,11 +221,10 @@ export default function Step4() {
 
   function renderItemCard(item: typeof instrumentItems[0]) {
     const lifespan = Math.max(1, item.lifespanYears ?? 5)
-    const age = Math.max(0, Math.min(item.ageYears ?? 0, lifespan - 1))
-    const remainingLife = Math.max(1, lifespan - age)
+    const remainingLife = lifespan
     const totalCost = item.unitCostUsd * item.quantity
     const pct = (item.pctSequencing ?? 100) / 100
-    const annual = item.status === 'buy' ? ((totalCost / remainingLife) * pct + totalCost * maintenanceRate * pct) : 0
+    const annual = item.status !== 'skip' ? ((totalCost / remainingLife) * pct + totalCost * maintenanceRate * pct) : 0
     return (
       <div
         key={item.idx}
@@ -233,18 +232,22 @@ export default function Step4() {
         style={{ opacity: item.status === 'skip' ? 0.4 : 1 }}
       >
         <div className="flex-1 min-w-36">
-          <input
-            type="text"
-            value={item.name}
-            list={`equip-names-${item.idx}`}
-            onChange={e => handleEquipmentNameChange(item.idx, e.target.value)}
+          <select
+            value={catalogueInstrumentNames.includes(item.name) ? item.name : '__custom__'}
+            onChange={e => {
+              if (e.target.value === '__custom__') return
+              handleEquipmentNameChange(item.idx, e.target.value)
+            }}
             className={inputClass}
             style={{ width: '100%', fontWeight: 500, fontSize: '0.875rem' }}
-            placeholder="Equipment name"
-          />
-          <datalist id={`equip-names-${item.idx}`}>
-            {catalogueEquipmentNames.map(n => <option key={n} value={n} />)}
-          </datalist>
+          >
+            {catalogueInstrumentNames.map(n => (
+              <option key={n} value={n}>{n}</option>
+            ))}
+            {!catalogueInstrumentNames.includes(item.name) && (
+              <option value="__custom__">{item.name}</option>
+            )}
+          </select>
           {(() => {
             const catItem = catalogue.equipment.find(c => c.name === item.name)
             const steps = catItem?.workflow_steps as string[] | undefined
@@ -300,35 +303,90 @@ export default function Step4() {
           <>
             <div className="flex items-center gap-1">
               <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_qty')}</label>
-              <input type="number" value={item.quantity} min={1}
+              <input type="number" onFocus={e => e.target.select()} value={item.quantity} min={1}
                 onChange={e => updateItem(item.idx, { quantity: (v => isNaN(v) ? 1 : v)(parseInt(e.target.value)) })}
                 className={inputClass} style={{ width: 60, textAlign: 'center' }} />
             </div>
             <div className="flex items-center gap-1">
               <label className="text-xs" style={{ color: 'var(--gx-text-muted)', display: 'flex', alignItems: 'center' }}>{t('col_price_each')}<Tooltip content={t('tooltip_unit_cost_equip')} /></label>
-              <input type="number" value={item.unitCostUsd} min={0}
+              <input type="number" onFocus={e => e.target.select()} value={item.unitCostUsd} min={0}
                 onChange={e => updateItem(item.idx, { unitCostUsd: parseFloat(e.target.value) || 0 })}
                 className={inputClass} style={{ width: 100, textAlign: 'right' }} />
             </div>
             <div className="flex items-center gap-1">
               <label className="text-xs" style={{ color: 'var(--gx-text-muted)', display: 'flex', alignItems: 'center' }}>{t('col_life_yr')}<Tooltip content={t('tooltip_life_yr')} /></label>
-              <input type="number" value={item.lifespanYears ?? 10} min={1} max={30}
+              <input type="number" onFocus={e => e.target.select()} value={item.lifespanYears ?? 10} min={1} max={30}
                 onChange={e => updateItem(item.idx, { lifespanYears: (v => isNaN(v) ? 10 : v)(parseInt(e.target.value)) })}
                 className={inputClass} style={{ width: 60, textAlign: 'center' }} />
             </div>
             <div className="flex items-center gap-1">
               <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_age_yr')}</label>
-              <input type="number" value={item.ageYears ?? 0} min={0} max={item.lifespanYears ? item.lifespanYears - 1 : 29}
+              <input type="number" onFocus={e => e.target.select()} value={item.ageYears ?? 0} min={0} max={item.lifespanYears ? item.lifespanYears - 1 : 29}
                 onChange={e => updateItem(item.idx, { ageYears: parseInt(e.target.value) || 0 })}
                 className={inputClass} style={{ width: 60, textAlign: 'center' }} />
             </div>
             <div className="flex items-center gap-1">
               <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_pct_seq')}</label>
-              <input type="number" value={item.pctSequencing ?? 100} min={0} max={100}
+              <input type="number" onFocus={e => e.target.select()} value={item.pctSequencing ?? 100} min={0} max={100}
                 onChange={e => updateItem(item.idx, { pctSequencing: parseInt(e.target.value) || 0 })}
                 className={inputClass} style={{ width: 60, textAlign: 'center' }} />
             </div>
             <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>${fmt(annual)}/yr</div>
+          </>
+        )}
+
+        {/* "Have" items: show quantity + optional depreciation fields (Issues #4 & #9) */}
+        {item.status === 'have' && (
+          <>
+            <div className="flex items-center gap-1">
+              <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_qty')}</label>
+              <input type="number" onFocus={e => e.target.select()} value={item.quantity} min={1}
+                onChange={e => updateItem(item.idx, { quantity: (v => isNaN(v) ? 1 : v)(parseInt(e.target.value)) })}
+                className={inputClass} style={{ width: 60, textAlign: 'center' }} />
+            </div>
+            <div className="flex items-center gap-1">
+              <label className="text-xs" style={{ color: 'var(--gx-text-muted)', display: 'flex', alignItems: 'center' }}>{t('label_purchase_cost')}<Tooltip content={t('tooltip_have_purchase_cost')} /></label>
+              <input type="number" onFocus={e => e.target.select()} value={item.unitCostUsd || ''} min={0}
+                placeholder={t('label_optional')}
+                onChange={e => updateItem(item.idx, { unitCostUsd: parseFloat(e.target.value) || 0 })}
+                className={inputClass} style={{ width: 100, textAlign: 'right' }} />
+            </div>
+            <div className="flex items-center gap-1">
+              <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_age_yr')}</label>
+              <input type="number" onFocus={e => e.target.select()} value={item.ageYears ?? ''} min={0}
+                placeholder="—"
+                onChange={e => updateItem(item.idx, { ageYears: parseInt(e.target.value) || 0 })}
+                className={inputClass} style={{ width: 60, textAlign: 'center' }} />
+            </div>
+            <div className="flex items-center gap-1">
+              <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_life_yr')}</label>
+              <input type="number" onFocus={e => e.target.select()} value={item.lifespanYears ?? 10} min={1} max={30}
+                onChange={e => updateItem(item.idx, { lifespanYears: (v => isNaN(v) ? 10 : v)(parseInt(e.target.value)) })}
+                className={inputClass} style={{ width: 60, textAlign: 'center' }} />
+            </div>
+            <div className="flex items-center gap-1">
+              <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_pct_seq')}</label>
+              <input type="number" onFocus={e => e.target.select()} value={item.pctSequencing ?? 100} min={0} max={100}
+                onChange={e => updateItem(item.idx, { pctSequencing: parseInt(e.target.value) || 0 })}
+                className={inputClass} style={{ width: 60, textAlign: 'center' }} />
+            </div>
+            {item.unitCostUsd > 0 ? (
+              <div className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>${fmt(annual)}/yr</div>
+            ) : (
+              <div className="text-xs" style={{ color: '#b45309' }}>{t('warn_no_depreciation_data')}</div>
+            )}
+            {(() => {
+              const catItem = catalogue.equipment.find(c => c.name === item.name)
+              const recommended = catItem?.recommended_quantity ?? 0
+              if (recommended > 0 && item.quantity < recommended) {
+                return (
+                  <div className="text-xs px-2 py-0.5 rounded-full" style={{ background: '#fef3c7', color: '#92400e', border: '1px solid #fcd34d', whiteSpace: 'nowrap' }}>
+                    {t('warn_insufficient_qty', { needed: recommended })}
+                  </div>
+                )
+              }
+              return null
+            })()}
           </>
         )}
 
@@ -397,11 +455,13 @@ export default function Step4() {
         )}
         {otherItems.map(item => {
           const lifespan = Math.max(1, item.lifespanYears ?? 5)
-          const age = Math.max(0, Math.min(item.ageYears ?? 0, lifespan - 1))
-          const remainingLife = Math.max(1, lifespan - age)
+          const remainingLife = lifespan
           const totalCost = item.unitCostUsd * item.quantity
           const pct = (item.pctSequencing ?? 100) / 100
-          const annual = item.status === 'buy' ? ((totalCost / remainingLife) * pct + totalCost * maintenanceRate * pct) : 0
+          const showFields = item.status === 'buy' || item.status === 'have'
+          const annual = showFields && (item.status === 'buy' || item.unitCostUsd > 0)
+            ? ((totalCost / remainingLife) * pct + totalCost * maintenanceRate * pct)
+            : 0
           return (
             <div key={item.idx} className="card p-3 flex flex-col gap-2" style={{ opacity: item.status === 'skip' ? 0.4 : 1 }}>
               <div className="flex gap-2 items-start">
@@ -445,33 +505,53 @@ export default function Step4() {
                   </button>
                 ))}
               </div>
-              {item.status === 'buy' && (
+              {showFields && (
                 <>
                   <div className="flex flex-wrap gap-2">
                     <div className="flex flex-col gap-0.5">
                       <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_qty')}</label>
-                      <input type="number" value={item.quantity} min={1} onChange={e => updateItem(item.idx, { quantity: (v => isNaN(v) ? 1 : v)(parseInt(e.target.value)) })} className={inputClass} style={{ width: 70, textAlign: 'center' }} />
+                      <input type="number" onFocus={e => e.target.select()} value={item.quantity} min={1} onChange={e => updateItem(item.idx, { quantity: (v => isNaN(v) ? 1 : v)(parseInt(e.target.value)) })} className={inputClass} style={{ width: 70, textAlign: 'center' }} />
                     </div>
                     <div className="flex flex-col gap-0.5">
-                      <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_price_each')}</label>
-                      <input type="number" value={item.unitCostUsd} min={0} onChange={e => updateItem(item.idx, { unitCostUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 100, textAlign: 'right' }} />
+                      <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{item.status === 'have' ? t('label_purchase_cost') : t('col_price_each')}</label>
+                      <input type="number" onFocus={e => e.target.select()} value={item.unitCostUsd || ''} min={0} placeholder={item.status === 'have' ? t('label_optional') : undefined} onChange={e => updateItem(item.idx, { unitCostUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 100, textAlign: 'right' }} />
                     </div>
                     <div className="flex flex-col gap-0.5">
                       <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_life_yr')}</label>
-                      <input type="number" value={item.lifespanYears ?? 10} min={1} max={30} onChange={e => updateItem(item.idx, { lifespanYears: (v => isNaN(v) ? 10 : v)(parseInt(e.target.value)) })} className={inputClass} style={{ width: 70, textAlign: 'center' }} />
+                      <input type="number" onFocus={e => e.target.select()} value={item.lifespanYears ?? 10} min={1} max={30} onChange={e => updateItem(item.idx, { lifespanYears: (v => isNaN(v) ? 10 : v)(parseInt(e.target.value)) })} className={inputClass} style={{ width: 70, textAlign: 'center' }} />
                     </div>
                     <div className="flex flex-col gap-0.5">
                       <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_age_yr')}</label>
-                      <input type="number" value={item.ageYears ?? 0} min={0} max={(item.lifespanYears ?? 10) - 1} onChange={e => updateItem(item.idx, { ageYears: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 70, textAlign: 'center' }} />
+                      <input type="number" onFocus={e => e.target.select()} value={item.ageYears ?? 0} min={0} max={(item.lifespanYears ?? 10) - 1} onChange={e => updateItem(item.idx, { ageYears: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 70, textAlign: 'center' }} />
                     </div>
                     <div className="flex flex-col gap-0.5">
                       <label className="text-xs" style={{ color: 'var(--gx-text-muted)' }}>{t('col_pct_seq')}</label>
-                      <input type="number" value={item.pctSequencing ?? 100} min={0} max={100} onChange={e => updateItem(item.idx, { pctSequencing: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 70, textAlign: 'center' }} />
+                      <input type="number" onFocus={e => e.target.select()} value={item.pctSequencing ?? 100} min={0} max={100} onChange={e => updateItem(item.idx, { pctSequencing: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 70, textAlign: 'center' }} />
                     </div>
                   </div>
-                  <div className="text-sm font-semibold" style={{ color: 'var(--gx-accent)' }}>
-                    {t('col_annual_usd_yr')}: ${fmt(annual)}
-                  </div>
+                  {item.status === 'buy' && (
+                    <div className="text-sm font-semibold" style={{ color: 'var(--gx-accent)' }}>
+                      {t('col_annual_usd_yr')}: ${fmt(annual)}
+                    </div>
+                  )}
+                  {item.status === 'have' && item.unitCostUsd > 0 && (
+                    <div className="text-sm" style={{ color: 'var(--gx-text-muted)' }}>
+                      {t('label_depreciation')}: ${fmt(annual)}/yr
+                    </div>
+                  )}
+                  {item.status === 'have' && !item.unitCostUsd && (
+                    <div className="text-xs" style={{ color: '#b45309' }}>
+                      {t('warn_no_depreciation_data')}
+                    </div>
+                  )}
+                  {item.status === 'have' && (() => {
+                    const catI = catalogue.equipment.find(c => c.name === item.name)
+                    const rec = catI?.recommended_quantity ?? 0
+                    if (rec > 0 && item.quantity < rec) {
+                      return <div className="text-xs" style={{ color: '#b45309' }}>{t('warn_insufficient_qty', { needed: rec })}</div>
+                    }
+                    return null
+                  })()}
                 </>
               )}
             </div>
@@ -501,11 +581,15 @@ export default function Step4() {
             )}
             {otherItems.map(item => {
               const lifespan = Math.max(1, item.lifespanYears ?? 5)
-              const age = Math.max(0, Math.min(item.ageYears ?? 0, lifespan - 1))
-              const remainingLife = Math.max(1, lifespan - age)
+              const remainingLife = lifespan
               const totalCost = item.unitCostUsd * item.quantity
               const pct = (item.pctSequencing ?? 100) / 100
-              const annual = item.status === 'buy' ? ((totalCost / remainingLife) * pct + totalCost * maintenanceRate * pct) : 0
+              const showFields = item.status === 'buy' || item.status === 'have'
+              const annual = showFields && (item.status === 'buy' || item.unitCostUsd > 0)
+                ? ((totalCost / remainingLife) * pct + totalCost * maintenanceRate * pct)
+                : 0
+              const catItem = catalogue.equipment.find(c => c.name === item.name)
+              const recommended = catItem?.recommended_quantity ?? 0
               return (
                 <tr key={item.idx} style={{ borderBottom: '1px solid var(--gx-border)', opacity: item.status === 'skip' ? 0.4 : 1 }}>
                   <td className="px-3 py-1.5" style={{ minWidth: 160 }}>
@@ -522,6 +606,11 @@ export default function Step4() {
                     <datalist id={`equip-names-${item.idx}`}>
                       {catalogueEquipmentNames.map(n => <option key={n} value={n} />)}
                     </datalist>
+                    {item.status === 'have' && recommended > 0 && item.quantity < recommended && (
+                      <div className="text-xs mt-0.5" style={{ color: '#b45309' }}>
+                        {t('warn_insufficient_qty', { needed: recommended })}
+                      </div>
+                    )}
                   </td>
                   <td className="px-3 py-1.5">
                     <div className="flex rounded overflow-hidden" style={{ border: '1px solid var(--gx-border)', width: 'fit-content' }}>
@@ -543,32 +632,40 @@ export default function Step4() {
                     </div>
                   </td>
                   <td className="px-3 py-1.5" style={{ textAlign: 'center' }}>
-                    {item.status === 'buy'
-                      ? <input type="number" value={item.quantity} min={1} onChange={e => updateItem(item.idx, { quantity: (v => isNaN(v) ? 1 : v)(parseInt(e.target.value)) })} className={inputClass} style={{ width: 55, textAlign: 'center' }} />
+                    {showFields
+                      ? <input type="number" onFocus={e => e.target.select()} value={item.quantity} min={1} onChange={e => updateItem(item.idx, { quantity: (v => isNaN(v) ? 1 : v)(parseInt(e.target.value)) })} className={inputClass} style={{ width: 55, textAlign: 'center' }} />
                       : <span style={{ color: 'var(--gx-text-muted)' }}>—</span>}
                   </td>
                   <td className="px-3 py-1.5" style={{ textAlign: 'right' }}>
-                    {item.status === 'buy'
-                      ? <input type="number" value={item.unitCostUsd} min={0} onChange={e => updateItem(item.idx, { unitCostUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 90, textAlign: 'right' }} />
+                    {showFields
+                      ? <input type="number" onFocus={e => e.target.select()} value={item.unitCostUsd || ''} min={0} placeholder={item.status === 'have' ? t('label_optional') : undefined} onChange={e => updateItem(item.idx, { unitCostUsd: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 90, textAlign: 'right' }} />
                       : <span style={{ color: 'var(--gx-text-muted)' }}>—</span>}
                   </td>
                   <td className="px-3 py-1.5" style={{ textAlign: 'center' }}>
-                    {item.status === 'buy'
-                      ? <input type="number" value={item.lifespanYears ?? 10} min={1} max={30} onChange={e => updateItem(item.idx, { lifespanYears: (v => isNaN(v) ? 10 : v)(parseInt(e.target.value)) })} className={inputClass} style={{ width: 55, textAlign: 'center' }} />
+                    {showFields
+                      ? <input type="number" onFocus={e => e.target.select()} value={item.lifespanYears ?? 10} min={1} max={30} onChange={e => updateItem(item.idx, { lifespanYears: (v => isNaN(v) ? 10 : v)(parseInt(e.target.value)) })} className={inputClass} style={{ width: 55, textAlign: 'center' }} />
                       : <span style={{ color: 'var(--gx-text-muted)' }}>—</span>}
                   </td>
                   <td className="px-3 py-1.5" style={{ textAlign: 'center' }}>
-                    {item.status === 'buy'
-                      ? <input type="number" value={item.ageYears ?? 0} min={0} max={(item.lifespanYears ?? 10) - 1} onChange={e => updateItem(item.idx, { ageYears: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 55, textAlign: 'center' }} />
+                    {showFields
+                      ? <input type="number" onFocus={e => e.target.select()} value={item.ageYears ?? 0} min={0} max={(item.lifespanYears ?? 10) - 1} onChange={e => updateItem(item.idx, { ageYears: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 55, textAlign: 'center' }} />
                       : <span style={{ color: 'var(--gx-text-muted)' }}>—</span>}
                   </td>
                   <td className="px-3 py-1.5" style={{ textAlign: 'center' }}>
-                    {item.status === 'buy'
-                      ? <input type="number" value={item.pctSequencing ?? 100} min={0} max={100} onChange={e => updateItem(item.idx, { pctSequencing: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 55, textAlign: 'center' }} />
+                    {showFields
+                      ? <input type="number" onFocus={e => e.target.select()} value={item.pctSequencing ?? 100} min={0} max={100} onChange={e => updateItem(item.idx, { pctSequencing: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 55, textAlign: 'center' }} />
                       : <span style={{ color: 'var(--gx-text-muted)' }}>—</span>}
                   </td>
-                  <td className="px-3 py-1.5" style={{ textAlign: 'right', color: item.status === 'buy' ? 'var(--gx-accent)' : 'var(--gx-text-muted)', whiteSpace: 'nowrap' }}>
-                    {item.status === 'buy' ? `$${fmt(annual)}` : '—'}
+                  <td className="px-3 py-1.5" style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                    {item.status === 'buy' ? (
+                      <span style={{ color: 'var(--gx-accent)' }}>${fmt(annual)}</span>
+                    ) : item.status === 'have' && item.unitCostUsd > 0 ? (
+                      <span style={{ color: 'var(--gx-text-muted)' }}>${fmt(annual)}</span>
+                    ) : item.status === 'have' ? (
+                      <span className="text-xs" style={{ color: '#b45309' }}>{t('warn_no_depreciation_short')}</span>
+                    ) : (
+                      <span style={{ color: 'var(--gx-text-muted)' }}>—</span>
+                    )}
                   </td>
                   <td className="px-3 py-1.5">
                     <button

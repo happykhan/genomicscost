@@ -324,8 +324,10 @@
   "label_bio_total": "Total bioinformatics",
 
   "label_section_a_seq_reagents": "A. Sequencing & Library Prep Reagents",
-  "label_section_b_reagents": "B. Reagents & Consumables",
-  "label_section_c_per_sample": "C. Per-Sample Reagent Usage (calculated from sequencing setup)",
+  "label_section_b_reagents": "B. Fixed Annual Reagents & Consumables",
+  "label_section_b_desc": "Items purchased in fixed annual quantities regardless of sample volume (e.g. calibration standards, annual service contracts, bulk PPE). Enter the total quantity needed per year.",
+  "label_section_c_per_sample": "C. Additional Per-Sample Consumables",
+  "label_section_c_desc": "Items consumed in proportion to sample volume (e.g. tips, tubes, extraction reagents used per sample). Enter the quantity per sample and the unit cost. Annual cost is calculated automatically from your total sample count. Sequencing reagents and library prep kits are already accounted for in Section A above.",
   "col_type": "Type",
   "col_qty_yr": "Qty/yr",
   "col_cost_per_wf_step": "Cost/workflow step",
@@ -392,6 +394,9 @@
 
   "toast_project_loaded": "Loaded \"{{name}}\"",
   "toast_project_load_error": "Could not read file — make sure it is a valid project .json",
+  "btn_import_excel": "Import WHO Excel file",
+  "toast_excel_imported": "Imported {{count}} fields from Excel file",
+  "toast_excel_import_error": "Could not read Excel file — make sure it is a valid WHO GCT .xlsx",
   "label_equip_depreciation_note": "depreciation + {{pct}}% maintenance",
   "label_cloud_operational": "Cloud (operational)",
   "label_inhouse_depreciation": "In-house (annual depreciation)",
@@ -491,5 +496,24 @@
   "hint_mul_reactions_kit": "× {{count}} reactions = kit price",
   "label_total_reactions": "Total reactions across all sequencers (incl. retests)",
   "label_total_samples_sequenced": "Total samples sequenced across all sequencers",
-  "label_auto": "auto"
+  "label_auto": "auto",
+
+  "field_ont_avg_read_length": "Average read length (bp)",
+  "tooltip_ont_avg_read_length": "Average read length for ONT long-read sequencing. Required for non-standard organisms to accurately calculate the number of samples per run based on coverage, read length and flow cell output.",
+  "placeholder_ont_avg_read_length": "e.g. 5000",
+  "hint_ont_avg_read_length": "Enter if your organism is not in the catalogue. Used to convert flow cell output into reads for the samples-per-run calculation.",
+
+  "field_barcode_pack_cost": "Barcode pack cost (USD)",
+  "hint_barcode_pack_cost": "Cost per ONT barcode expansion pack.",
+  "field_barcode_packs_per_run": "Barcode packs per run",
+  "hint_barcode_packs_per_run": "Number of barcode packs consumed per sequencing run. Added to sequencing reagent cost.",
+
+  "label_purchase_cost": "Purchase cost ($)",
+  "tooltip_have_purchase_cost": "Original purchase cost of this equipment. Enter to calculate remaining depreciation for items you already own.",
+  "warn_no_depreciation_data": "Enter purchase cost and age to calculate depreciation",
+  "warn_no_depreciation_short": "no cost",
+  "warn_insufficient_qty": "You may need {{needed}} units to meet your target throughput",
+  "label_depreciation": "Depreciation",
+  "note_import_review": "Imported values need review. Additional library preparation reagents keep their annual workbook quantities; revise these in Step 3 when throughput changes. Unpriced inputs stay at zero.",
+  "note_partial_estimate": "Draft estimate: some enabled sequencers have zero sequencing or library preparation prices. Review these inputs before using the results."
 }

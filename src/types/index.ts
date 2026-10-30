@@ -131,6 +131,11 @@ export interface SequencerConfig {
   coverageXUserSet?: boolean
   // True when user has manually overridden bufferPct; absent = auto from pathogen type
   bufferPctUserSet?: boolean
+  // ONT: user-entered average read length for non-standard organisms (Issue #5)
+  ontAvgReadLengthBp?: number
+  // ONT: barcode pack costs (Issue #6)
+  barcodePackCostUsd?: number
+  barcodePacksPerRun?: number
 }
 
 export type EquipmentStatus = 'buy' | 'have' | 'skip'
@@ -214,6 +219,7 @@ export interface TransportItem {
 }
 
 export interface Project {
+  importedFromWho?: boolean
   id: string
   name: string
   country: string

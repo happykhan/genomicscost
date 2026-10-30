@@ -325,8 +325,10 @@
   "catalogue_add_title": "Ajouter un élément personnalisé",
 
   "label_section_a_seq_reagents": "A. Réactifs de séquençage et préparation de bibliothèque",
-  "label_section_b_reagents": "B. Réactifs et consommables",
-  "label_section_c_per_sample": "C. Utilisation de réactifs par échantillon (calculé à partir de la configuration de séquençage)",
+  "label_section_b_reagents": "B. Réactifs et consommables annuels fixes",
+  "label_section_b_desc": "Articles achetés en quantités annuelles fixes, indépendamment du volume d'échantillons (ex. standards de calibration, contrats de service annuels, EPI en vrac). Saisissez la quantité totale nécessaire par an.",
+  "label_section_c_per_sample": "C. Consommables supplémentaires par échantillon",
+  "label_section_c_desc": "Articles consommés proportionnellement au volume d'échantillons (ex. embouts, tubes, réactifs d'extraction utilisés par échantillon). Saisissez la quantité par échantillon et le coût unitaire. Le coût annuel est calculé automatiquement à partir de votre nombre total d'échantillons. Les réactifs de séquençage et kits de préparation de bibliothèques sont déjà comptabilisés dans la Section A ci-dessus.",
   "col_type": "Type",
   "col_qty_yr": "Qté/an",
   "col_cost_per_wf_step": "Coût/étape de travail",
@@ -393,6 +395,9 @@
 
   "toast_project_loaded": "Chargé « {{name}} »",
   "toast_project_load_error": "Impossible de lire le fichier — assurez-vous qu'il s'agit d'un .json de projet valide",
+  "btn_import_excel": "Importer un fichier Excel OMS",
+  "toast_excel_imported": "{{count}} champs importés depuis le fichier Excel",
+  "toast_excel_import_error": "Impossible de lire le fichier Excel — assurez-vous qu'il s'agit d'un .xlsx OMS GCT valide",
   "label_equip_depreciation_note": "amortissement + {{pct}}% maintenance",
   "label_cloud_operational": "Cloud (opérationnel)",
   "label_inhouse_depreciation": "Interne (amortissement annuel)",
@@ -492,5 +497,24 @@
   "hint_mul_reactions_kit": "× {{count}} réactions = prix du kit",
   "label_total_reactions": "Total des réactions sur tous les séquenceurs (incl. retests)",
   "label_total_samples_sequenced": "Total des échantillons séquencés sur tous les séquenceurs",
-  "label_auto": "auto"
+  "label_auto": "auto",
+
+  "field_ont_avg_read_length": "Longueur moyenne de lecture (pb)",
+  "tooltip_ont_avg_read_length": "Longueur moyenne de lecture pour le séquençage long-read ONT. Nécessaire pour les organismes non standard afin de calculer le nombre d'échantillons par run.",
+  "placeholder_ont_avg_read_length": "ex. 5000",
+  "hint_ont_avg_read_length": "Saisir si votre organisme n'est pas dans le catalogue. Utilisé pour convertir le débit de la cellule en lectures.",
+
+  "field_barcode_pack_cost": "Coût du pack de codes-barres (USD)",
+  "hint_barcode_pack_cost": "Coût par pack d'expansion de codes-barres ONT.",
+  "field_barcode_packs_per_run": "Packs de codes-barres par run",
+  "hint_barcode_packs_per_run": "Nombre de packs de codes-barres consommés par run de séquençage. Ajouté au coût des réactifs de séquençage.",
+
+  "label_purchase_cost": "Coût d'achat ($)",
+  "tooltip_have_purchase_cost": "Coût d'achat initial de cet équipement. Saisir pour calculer l'amortissement restant des équipements déjà possédés.",
+  "warn_no_depreciation_data": "Saisir le coût d'achat et l'âge pour calculer l'amortissement",
+  "warn_no_depreciation_short": "pas de coût",
+  "warn_insufficient_qty": "Vous pourriez avoir besoin de {{needed}} unités pour atteindre votre débit cible",
+  "label_depreciation": "Amortissement",
+  "note_import_review": "Les valeurs importées doivent être vérifiées. Les réactifs supplémentaires de préparation des bibliothèques conservent les quantités annuelles du classeur ; modifiez-les à l’étape 3 si le volume change. Les prix non renseignés restent à zéro.",
+  "note_partial_estimate": "Estimation provisoire : certains séquenceurs activés ont un prix nul pour le séquençage ou la préparation des bibliothèques. Vérifiez ces données avant d’utiliser les résultats."
 }

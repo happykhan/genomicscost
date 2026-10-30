@@ -14,18 +14,18 @@ test.describe('Home page', () => {
 })
 
 test.describe('Wizard navigation', () => {
-  test('navigates through all 7 steps', async ({ page }) => {
+  test('navigates through all 8 steps', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: /Start new estimate/i }).click()
     await expect(page).toHaveURL('/wizard/1')
 
-    for (let step = 1; step <= 6; step++) {
+    for (let step = 1; step <= 7; step++) {
       await expect(page.getByRole('button', { name: /Next/i })).toBeVisible()
       await page.getByRole('button', { name: /Next/i }).click()
       await expect(page).toHaveURL(`/wizard/${step + 1}`)
     }
 
-    // Step 7: results
+    // Step 8: results
     await expect(page.getByTestId('print-btn')).toBeVisible()
   })
 
@@ -43,9 +43,9 @@ test.describe('Wizard navigation', () => {
   })
 })
 
-test.describe('Results page (Step 7)', () => {
+test.describe('Results page (Step 8)', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/wizard/7')
+    await page.goto('/wizard/8')
   })
 
   test('shows cost per sample', async ({ page }) => {
@@ -59,7 +59,7 @@ test.describe('Results page (Step 7)', () => {
   })
 
   test('save button exists', async ({ page }) => {
-    await expect(page.getByRole('button', { name: /Save/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /Save/i }).first()).toBeVisible()
   })
 })
 

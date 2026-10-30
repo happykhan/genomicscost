@@ -4,7 +4,7 @@
  * Tests the full wizard flow with WHO demo workbook data loaded via
  * the share URL mechanism, and also verifies basic wizard navigation.
  *
- * The share URL auto-redirects to /wizard/7, so we verify results there
+ * The share URL auto-redirects to /wizard/8, so we verify results there
  * and also navigate backwards through the steps to check project data.
  */
 import { test, expect } from '@playwright/test'
@@ -121,16 +121,12 @@ test.describe('WHO GCT demo workbook - share URL', () => {
       return btoa(unescape(encodeURIComponent(projectJson)))
     }, JSON.stringify(DEMO_PROJECT))
 
-    // Navigate to share URL — app should load project and auto-redirect to /wizard/7
-    await page.goto(`/#share=${encoded}`)
+    // Navigate to share URL — app should load project and auto-redirect to /wizard/8
+    await page.goto('about:blank')
+    await page.goto(`http://localhost:5173/#share=${encoded}`)
     await page.waitForTimeout(1000)
 
-    const url = page.url()
-    if (!url.includes('/wizard/7')) {
-      // Share URL may not work in all environments - skip remaining assertions
-      test.skip()
-      return
-    }
+    await expect(page).toHaveURL('/wizard/8')
 
     // Results page should show the cost hero
     const costHero = page.locator('.gx-cost-hero')
@@ -145,8 +141,8 @@ test.describe('WHO GCT demo workbook - share URL', () => {
     expect(costValue).toBeLessThan(500)
 
     // Project name and pathogens visible
-    await expect(page.getByText('WHO GCT Demo Workbook')).toBeVisible()
-    await expect(page.getByText('Salmonella spp.')).toBeVisible()
+    await expect(page.getByText('WHO GCT Demo Workbook').first()).toBeVisible()
+    await expect(page.locator('body')).toContainText('Salmonella spp.')
 
     // Export buttons
     await expect(page.getByTestId('print-btn')).toBeVisible()
@@ -159,18 +155,15 @@ test.describe('WHO GCT demo workbook - share URL', () => {
       return btoa(unescape(encodeURIComponent(projectJson)))
     }, JSON.stringify(DEMO_PROJECT))
 
-    await page.goto(`/#share=${encoded}`)
+    await page.goto('about:blank')
+    await page.goto(`http://localhost:5173/#share=${encoded}`)
     await page.waitForTimeout(1000)
 
-    const url = page.url()
-    if (!url.includes('/wizard/7')) {
-      test.skip()
-      return
-    }
+    await expect(page).toHaveURL('/wizard/8')
 
     // Navigate back to step 1 using Back button
     // From step 7, click Back repeatedly
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 7; i++) {
       await page.getByRole('button', { name: /Back/i }).click()
     }
     await expect(page).toHaveURL('/wizard/1')
@@ -179,9 +172,9 @@ test.describe('WHO GCT demo workbook - share URL', () => {
     const nameInput = page.locator('input[placeholder*="National Reference"]')
     await expect(nameInput).toHaveValue('WHO GCT Demo Workbook')
 
-    await expect(page.getByText('Salmonella spp.')).toBeVisible()
-    await expect(page.getByText('Escherichia coli')).toBeVisible()
-    await expect(page.getByText('800')).toBeVisible()
+    await expect(page.locator('body')).toContainText('Salmonella spp.')
+    await expect(page.locator('body')).toContainText('Escherichia coli')
+    await expect(page.getByText('800', { exact: true })).toBeVisible()
   })
 
   test('share URL: verify personnel on step 5', async ({ page }) => {
@@ -190,29 +183,27 @@ test.describe('WHO GCT demo workbook - share URL', () => {
       return btoa(unescape(encodeURIComponent(projectJson)))
     }, JSON.stringify(DEMO_PROJECT))
 
-    await page.goto(`/#share=${encoded}`)
+    await page.goto('about:blank')
+    await page.goto(`http://localhost:5173/#share=${encoded}`)
     await page.waitForTimeout(1000)
 
-    const url = page.url()
-    if (!url.includes('/wizard/7')) {
-      test.skip()
-      return
-    }
+    await expect(page).toHaveURL('/wizard/8')
 
-    // Navigate back to step 5 (2 Back clicks from step 7)
+    // Navigate back to step 5 from results.
+    await page.getByRole('button', { name: /Back/i }).click()
     await page.getByRole('button', { name: /Back/i }).click()
     await page.getByRole('button', { name: /Back/i }).click()
     await expect(page).toHaveURL('/wizard/5')
 
     // Personnel roles from the demo workbook
-    await expect(page.getByText('Clinical microbiologist')).toBeVisible()
-    await expect(page.getByText('Bioinformatician')).toBeVisible()
-    await expect(page.getByText('Molecular biologist')).toBeVisible()
+    await expect(page.locator('input[value="Clinical microbiologist"]')).toBeVisible()
+    await expect(page.locator('input[value="Bioinformatician"]')).toBeVisible()
+    await expect(page.locator('input[value="Molecular biologist"]')).toBeVisible()
   })
 })
 
 test.describe('WHO GCT demo workbook - wizard walkthrough', () => {
-  test('walk through all 7 steps with default data', async ({ page }) => {
+  test('walk through all 8 steps with default data', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: /Start new estimate/i }).click()
     await expect(page).toHaveURL('/wizard/1')
@@ -235,6 +226,8 @@ test.describe('WHO GCT demo workbook - wizard walkthrough', () => {
     await page.getByRole('button', { name: /Next/i }).click()
     await expect(page).toHaveURL('/wizard/4')
 
+    await expect(page.getByRole('heading', { name: /Step 4:/ })).toBeVisible()
+
     // Step 5
     await page.getByRole('button', { name: /Next/i }).click()
     await expect(page).toHaveURL('/wizard/5')
@@ -246,6 +239,9 @@ test.describe('WHO GCT demo workbook - wizard walkthrough', () => {
     // Step 7
     await page.getByRole('button', { name: /Next/i }).click()
     await expect(page).toHaveURL('/wizard/7')
+
+    await page.getByRole('button', { name: /Next/i }).click()
+    await expect(page).toHaveURL('/wizard/8')
 
     // Results page
     const costHero = page.locator('.gx-cost-hero')
@@ -262,7 +258,7 @@ test.describe('WHO GCT demo workbook - wizard walkthrough', () => {
     // Export buttons
     await expect(page.getByTestId('print-btn')).toBeVisible()
     await expect(page.getByTestId('csv-btn')).toBeVisible()
-    await expect(page.getByRole('button', { name: /Save/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /Save/i }).first()).toBeVisible()
   })
 
   test('add second pathogen and verify total updates', async ({ page }) => {

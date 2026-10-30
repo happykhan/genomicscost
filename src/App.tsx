@@ -27,8 +27,8 @@ const AppIcon = () => (
     <circle cx="7.5"   cy="20"   r="3"   fill="#2dd4bf" opacity="0.45"/>
     <circle cx="15.5"  cy="13.5" r="3"   fill="#2dd4bf" opacity="0.70"/>
     <circle cx="24"    cy="6.5"  r="3.5" fill="#2dd4bf"/>
-    <line x1="10.5" y1="19.2" x2="12.5" y2="14.5" stroke="#2dd4bf" stroke-width="1.2" opacity="0.4" strokeLinecap="round"/>
-    <line x1="18.5" y1="12.5" x2="20.5" y2="8"    stroke="#2dd4bf" stroke-width="1.2" opacity="0.55" strokeLinecap="round"/>
+    <line x1="10.5" y1="19.2" x2="12.5" y2="14.5" stroke="#2dd4bf" strokeWidth="1.2" opacity="0.4" strokeLinecap="round"/>
+    <line x1="18.5" y1="12.5" x2="20.5" y2="8"    stroke="#2dd4bf" strokeWidth="1.2" opacity="0.55" strokeLinecap="round"/>
   </svg>
 )
 
@@ -177,7 +177,7 @@ function WizardTabBar() {
       <div style={{ display: 'flex', alignItems: 'flex-start', padding: '12px 0', minWidth: 'max-content' }}>
         {STEPS.flatMap((s, i) => {
           const isActive = s.n === currentStep
-          const isDone = s.n < currentStep
+          const isDone = false // Navigation alone does not validate earlier steps.
           const items = []
           if (i > 0) {
             items.push(

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useMemo, useCallback, useRef } from 'react'
+import React, { createContext, useContext, useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import type { Project, SequencerConfig, CostBreakdown, ConsumableWorkflowStep } from '../types'
 import { calculateCosts } from '../lib/calculations'
 import { createDefaultProject, createDefaultCloudItems, createDefaultInhouseItems, createDefaultEquipment, buildFilteredConsumables, isConsumablesAtDefaults } from '../lib/defaults'
@@ -232,10 +232,14 @@ function loadInitialProject(): Project {
     const match = hash.match(/^#share=(.+)$/)
     if (match) {
       // Try lz-string first (new format), fall back to btoa (legacy links)
-      const raw = LZString.decompressFromEncodedURIComponent(match[1])
-        ?? JSON.parse(decodeURIComponent(escape(atob(match[1]))))
-      const decoded = typeof raw === 'string' ? JSON.parse(raw) : raw
-      window.history.replaceState(null, '', window.location.pathname)
+      let decoded: unknown
+      try {
+        const raw = LZString.decompressFromEncodedURIComponent(match[1])
+        if (!raw) throw new Error('Not a compressed link')
+        decoded = JSON.parse(raw)
+      } catch {
+        decoded = JSON.parse(decodeURIComponent(escape(atob(match[1]))))
+      }
       shareProjectLoaded = true
       return migrateProject(decoded)
     }
@@ -246,6 +250,12 @@ function loadInitialProject(): Project {
 export function ProjectProvider({ children }: { children: React.ReactNode }) {
   const [project, setProject] = useState<Project>(loadInitialProject)
   const [savedProjects, setSavedProjects] = useState<Project[]>(loadSavedProjects)
+
+  useEffect(() => {
+    if (shareProjectLoaded && window.location.hash.startsWith('#share=')) {
+      window.history.replaceState(null, '', window.location.pathname)
+    }
+  }, [])
 
   const costs = useMemo(() => calculateCosts(project), [project])
 

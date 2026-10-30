@@ -70,7 +70,7 @@ export default function Step6() {
   // In-house: annual depreciation cost
   const inhouseTotal = showInhouse
     ? bioinformatics.inhouseItems.filter(i => i.enabled).reduce((sum, item) => {
-        const remainingLife = Math.max(1, (item.lifespanYears ?? 1) - (item.ageYears ?? 0))
+        const remainingLife = Math.max(1, item.lifespanYears ?? 1)
         return sum + (item.pricePerUnit ?? 0) * (item.quantity ?? 1) * ((item.pctUse ?? 100) / 100) / remainingLife
       }, 0)
     : 0
@@ -139,16 +139,16 @@ export default function Step6() {
                           <input type="text" value={item.description} onChange={e => updateCloudItem(idx, { description: e.target.value })} className={inputClass} style={{ width: '100%', minWidth: 120 }} />
                         </td>
                         <td className="px-3 py-2">
-                          <input type="number" value={item.pricePerUnit} min={0} step={0.01} onChange={e => updateCloudItem(idx, { pricePerUnit: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 90, textAlign: 'right' }} />
+                          <input type="number" onFocus={e => e.target.select()} value={item.pricePerUnit} min={0} step={0.01} onChange={e => updateCloudItem(idx, { pricePerUnit: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 90, textAlign: 'right' }} />
                         </td>
                         <td className="px-3 py-2">
-                          <input type="number" value={item.quantity} min={0} onChange={e => updateCloudItem(idx, { quantity: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 60, textAlign: 'center' }} />
+                          <input type="number" onFocus={e => e.target.select()} value={item.quantity} min={0} onChange={e => updateCloudItem(idx, { quantity: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 60, textAlign: 'center' }} />
                         </td>
                         <td className="px-3 py-2">
-                          <input type="number" value={item.samplesThisScenario} min={0} onChange={e => updateCloudItem(idx, { samplesThisScenario: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 80, textAlign: 'right' }} />
+                          <input type="number" onFocus={e => e.target.select()} value={item.samplesThisScenario} min={0} onChange={e => updateCloudItem(idx, { samplesThisScenario: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 80, textAlign: 'right' }} />
                         </td>
                         <td className="px-3 py-2">
-                          <input type="number" value={item.totalSamplesAllPathogens} min={0} onChange={e => updateCloudItem(idx, { totalSamplesAllPathogens: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 80, textAlign: 'right' }} />
+                          <input type="number" onFocus={e => e.target.select()} value={item.totalSamplesAllPathogens} min={0} onChange={e => updateCloudItem(idx, { totalSamplesAllPathogens: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 80, textAlign: 'right' }} />
                         </td>
                         <td className="px-3 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>
                           ${fmt(annualCost)}
@@ -194,7 +194,7 @@ export default function Step6() {
                 </thead>
                 <tbody>
                   {bioinformatics.inhouseItems.map((item, idx) => {
-                    const remainingLife = Math.max(1, (item.lifespanYears ?? 1) - (item.ageYears ?? 0))
+                    const remainingLife = Math.max(1, item.lifespanYears ?? 1)
                     const annualCost = item.enabled
                       ? (item.pricePerUnit ?? 0) * (item.quantity ?? 1) * ((item.pctUse ?? 100) / 100) / remainingLife
                       : 0
@@ -207,19 +207,19 @@ export default function Step6() {
                           <input type="text" value={item.description} title={item.description} onChange={e => updateInhouseItem(idx, { description: e.target.value })} className={inputClass} style={{ width: '100%', minWidth: 120 }} />
                         </td>
                         <td className="px-3 py-2">
-                          <input type="number" value={item.pricePerUnit} min={0} step={0.01} onChange={e => updateInhouseItem(idx, { pricePerUnit: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 90, textAlign: 'right' }} />
+                          <input type="number" onFocus={e => e.target.select()} value={item.pricePerUnit} min={0} step={0.01} onChange={e => updateInhouseItem(idx, { pricePerUnit: parseFloat(e.target.value) || 0 })} className={inputClass} style={{ width: 90, textAlign: 'right' }} />
                         </td>
                         <td className="px-3 py-2">
-                          <input type="number" value={item.quantity} min={0} onChange={e => updateInhouseItem(idx, { quantity: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 60, textAlign: 'center' }} />
+                          <input type="number" onFocus={e => e.target.select()} value={item.quantity} min={0} onChange={e => updateInhouseItem(idx, { quantity: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 60, textAlign: 'center' }} />
                         </td>
                         <td className="px-3 py-2">
-                          <input type="number" value={item.pctUse} min={0} max={100} onChange={e => updateInhouseItem(idx, { pctUse: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 60, textAlign: 'right' }} />
+                          <input type="number" onFocus={e => e.target.select()} value={item.pctUse} min={0} max={100} onChange={e => updateInhouseItem(idx, { pctUse: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 60, textAlign: 'right' }} />
                         </td>
                         <td className="px-3 py-2">
-                          <input type="number" value={item.lifespanYears} min={1} max={30} onChange={e => updateInhouseItem(idx, { lifespanYears: (v => isNaN(v) ? 1 : v)(parseInt(e.target.value)) })} className={inputClass} style={{ width: 60, textAlign: 'center' }} />
+                          <input type="number" onFocus={e => e.target.select()} value={item.lifespanYears} min={1} max={30} onChange={e => updateInhouseItem(idx, { lifespanYears: (v => isNaN(v) ? 1 : v)(parseInt(e.target.value)) })} className={inputClass} style={{ width: 60, textAlign: 'center' }} />
                         </td>
                         <td className="px-3 py-2">
-                          <input type="number" value={item.ageYears} min={0} max={Math.max(0, (item.lifespanYears ?? 1) - 1)} onChange={e => updateInhouseItem(idx, { ageYears: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 60, textAlign: 'center' }} />
+                          <input type="number" onFocus={e => e.target.select()} value={item.ageYears} min={0} max={Math.max(0, (item.lifespanYears ?? 1) - 1)} onChange={e => updateInhouseItem(idx, { ageYears: parseInt(e.target.value) || 0 })} className={inputClass} style={{ width: 60, textAlign: 'center' }} />
                         </td>
                         <td className="px-3 py-2 text-right font-medium" style={{ color: 'var(--gx-text)' }}>
                           ${fmt(annualCost)}
@@ -282,14 +282,14 @@ export default function Step6() {
                     <tr style={{ borderBottom: '1px solid var(--gx-border)', color: 'var(--gx-text-muted)' }}>
                       <th style={{ textAlign: 'left', fontWeight: 500, paddingBottom: 4 }}>{t('col_component')}</th>
                       <th style={{ textAlign: 'right', fontWeight: 500, paddingBottom: 4 }}>{t('col_purchase_cost')}</th>
-                      <th style={{ textAlign: 'right', fontWeight: 500, paddingBottom: 4 }}>{t('col_remaining_life')}</th>
+                      <th style={{ textAlign: 'right', fontWeight: 500, paddingBottom: 4 }}>{t('col_lifetime_yr')}</th>
                       <th style={{ textAlign: 'right', fontWeight: 500, paddingBottom: 4 }}>{t('col_annual_depreciation')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {bioinformatics.inhouseItems.filter(i => i.enabled && (i.quantity ?? 0) > 0).map((item, idx) => {
                       const purchaseCost = (item.pricePerUnit ?? 0) * (item.quantity ?? 1)
-                      const remainingLife = Math.max(1, (item.lifespanYears ?? 1) - (item.ageYears ?? 0))
+                      const remainingLife = Math.max(1, item.lifespanYears ?? 1)
                       const depreciation = purchaseCost * ((item.pctUse ?? 100) / 100) / remainingLife
                       return (
                         <tr key={idx} style={{ borderBottom: '1px solid var(--gx-border)' }}>

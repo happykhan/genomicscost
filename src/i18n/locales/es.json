@@ -326,8 +326,10 @@
   "matrix_title": "Matriz de asignación de muestras",
 
   "label_section_a_seq_reagents": "A. Reactivos de secuenciación y preparación de biblioteca",
-  "label_section_b_reagents": "B. Reactivos y consumibles",
-  "label_section_c_per_sample": "C. Uso de reactivos por muestra (calculado a partir de la configuración de secuenciación)",
+  "label_section_b_reagents": "B. Reactivos y consumibles anuales fijos",
+  "label_section_b_desc": "Artículos comprados en cantidades anuales fijas independientemente del volumen de muestras (ej. estándares de calibración, contratos de servicio anuales, EPP al por mayor). Ingrese la cantidad total necesaria por año.",
+  "label_section_c_per_sample": "C. Consumibles adicionales por muestra",
+  "label_section_c_desc": "Artículos consumidos en proporción al volumen de muestras (ej. puntas, tubos, reactivos de extracción usados por muestra). Ingrese la cantidad por muestra y el costo unitario. El costo anual se calcula automáticamente a partir del recuento total de muestras. Los reactivos de secuenciación y kits de preparación de bibliotecas ya están contabilizados en la Sección A anterior.",
   "col_type": "Tipo",
   "col_qty_yr": "Cant./año",
   "col_cost_per_wf_step": "Costo/etapa de trabajo",
@@ -394,6 +396,9 @@
 
   "toast_project_loaded": "Cargado \"{{name}}\"",
   "toast_project_load_error": "No se pudo leer el archivo — asegúrese de que sea un .json de proyecto válido",
+  "btn_import_excel": "Importar archivo Excel de la OMS",
+  "toast_excel_imported": "{{count}} campos importados del archivo Excel",
+  "toast_excel_import_error": "No se pudo leer el archivo Excel — asegúrese de que sea un .xlsx OMS GCT válido",
   "label_equip_depreciation_note": "depreciación + {{pct}}% mantenimiento",
   "label_cloud_operational": "Nube (operacional)",
   "label_inhouse_depreciation": "Interno (depreciación anual)",
@@ -493,5 +498,24 @@
   "hint_mul_reactions_kit": "× {{count}} reacciones = precio del kit",
   "label_total_reactions": "Total de reacciones en todos los secuenciadores (incl. repeticiones)",
   "label_total_samples_sequenced": "Total de muestras secuenciadas en todos los secuenciadores",
-  "label_auto": "auto"
+  "label_auto": "auto",
+
+  "field_ont_avg_read_length": "Longitud promedio de lectura (pb)",
+  "tooltip_ont_avg_read_length": "Longitud promedio de lectura para secuenciación de lectura larga ONT. Necesaria para organismos no estándar para calcular con precisión el número de muestras por corrida.",
+  "placeholder_ont_avg_read_length": "p. ej. 5000",
+  "hint_ont_avg_read_length": "Ingrese si su organismo no está en el catálogo. Se usa para convertir la salida de la celda de flujo en lecturas.",
+
+  "field_barcode_pack_cost": "Costo del paquete de códigos de barras (USD)",
+  "hint_barcode_pack_cost": "Costo por paquete de expansión de códigos de barras ONT.",
+  "field_barcode_packs_per_run": "Paquetes de códigos de barras por corrida",
+  "hint_barcode_packs_per_run": "Paquetes de códigos de barras consumidos por corrida de secuenciación. Se añade al costo de reactivos de secuenciación.",
+
+  "label_purchase_cost": "Costo de compra ($)",
+  "tooltip_have_purchase_cost": "Costo de compra original de este equipo. Ingrese para calcular la depreciación restante de los equipos que ya posee.",
+  "warn_no_depreciation_data": "Ingrese el costo de compra y la antigüedad para calcular la depreciación",
+  "warn_no_depreciation_short": "sin costo",
+  "warn_insufficient_qty": "Puede necesitar {{needed}} unidades para alcanzar su rendimiento objetivo",
+  "label_depreciation": "Depreciación",
+  "note_import_review": "Revise los valores importados. Los reactivos adicionales de preparación de bibliotecas conservan las cantidades anuales del archivo; ajústelas en el paso 3 si cambia el volumen. Los precios sin especificar permanecen en cero.",
+  "note_partial_estimate": "Estimación provisional: algunos secuenciadores activos tienen precios de secuenciación o preparación de bibliotecas de cero. Revise estos datos antes de usar los resultados."
 }
